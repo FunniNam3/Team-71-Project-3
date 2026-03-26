@@ -1,3 +1,5 @@
+// Almost all of this code was just copied from the setup guide for auth0
+
 import Image from "next/image";
 import { auth0 } from "@/lib/auth0";
 

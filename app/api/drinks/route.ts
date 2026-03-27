@@ -64,7 +64,7 @@ export async function GET(request: Request) {
   }
 }
 
-// This function adds a drink to the drink table in the database,
+// This function adds a new drink to the drink table in the database,
 // Uses request body
 // Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
 export async function POST(request: Request) {
@@ -94,6 +94,7 @@ export async function POST(request: Request) {
   }
 }
 
+// I don't think we need this one
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
@@ -107,11 +108,29 @@ export async function PUT(request: Request) {
   }
 }
 
+// This function modifies the properties of a drink in the database.
+// Uses request body
+// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
+// updates drink with provided id. Cannot update id itself
 export async function PATCH(request: Request) {
   try {
+    // TODO: test
+
     const body = await request.json();
 
-    // TODO: update part of resource
+    await pool.query(
+      "UPDATE drink SET name = $1, ice = $2, sweetness = $3, milk = $4, boba = $5, popping_boba = $6, price = $7 WHERE id = $8",
+      [
+        body.name,
+        body.ice,
+        body.sweetness,
+        body.milk,
+        body.boba,
+        body.popping_boba,
+        body.price,
+        body.id,
+      ],
+    );
 
     return NextResponse.json({ message: "PATCH success" }, { status: 200 });
   } catch (error) {

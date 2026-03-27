@@ -94,12 +94,31 @@ export async function POST(request: Request) {
   }
 }
 
-// I don't think we need this one
+// This function replaces a drink with a new drink in the database.
+// Note that this destroys the original drink.
+// Uses request body
+// Include key values pairs for oldId, newId, name, ice, sweetness, milk, boba, popping_boba, price
+// replaces drink with provided oldId.
 export async function PUT(request: Request) {
   try {
+    // TODO: test
+
     const body = await request.json();
 
-    // TODO: replace full resource
+    await pool.query(
+      "UPDATE drink SET id = $1, name = $2, ice = $3, sweetness = $4, milk = $5, boba = $6, popping_boba = $7, price = $8 WHERE id = $9",
+      [
+        body.newId,
+        body.name,
+        body.ice,
+        body.sweetness,
+        body.milk,
+        body.boba,
+        body.popping_boba,
+        body.price,
+        body.oldId,
+      ],
+    );
 
     return NextResponse.json({ message: "PUT success" }, { status: 200 });
   } catch (error) {

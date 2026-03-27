@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     // TODO: read query params or fetch data
 
     const url = new URL(request.url);
-    const singular = url.searchParams.get('singular');
+    const singular = url.searchParams.get("singular");
 
     if (!singular) {
       // no drink id input. request and return all names of drinks
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const drinkId = url.searchParams.get('id');
+    const drinkId = url.searchParams.get("id");
 
     // return full row of drink data for specified drink id
     const result = await pool.query("SELECT * FROM drink WHERE id = $1", [
@@ -69,10 +69,21 @@ export async function GET(request: Request) {
 // Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
 export async function POST(request: Request) {
   try {
-    
     const body = await request.json();
 
-    // TODO: create new resource
+    const result = await pool.query(
+      "INSERT INTO drink VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      [
+        body.id,
+        body.name,
+        body.ice,
+        body.sweetness,
+        body.milk,
+        body.boba,
+        body.popping_boba,
+        body.price,
+      ],
+    );
 
     return NextResponse.json({ message: "POST success" }, { status: 201 });
   } catch (error) {

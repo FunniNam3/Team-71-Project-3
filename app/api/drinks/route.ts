@@ -27,15 +27,17 @@ DELETE - Remove data
 
 // This function queries the database for single specified drink with its information,
 // or returns all the names of the drinks.
-// For use, please indicate the desired drink id in the request body. If you would like all of the drink names,
-// leave the request body blank
+// Uses Query parameter
+// For use, please indicate the desired drink id and singular to true in the url using key value. (ex: .../drinks/?singular=true&id=12)
+// If you would like all of the drink names, set singular to false. (ex: .../drinks/?singular=false)
 export async function GET(request: Request) {
   try {
     // TODO: read query params or fetch data
 
-    const body = await request.json();
+    const url = new URL(request.url);
+    const singular = url.searchParams.get('singular');
 
-    if (!body.id) {
+    if (!singular) {
       // no drink id input. request and return all names of drinks
       const result = await pool.query("SELECT name FROM drink");
 
@@ -45,9 +47,11 @@ export async function GET(request: Request) {
       );
     }
 
+    const drinkId = url.searchParams.get('id');
+
     // return full row of drink data for specified drink id
     const result = await pool.query("SELECT * FROM drink WHERE id = $1", [
-      body.id,
+      drinkId,
     ]);
 
     return NextResponse.json(
@@ -60,8 +64,12 @@ export async function GET(request: Request) {
   }
 }
 
+// This function adds a drink to the drink table in the database,
+// Uses request body
+// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
 export async function POST(request: Request) {
   try {
+    
     const body = await request.json();
 
     // TODO: create new resource

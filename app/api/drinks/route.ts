@@ -28,16 +28,16 @@ DELETE - Remove data
 // This function queries the database for single specified drink with its information,
 // or returns all the names of the drinks.
 // Uses Query parameter
-// For use, please indicate the desired drink id and singular to true in the url using key value. (ex: .../drinks/?singular=true&id=12)
-// If you would like all of the drink names, set singular to false. (ex: .../drinks/?singular=false)
+// For use, please indicate the desired drink id in the url using key value. (ex: .../drinks/?id=12)
+// If you would like all of the drink names, set allDrinks to true. (ex: .../drinks/?allDrinks=true)
 export async function GET(request: Request) {
   try {
 
     const url = new URL(request.url);
-    const singular = url.searchParams.get("singular");
+    const allDrinks = url.searchParams.get("allDrinks");
 
-    if (singular == "false") {
-      // no drink id input. request and return all names of drinks
+    if (allDrinks == "true") {
+      // Request and return all names of drinks
       const result = await pool.query("SELECT name, price FROM drink");
 
       return NextResponse.json(
@@ -46,6 +46,7 @@ export async function GET(request: Request) {
       );
     }
 
+    // id is given. 
     const drinkId = url.searchParams.get("id");
 
     // return full row of drink data for specified drink id

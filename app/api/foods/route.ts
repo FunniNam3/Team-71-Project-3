@@ -28,16 +28,16 @@ DELETE - Remove data
 // This function queries the database for single specified food with its information,
 // or returns all the names of the foods.
 // Uses Query parameter
-// For use, please indicate the desired food id and singular to true in the url using key value. (ex: .../foods/?singular=true&id=3)
-// If you would like all of the food names, set singular to false. (ex: .../foods/?singular=false)
+// For use, please indicate the desired food id in the url using key value. (ex: .../foods/?id=3)
+// If you would like all of the food names, set allFoods to true. (ex: .../foods/?allFoods=false)
 export async function GET(request: Request) {
   try {
 
     const url = new URL(request.url);
-    const singular = url.searchParams.get("singular");
+    const allFoods = url.searchParams.get("allFoods");
 
-    if (singular == "false") {
-      // no food id input. request and return all names of foods
+    if (allFoods == "true") {
+      // Request and return all names of foods
       const result = await pool.query("SELECT name, price FROM food");
 
       return NextResponse.json(
@@ -46,6 +46,7 @@ export async function GET(request: Request) {
       );
     }
 
+    // food id given 
     const foodId = url.searchParams.get("id");
 
     // return full row of food data for specified food id

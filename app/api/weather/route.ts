@@ -4,7 +4,9 @@
 
 import { fetchWeatherApi } from "openmeteo";
 
-
+// This GET function will receive the weather data for College Station
+// It returns weatherData object containing the daily max and min temp as well as
+// current temp, apparent temp, whether it is day or night, and cloud cover
 export async function GET(request: Request) {
   try {
 
@@ -18,7 +20,7 @@ export async function GET(request: Request) {
       temperature_unit: "fahrenheit",
       precipitation_unit: "inch",
     };
-    const url = "https://my-server.tld/v1/forecast";
+    const url = "https://api.open-meteo.com/v1/forecast";
     const responses = await fetchWeatherApi(url, params);
 
     // Process first location. Add a for-loop for multiple locations or weather models

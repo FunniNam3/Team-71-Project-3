@@ -24,92 +24,34 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
+// search functino for user table
 export async function GET(request: Request) {
   try {
-    // TODO: read query params or fetch data
+    const { searchParams } = new URL(request.url);
+    const q = searchParams.get("q");
 
-    return NextResponse.json(
-      { message: "GET success" },
-      { status: 200 }
+    if (!q) {
+      return Response.json([]);
+    }
+
+    const result = await pool.query(
+      `
+      SELECT * FROM users
+      WHERE
+        CAST(id AS TEXT) ILIKE $1
+        OR auth0_user_id ILIKE $1
+        OR email ILIKE $1
+        OR name ILIKE $1
+        OR role ILIKE $1
+      `,
+      [`%${q}%`]
     );
-  } catch (error) {
-    console.error("GET error:", error);
-    return NextResponse.json(
-      { error: "GET failed" },
-      { status: 500 }
-    );
-  }
-}
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-
-    // TODO: create new resource
-
-    return NextResponse.json(
-      { message: "POST success" },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("POST error:", error);
-    return NextResponse.json(
-      { error: "POST failed" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: Request) {
-  try {
-    const body = await request.json();
-
-    // TODO: replace full resource
-
-    return NextResponse.json(
-      { message: "PUT success" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("PUT error:", error);
-    return NextResponse.json(
-      { error: "PUT failed" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(request: Request) {
-  try {
-    const body = await request.json();
-
-    // TODO: update part of resource
-
-    return NextResponse.json(
-      { message: "PATCH success" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("PATCH error:", error);
-    return NextResponse.json(
-      { error: "PATCH failed" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    // TODO: delete resource
-
-    return NextResponse.json(
-      { message: "DELETE success" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("DELETE error:", error);
-    return NextResponse.json(
-      { error: "DELETE failed" },
+    return Response.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    return Response.json(
+      { error: "Failed to search users" },
       { status: 500 }
     );
   }

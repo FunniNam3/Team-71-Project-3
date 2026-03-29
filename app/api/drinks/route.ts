@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
     if (singular == "false") {
       // no drink id input. request and return all names of drinks
-      const result = await pool.query("SELECT name FROM drink");
+      const result = await pool.query("SELECT name, price FROM drink");
 
       return NextResponse.json(
         { message: "GET success", data: result.rows },

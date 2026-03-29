@@ -28,8 +28,8 @@ DELETE - Remove data
 // This function queries the database for the amount of each food and drink sold given a time frame,
 // Uses Query parameter
 // For use, please indicate the desired time frame using key value pairs for startDate and endDate
-// startDate (YYYY-MM-DD) endDate (YYYY-MM-DD). (ex: .../food_and_drink_count/?startYear=2026-03-01&endDate=2026-04-23)
-// If want all time data, set allTime to true (ex: .../food_and_drink_count/?allTime=true)
+// startDate (YYYY-MM-DD) endDate (YYYY-MM-DD). (ex: .../food-and-drink-count/?startYear=2026-03-01&endDate=2026-04-23)
+// If want all time data, set allTime to true (ex: .../food-and-drink-count/?allTime=true)
 export async function GET(request: Request) {
   try {
 

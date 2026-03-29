@@ -158,9 +158,18 @@ export async function PATCH(request: Request) {
   }
 }
 
+// This function deletes a single specified drink from the drink table,
+// Uses Query parameter
+// For use, please indicate the desired drink id to be deleted (ex: .../drinks/?id=12)
 export async function DELETE(request: Request) {
   try {
-    // TODO: delete resource
+
+    // TODO: test
+
+    const url = new URL(request.url);
+    const drinkId = url.searchParams.get("id");
+
+    await pool.query("DELETE FROM drink WHERE id = $1", [drinkId]);
 
     return NextResponse.json({ message: "DELETE success" }, { status: 200 });
   } catch (error) {

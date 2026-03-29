@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const singular = url.searchParams.get("singular");
 
-    if (!singular) {
+    if (singular == "false") {
       // no drink id input. request and return all names of drinks
       const result = await pool.query("SELECT name FROM drink");
 

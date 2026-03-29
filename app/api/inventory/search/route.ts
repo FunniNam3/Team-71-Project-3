@@ -29,48 +29,24 @@ DELETE - Remove data
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const q = searchParams.get("q");
 
-    const id = searchParams.get("id");
-    const amount = searchParams.get("amount");
-    const name = searchParams.get("name");
-    const supplier_name = searchParams.get("supplier_name");
-    const supplier_contact = searchParams.get("supplier_contact");
-
-    const conditions: string[] = [];
-    const values: (string | number)[] = [];
-
-    if (id) {
-      values.push(Number(id));
-      conditions.push(`id = $${values.length}`);
+    if (!q) {
+      return Response.json([]);
     }
 
-    if (amount) {
-      values.push(Number(amount));
-      conditions.push(`amount = $${values.length}`);
-    }
-
-    if (name) {
-      values.push(`%${name}%`);
-      conditions.push(`name ILIKE $${values.length}`);
-    }
-
-    if (supplier_name) {
-      values.push(`%${supplier_name}%`);
-      conditions.push(`supplier_name ILIKE $${values.length}`);
-    }
-
-    if (supplier_contact) {
-      values.push(`%${supplier_contact}%`);
-      conditions.push(`supplier_contact ILIKE $${values.length}`);
-    }
-
-    let query = "SELECT * FROM inventory";
-
-    if (conditions.length > 0) {
-      query += " WHERE " + conditions.join(" AND ");
-    }
-
-    const result = await pool.query(query, values);
+    const result = await pool.query(
+      `
+      SELECT * FROM inventory
+      WHERE
+        CAST(id AS TEXT) ILIKE $1
+        OR CAST(amount AS TEXT) ILIKE $1
+        OR name ILIKE $1
+        OR supplier_name ILIKE $1
+        OR supplier_contact ILIKE $1
+      `,
+      [`%${q}%`]
+    );
 
     return Response.json(result.rows);
   } catch (err) {

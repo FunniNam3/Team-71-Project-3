@@ -24,7 +24,7 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
-// return whole purchases table
+// return whole purchase table
 export async function GET() {
   try {
     const result = await pool.query("SELECT * FROM purchase");

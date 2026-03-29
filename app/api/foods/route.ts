@@ -25,11 +25,11 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
-// This function queries the database for single specified drink with its information,
-// or returns all the names of the drinks.
+// This function queries the database for single specified food with its information,
+// or returns all the names of the foods.
 // Uses Query parameter
-// For use, please indicate the desired drink id and singular to true in the url using key value. (ex: .../drinks/?singular=true&id=12)
-// If you would like all of the drink names, set singular to false. (ex: .../drinks/?singular=false)
+// For use, please indicate the desired food id and singular to true in the url using key value. (ex: .../foods/?singular=true&id=3)
+// If you would like all of the food names, set singular to false. (ex: .../foods/?singular=false)
 export async function GET(request: Request) {
   try {
 
@@ -37,8 +37,8 @@ export async function GET(request: Request) {
     const singular = url.searchParams.get("singular");
 
     if (singular == "false") {
-      // no drink id input. request and return all names of drinks
-      const result = await pool.query("SELECT name FROM drink");
+      // no food id input. request and return all names of foods
+      const result = await pool.query("SELECT name FROM food");
 
       return NextResponse.json(
         { message: "GET success", data: result.rows },
@@ -46,11 +46,11 @@ export async function GET(request: Request) {
       );
     }
 
-    const drinkId = url.searchParams.get("id");
+    const foodId = url.searchParams.get("id");
 
-    // return full row of drink data for specified drink id
-    const result = await pool.query("SELECT * FROM drink WHERE id = $1", [
-      drinkId,
+    // return full row of food data for specified food id
+    const result = await pool.query("SELECT * FROM food WHERE id = $1", [
+      foodId,
     ]);
 
     return NextResponse.json(
@@ -63,9 +63,9 @@ export async function GET(request: Request) {
   }
 }
 
-// This function adds a new drink to the drink table in the database,
+// This function adds a new food to the food table in the database,
 // Uses request body
-// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
+// Include key values pairs for id, name, price
 export async function POST(request: Request) {
   try {
     // TODO: test
@@ -73,15 +73,10 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     await pool.query(
-      "INSERT INTO drink VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      "INSERT INTO food VALUES ($1, $2, $3)",
       [
         body.id,
         body.name,
-        body.ice,
-        body.sweetness,
-        body.milk,
-        body.boba,
-        body.popping_boba,
         body.price,
       ],
     );
@@ -93,11 +88,11 @@ export async function POST(request: Request) {
   }
 }
 
-// This function replaces a drink with a new drink in the database.
-// Note that this destroys the original drink.
+// This function replaces a food with a new food in the database.
+// Note that this destroys the original food.
 // Uses request body
-// Include key values pairs for oldId, newId, name, ice, sweetness, milk, boba, popping_boba, price
-// replaces drink with provided oldId.
+// Include key values pairs for oldId, newId, name, price
+// replaces food with provided oldId.
 export async function PUT(request: Request) {
   try {
     // TODO: test
@@ -105,16 +100,11 @@ export async function PUT(request: Request) {
     const body = await request.json();
 
     await pool.query(
-      "UPDATE drink SET id = $1, name = $2, ice = $3, sweetness = $4, milk = $5, boba = $6, popping_boba = $7, price = $8 WHERE id = $9",
+      "UPDATE food SET id = $1, name = $2, price = $8 WHERE id = $9",
       [
         body.newId,
         body.name,
         body.ice,
-        body.sweetness,
-        body.milk,
-        body.boba,
-        body.popping_boba,
-        body.price,
         body.oldId,
       ],
     );
@@ -126,10 +116,10 @@ export async function PUT(request: Request) {
   }
 }
 
-// This function modifies the properties of a drink in the database.
+// This function modifies the properties of a food in the database.
 // Uses request body
-// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
-// updates drink with provided id. Cannot update id itself
+// Include key values pairs for id, name, price
+// updates food with provided id. Cannot update id itself
 export async function PATCH(request: Request) {
   try {
     // TODO: test
@@ -137,14 +127,9 @@ export async function PATCH(request: Request) {
     const body = await request.json();
 
     await pool.query(
-      "UPDATE drink SET name = $1, ice = $2, sweetness = $3, milk = $4, boba = $5, popping_boba = $6, price = $7 WHERE id = $8",
+      "UPDATE food SET name = $1, price = $2 WHERE id = $3",
       [
         body.name,
-        body.ice,
-        body.sweetness,
-        body.milk,
-        body.boba,
-        body.popping_boba,
         body.price,
         body.id,
       ],
@@ -157,18 +142,18 @@ export async function PATCH(request: Request) {
   }
 }
 
-// This function deletes a single specified drink from the drink table,
+// This function deletes a single specified food from the food table,
 // Uses Query parameter
-// For use, please indicate the desired drink id to be deleted (ex: .../drinks/?id=12)
+// For use, please indicate the desired food id to be deleted (ex: .../foods/?id=3)
 export async function DELETE(request: Request) {
   try {
 
     // TODO: test
 
     const url = new URL(request.url);
-    const drinkId = url.searchParams.get("id");
+    const foodId = url.searchParams.get("id");
 
-    await pool.query("DELETE FROM drink WHERE id = $1", [drinkId]);
+    await pool.query("DELETE FROM food WHERE id = $1", [foodId]);
 
     return NextResponse.json({ message: "DELETE success" }, { status: 200 });
   } catch (error) {

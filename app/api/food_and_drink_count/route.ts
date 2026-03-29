@@ -27,17 +27,51 @@ DELETE - Remove data
 
 // This function queries the database for the amount of each food and drink sold given a time frame,
 // Uses Query parameter
-// For use, please indicate the desired time frame using key value pairs for
-// year (YYYY) month (MM) day (DD). (ex: .../food_and_drink_count/?year=2026&month=03&day=01)
+// For use, please indicate the desired time frame using key value pairs for startDate and endDate
+// startDate (YYYY-MM-DD) endDate (YYYY-MM-DD). (ex: .../food_and_drink_count/?startYear=2026-03-01&endDate=2026-04-23)
+// If want all time data, set allTime to true (ex: .../food_and_drink_count/?allTime=true)
 export async function GET(request: Request) {
   try {
+    // TODO: Test
 
     const url = new URL(request.url);
-    const singular = url.searchParams.get("singular");
 
-    if (singular == "false") {
-      // no drink id input. request and return all names of drinks
-      const result = await pool.query("SELECT name, price FROM drink");
+    const startDate = url.searchParams.get("startDate");
+    const endDate = url.searchParams.get("endDate");
+    const allTime = url.searchParams.get("allTime");
+
+    if (allTime == "true") {
+      // Request and return all count of foods and drinks sold for all time
+      const result = await pool.query(
+        `
+        SELECT COUNT(drink_id) AS number_of_orders, name 
+        FROM ( 
+            SELECT 
+                drink_to_receipt.drink_id, 
+                drink.name, 
+                DATE_PART('month', receipt.purchase_date) AS month, 
+                DATE_PART('day', receipt.purchase_date) AS day, 
+                DATE_PART('year', receipt.purchase_date) AS year 
+            FROM drink 
+            INNER JOIN drink_to_receipt ON drink.id = drink_to_receipt.drink_id 
+            INNER JOIN receipt ON receipt.id = drink_to_receipt.receipt_id 
+        ) 
+        GROUP BY name 
+        UNION 
+        SELECT COUNT(food_id) AS number_of_orders, name 
+        FROM ( 
+            SELECT 
+                food_to_receipt.food_id, 
+                food.name, 
+                DATE_PART('month', receipt.purchase_date) AS month, 
+                DATE_PART('day', receipt.purchase_date) AS day, 
+                DATE_PART('year', receipt.purchase_date) AS year 
+            FROM food 
+            INNER JOIN food_to_receipt ON food.id = food_to_receipt.food_id 
+            INNER JOIN receipt ON receipt.id = food_to_receipt.receipt_id 
+        ) 
+        GROUP BY name`,
+      );
 
       return NextResponse.json(
         { message: "GET success", data: result.rows },
@@ -45,15 +79,43 @@ export async function GET(request: Request) {
       );
     }
 
-    const drinkId = url.searchParams.get("id");
-
-    // return full row of drink data for specified drink id
-    const result = await pool.query("SELECT * FROM drink WHERE id = $1", [
-      drinkId,
-    ]);
+    // Request and return all count of foods and drinks sold in given time frame
+    const result = await pool.query(
+      `
+        SELECT COUNT(drink_id) AS number_of_orders, name 
+        FROM ( 
+            SELECT 
+                drink_to_receipt.drink_id, 
+                drink.name, 
+                DATE_PART('month', receipt.purchase_date) AS month, 
+                DATE_PART('day', receipt.purchase_date) AS day, 
+                DATE_PART('year', receipt.purchase_date) AS year 
+            FROM drink 
+            INNER JOIN drink_to_receipt ON drink.id = drink_to_receipt.drink_id 
+            INNER JOIN receipt ON receipt.id = drink_to_receipt.receipt_id 
+            WHERE receipt.purchase_date BETWEEN $1 AND $2 
+        ) 
+        GROUP BY name 
+        UNION 
+        SELECT COUNT(food_id) AS number_of_orders, name 
+        FROM ( 
+            SELECT 
+                food_to_receipt.food_id, 
+                food.name, 
+                DATE_PART('month', receipt.purchase_date) AS month, 
+                DATE_PART('day', receipt.purchase_date) AS day, 
+                DATE_PART('year', receipt.purchase_date) AS year 
+            FROM food 
+            INNER JOIN food_to_receipt ON food.id = food_to_receipt.food_id 
+            INNER JOIN receipt ON receipt.id = food_to_receipt.receipt_id 
+            WHERE receipt.purchase_date BETWEEN $1 AND $2 
+        ) 
+        GROUP BY name`,
+      [startDate, endDate],
+    );
 
     return NextResponse.json(
-      { message: "GET success", data: result.rows[0] },
+      { message: "GET success", data: result.rows },
       { status: 200 },
     );
   } catch (error) {

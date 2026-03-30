@@ -1,10 +1,8 @@
-import Image from "next/image";
-
-// TODO Make this the landing page
-export default function Home() {
+export default function page() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center">
       <h1>Herro</h1>
+      <h2>HI</h2>
     </div>
   );
 }

@@ -22,10 +22,10 @@ export default function Home() {
           </div>
           <div className="flex-1 flex justify-center">
             <Image
-              src="/Template Image.svg"
+              src="/Template Image.png"
               alt="Boba tea"
-              width={300}
-              height={400}
+              width={205}
+              height={200}
               className="object-contain"
             />
           </div>
@@ -43,10 +43,10 @@ export default function Home() {
           </div>
           <div className="flex-1 flex justify-center">
             <Image
-              src="/Template Image.svg"
+              src="/Template Image.png"
               alt="Boba tea"
-              width={300}
-              height={400}
+              width={205}
+              height={200}
               className="object-contain"
             />
           </div>
@@ -64,10 +64,10 @@ export default function Home() {
           </div>
           <div className="flex-1 flex justify-center">
             <Image
-              src="/Template Image.svg"
+              src="/Template Image.png"
               alt="Boba tea"
-              width={300}
-              height={400}
+              width={205}
+              height={200}
               className="object-contain"
             />
           </div>

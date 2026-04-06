@@ -1,20 +1,43 @@
 // TODO Make this drink selection// src/app/POS/Order/page.tsx
 'use client'; // Required for use of state and event handlers
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from '../../components/DrinkCard';
 // You would also need a CustomizationModal component (not built here)
 
-const menuItems = [
+/*const menuItems = [
   { id: 1, name: 'Brown Sugar Milk Tea', description: 'Our signature boba with...', price: 5.50, imageUrl: '/Template image.svg', category: 'Milk Tea' },
   { id: 2, name: 'Chicken Wings', description: 'Crispy fried wings...', price: 8.99, imageUrl: '/Template image.svg', category: 'Food' },
   // ... add more mock items to fill the 3x3 grid from image_1.png
-];
+];*/
+
+// For demonstration, let's create some mock data
 
 
 
 export default function OrderPage() {
   // 1. Create the state (default to 'Most Ordered' or 'All')
+  const [menuItems, setMenuItems] = useState<any[]>([]); // This will hold all menu items
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { 
+    // Simulate fetching data from an API
+    fetch('/api/menu') // You would replace this with your actual API endpoint
+      .then(response => response.json())
+      .then(data => {
+        setMenuItems(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching menu items:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="text-center mt-20 text-gray-500">Loading menu...</div>;
+  }
+  
   const [activeTab, setActiveTab] = useState('Most Ordered');
 
   // 2. Define your categories exactly as they appear in your data

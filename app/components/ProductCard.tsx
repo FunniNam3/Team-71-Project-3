@@ -42,12 +42,12 @@ export default function ProductCard({
         <span className="text-(--dark) text-xl font-bold">
           ${price.toFixed(2)}
         </span>
-        <button
+        <div
           onClick={onCustomize}
           className="bg-[#00A67E] text-white rounded-full p-2 hover:scale-105 active:scale-95 transition-all shadow-md"
         >
           <Image src="/plus-icon.svg" alt="Add" width={24} height={24} />
-        </button>
+        </div>
       </div>
     </button>
   );

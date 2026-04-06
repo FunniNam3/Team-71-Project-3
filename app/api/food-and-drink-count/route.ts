@@ -110,7 +110,7 @@ export async function GET(request: Request) {
               FROM drink 
               INNER JOIN drink_to_receipt ON drink.id = drink_to_receipt.drink_id 
               INNER JOIN receipt ON receipt.id = drink_to_receipt.receipt_id 
-              WHERE receipt.purchase_date BETWEEN '2026-03-25' AND '2026-04-04' 
+              WHERE receipt.purchase_date BETWEEN $1 AND $2 
           ) 
           GROUP BY id, name 
           UNION 
@@ -125,7 +125,7 @@ export async function GET(request: Request) {
               FROM food 
               INNER JOIN food_to_receipt ON food.id = food_to_receipt.food_id 
               INNER JOIN receipt ON receipt.id = food_to_receipt.receipt_id 
-              WHERE receipt.purchase_date BETWEEN '2024-03-25' AND '2026-04-04' 
+              WHERE receipt.purchase_date BETWEEN $1 AND $2 
           ) 
           GROUP BY id, name 
         ) 

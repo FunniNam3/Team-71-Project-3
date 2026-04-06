@@ -2,7 +2,7 @@
 "use client"; // Required for use of state and event handlers
 
 import { useState, useEffect } from "react";
-import ProductCard from "@components/DrinkCard";
+import ProductCard from "@components/ProductCard";
 // You would also need a CustomizationModal component (not built here)
 
 /*const menuItems = [

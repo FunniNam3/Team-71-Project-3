@@ -23,7 +23,7 @@ export default function NavBar() {
           <Link className={LinkStyle} href="/auth/login">
             <Image
               className="h-5 w-auto"
-              src="/login.svg"
+              src="/Login.svg"
               alt=""
               width={18}
               height={18}

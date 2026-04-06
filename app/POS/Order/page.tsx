@@ -24,17 +24,25 @@ export default function OrderPage() {
 
   useEffect(() => { 
   setLoading(true);
-  // 1. Make sure the URL is /api/drinks (matching your route.ts file)
+  
+  // 1. Fetch from your team's endpoint
   fetch('/api/drinks?allDrinks=true') 
     .then(response => response.json())
     .then(res => {
-      // 2. Your API returns { message: "...", data: [...] }
-      // So we MUST use res.data
+      // 2. Check if the data exists and is an array
       if (res.data && Array.isArray(res.data)) {
-        setMenuItems(res.data);
+        
+        // 3. ADD THE IMAGE HERE:
+        // We transform the data to include your placeholder image path
+        const itemsWithPlaceholder = res.data.map((item: any) => ({
+          ...item,
+          imageUrl: '/Template image.svg' // This must match your public folder filename exactly
+        }));
+
+        setMenuItems(itemsWithPlaceholder);
       } else {
         console.error("Received something that isn't an array:", res);
-        setMenuItems([]); // Fallback
+        setMenuItems([]); 
       }
       setLoading(false);
     })

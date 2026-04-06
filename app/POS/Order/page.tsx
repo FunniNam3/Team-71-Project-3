@@ -19,36 +19,46 @@ export default function OrderPage() {
   // 1. Create the state (default to 'Most Ordered' or 'All')
   const [menuItems, setMenuItems] = useState<any[]>([]); // This will hold all menu items
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('most ordered');
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   useEffect(() => { 
-    // Simulate fetching data from an API
-    fetch('/api/menu') // You would replace this with your actual API endpoint
-      .then(response => response.json())
-      .then(data => {
-        setMenuItems(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching menu items:', error);
-        setLoading(false);
-      });
-  }, []);
+  setLoading(true);
+  // 1. Make sure the URL is /api/drinks (matching your route.ts file)
+  fetch('/api/drinks?allDrinks=true') 
+    .then(response => response.json())
+    .then(res => {
+      // 2. Your API returns { message: "...", data: [...] }
+      // So we MUST use res.data
+      if (res.data && Array.isArray(res.data)) {
+        setMenuItems(res.data);
+      } else {
+        console.error("Received something that isn't an array:", res);
+        setMenuItems([]); // Fallback
+      }
+      setLoading(false);
+    })
+    .catch(error => {
+      console.error('Fetch error:', error);
+      setLoading(false);
+    });
+}, []);
 
   if (loading) {
     return <div className="text-center mt-20 text-gray-500">Loading menu...</div>;
   }
   
-  const [activeTab, setActiveTab] = useState('Most Ordered');
+  
 
   // 2. Define your categories exactly as they appear in your data
-  const categories = ['Most Ordered', 'Milk Tea', 'Fruit Tea', 'Specialty Tea', 'Food'];
+  const categories = ['most ordered', 'milk tea', 'fruit tea', 'specialty tea', 'food'];
 
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  
 
   // 3. Filter the items based on the activeTab
-  const filteredItems = activeTab === 'Most Ordered' 
-    ? menuItems // Show everything (or a specific "featured" list)
-    : menuItems.filter(item => item.category === activeTab);
+  const filteredItems = activeTab === 'most ordered' 
+    ? menuItems.filter(item => item.category?.includes("most ordered")) // Show everything (or a specific "featured" list)
+    : menuItems.filter(item => item.category?.includes(activeTab));
 
   return (
     <main className="p-8 ]">

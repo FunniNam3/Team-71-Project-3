@@ -5,9 +5,17 @@ import ProductCard from "@components/ProductCard";
 
 export default function OrderPage() {
   // 1. Create the state (default to 'Most Ordered' or 'All')
+  /* 
+    TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
+    Figure out what it is returning 
+  */
   const [menuItems, setMenuItems] = useState<any[]>([]); // This will hold all menu items
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("most ordered");
+  /* 
+    TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
+    Figure out what it is returning 
+  */
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   useEffect(() => {
@@ -82,19 +90,13 @@ export default function OrderPage() {
       {/* Re-arranged Grid */}
       <div className="grid grid-cols-4 gap-2">
         {filteredItems.map((item) => (
-          <div
+          /* Your Product Card Content */
+          // TODO Make all of the product cards the same size
+          <ProductCard
             key={item.id}
-            className="bg-white p-4 rounded-2xl border-2 border-[#00A67E]"
-          >
-            {
-              /* Your Product Card Content */
-              <ProductCard
-                key={item.id}
-                {...item}
-                onCustomize={() => setSelectedProduct(item)} // This opens the modal
-              />
-            }
-          </div>
+            {...item}
+            onCustomize={() => setSelectedProduct(item)} // This opens the modal
+          />
         ))}
       </div>
     </main>

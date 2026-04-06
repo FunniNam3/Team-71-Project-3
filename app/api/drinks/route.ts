@@ -37,8 +37,8 @@ export async function GET(request: Request) {
     const allDrinks = url.searchParams.get("allDrinks");
 
     if (allDrinks == "true") {
-      // Request and return all drinks with their id, name, price and category
-      const result = await pool.query("SELECT id, name, price, category FROM drink");
+      // Request and return all names of drinks
+      const result = await pool.query("SELECT * FROM drink");
 
       return NextResponse.json(
         { message: "GET success", data: result.rows },

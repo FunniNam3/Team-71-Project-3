@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     const q = searchParams.get("q");
 
     if (!q) {
-      return Response.json([]);
+      return NextResponse.json([]);
     }
 
     const result = await pool.query(
@@ -51,10 +51,10 @@ export async function GET(request: Request) {
       [`%${q}%`]
     );
 
-    return Response.json(result.rows);
+    return NextResponse.json(result.rows);
   } catch (err) {
     console.error(err);
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to search drink table" },
       { status: 500 }
     );

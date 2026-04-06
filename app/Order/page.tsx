@@ -1,50 +1,72 @@
-// TODO Make this drink selection// src/app/POS/Order/page.tsx
 "use client"; // Required for use of state and event handlers
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "@components/ProductCard";
-// You would also need a CustomizationModal component (not built here)
-
-const menuItems = [
-  {
-    id: 1,
-    name: "Brown Sugar Milk Tea",
-    description: "Our signature boba with...",
-    price: 5.5,
-    imageUrl: "/Template image.png",
-    category: "Milk Tea",
-  },
-  {
-    id: 2,
-    name: "Chicken Wings",
-    description: "Crispy fried wings...",
-    price: 8.99,
-    imageUrl: "/Template image.png",
-    category: "Food",
-  },
-  // ... add more mock items to fill the 3x3 grid from image_1.png
-];
 
 export default function OrderPage() {
   // 1. Create the state (default to 'Most Ordered' or 'All')
-  const [activeTab, setActiveTab] = useState("Most Ordered");
+  /* 
+    TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
+    Figure out what it is returning 
+  */
+  const [menuItems, setMenuItems] = useState<any[]>([]); // This will hold all menu items
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("most ordered");
+  /* 
+    TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
+    Figure out what it is returning 
+  */
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
+  useEffect(() => {
+    setLoading(true);
+
+    // 1. Fetch from your team's endpoint
+    fetch("/api/drinks?allDrinks=true")
+      .then((response) => response.json())
+      .then((res) => {
+        // 2. Check if the data exists and is an array
+        if (res.data && Array.isArray(res.data)) {
+          // 3. ADD THE IMAGE HERE:
+          // We transform the data to include your placeholder image path
+          const itemsWithPlaceholder = res.data.map((item: any) => ({
+            ...item,
+            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+          }));
+
+          setMenuItems(itemsWithPlaceholder);
+        } else {
+          console.error("Received something that isn't an array:", res);
+          setMenuItems([]);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center mt-20 text-gray-500">Loading menu...</div>
+    );
+  }
 
   // 2. Define your categories exactly as they appear in your data
   const categories = [
-    "Most Ordered",
-    "Milk Tea",
-    "Fruit Tea",
-    "Specialty Tea",
-    "Food",
+    "most ordered",
+    "milk tea",
+    "fruit tea",
+    "specialty tea",
+    "food",
   ];
-
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // 3. Filter the items based on the activeTab
   const filteredItems =
-    activeTab === "Most Ordered"
-      ? menuItems // Show everything (or a specific "featured" list)
-      : menuItems.filter((item) => item.category === activeTab);
+    activeTab === "most ordered"
+      ? menuItems.filter((item) => item.category?.includes("most ordered")) // Show everything (or a specific "featured" list)
+      : menuItems.filter((item) => item.category?.includes(activeTab));
 
   return (
     <main className="p-8 ]">
@@ -68,19 +90,13 @@ export default function OrderPage() {
       {/* Re-arranged Grid */}
       <div className="grid grid-cols-4 gap-2">
         {filteredItems.map((item) => (
-          <div
+          /* Your Product Card Content */
+          // TODO Make all of the product cards the same size
+          <ProductCard
             key={item.id}
-            className="bg-white p-4 rounded-2xl border-2 border-[#00A67E]"
-          >
-            {
-              /* Your Product Card Content */
-              <ProductCard
-                key={item.id}
-                {...item}
-                onCustomize={() => setSelectedProduct(item)} // This opens the modal
-              />
-            }
-          </div>
+            {...item}
+            onCustomize={() => setSelectedProduct(item)} // This opens the modal
+          />
         ))}
       </div>
     </main>

@@ -1,17 +1,7 @@
-// TODO Make this drink selection// src/app/POS/Order/page.tsx
 "use client"; // Required for use of state and event handlers
 
 import { useState, useEffect } from "react";
 import ProductCard from "@components/ProductCard";
-// You would also need a CustomizationModal component (not built here)
-
-/*const menuItems = [
-  { id: 1, name: 'Brown Sugar Milk Tea', description: 'Our signature boba with...', price: 5.50, imageUrl: '/Template image.svg', category: 'Milk Tea' },
-  { id: 2, name: 'Chicken Wings', description: 'Crispy fried wings...', price: 8.99, imageUrl: '/Template image.svg', category: 'Food' },
-  // ... add more mock items to fill the 3x3 grid from image_1.png
-];*/
-
-// For demonstration, let's create some mock data
 
 export default function OrderPage() {
   // 1. Create the state (default to 'Most Ordered' or 'All')
@@ -33,7 +23,7 @@ export default function OrderPage() {
           // We transform the data to include your placeholder image path
           const itemsWithPlaceholder = res.data.map((item: any) => ({
             ...item,
-            imageUrl: "/Template image.svg", // This must match your public folder filename exactly
+            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
           }));
 
           setMenuItems(itemsWithPlaceholder);

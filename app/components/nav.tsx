@@ -1,6 +1,7 @@
 import { auth0 } from "@/lib/auth0";
 import Image from "next/image";
 import Link from "next/link";
+import NavClient from "./navClient";
 
 export default async function NavBar() {
   const LinkStyle =
@@ -45,42 +46,7 @@ export default async function NavBar() {
             />
             Manager
           </Link>
-          {!user && (
-            <Link className={LinkStyle} href="/auth/login">
-              <Image
-                className="h-5 w-auto"
-                src="/Login.svg"
-                alt=""
-                width={18}
-                height={18}
-              />
-              Login
-            </Link>
-          )}
-          {user && (
-            <>
-              <Link className={LinkStyle} href="/Profile">
-                <Image
-                  className="h-5 w-auto"
-                  src="/User.svg"
-                  alt=""
-                  width={18}
-                  height={18}
-                />
-                {user.given_name}
-              </Link>
-              <Link className={LinkStyle} href="/auth/logout">
-                <Image
-                  className="h-5 w-auto"
-                  src="/Logout.svg"
-                  alt=""
-                  width={18}
-                  height={18}
-                />
-                Logout
-              </Link>
-            </>
-          )}
+          {<NavClient user={user} />}
         </div>
       </div>
     </nav>

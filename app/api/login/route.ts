@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import { auth0 } from "@/lib/auth0";
 

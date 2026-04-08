@@ -1,9 +1,14 @@
+import { auth0 } from "@/lib/auth0";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function NavBar() {
+export default async function NavBar() {
   const LinkStyle =
     "flex gap-2 text-white m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
+
+  const session = await auth0.getSession();
+  const user = session?.user;
+
   return (
     <nav className="w-full p-3 bg-transparent">
       <div className="w-full max-w-250 mx-auto bg-white flex justify-between gap-3 p-3 rounded-full">
@@ -20,16 +25,6 @@ export default function NavBar() {
           />
         </Link>
         <div className="w-fit flex gap-4">
-          <Link className={LinkStyle} href="/auth/login">
-            <Image
-              className="h-5 w-auto"
-              src="/Login.svg"
-              alt=""
-              width={18}
-              height={18}
-            />
-            Login
-          </Link>
           <Link className={LinkStyle} href="/Order">
             <Image
               className="h-5 w-auto"
@@ -50,6 +45,42 @@ export default function NavBar() {
             />
             Manager
           </Link>
+          {!user && (
+            <Link className={LinkStyle} href="/auth/login">
+              <Image
+                className="h-5 w-auto"
+                src="/Login.svg"
+                alt=""
+                width={18}
+                height={18}
+              />
+              Login
+            </Link>
+          )}
+          {user && (
+            <>
+              <Link className={LinkStyle} href="/Profile">
+                <Image
+                  className="h-5 w-auto"
+                  src="/User.svg"
+                  alt=""
+                  width={18}
+                  height={18}
+                />
+                {user.given_name}
+              </Link>
+              <Link className={LinkStyle} href="/auth/logout">
+                <Image
+                  className="h-5 w-auto"
+                  src="/Logout.svg"
+                  alt=""
+                  width={18}
+                  height={18}
+                />
+                Logout
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

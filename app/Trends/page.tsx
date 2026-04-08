@@ -1,6 +1,6 @@
 // This work is dedicated to the Holy Family. To Jesus, Mary and St. Joseph!
 
-// installed chart.js and react-chartjs-2
+// installed chart.js skia-canvas and react-chartjs-2
 
 import {
   Chart as ChartJS,
@@ -11,9 +11,12 @@ import {
   Title,
   Tooltip,
   Legend,
+  Chart,
 } from "chart.js";
+import { create } from "domain";
 import { use, useState } from "react";
 import { Line } from "react-chartjs-2";
+import { Canvas } from "skia-canvas";
 
 type tableEntry = {
   id: number;
@@ -38,21 +41,41 @@ export default function TrendsPage() {
   // When set to false, safe to create graphs and display
   const [loading, setLoading] = useState(true);
 
+  // async function getWeeklyData() {
+  //   try {
+  //     // get weekly most frequently purchased items
+  //     const weeklyData = await fetch('http://localhost:3000/api/food-and-drink-count?weekly=true');
 
+  //   }
+  //   catch (error) {
+  //     console.error(error.message);
+  //   }
 
+  // }
 
-  async function getWeeklyData() {
-    try {
-      // get weekly most frequently purchased items
-      const weeklyData = await fetch('http://localhost:3000/api/food-and-drink-count?weekly=true');
+  // set up pi chart for items bought
+  async function redrawPiChart() {
+    const request = await fetch(
+      "http://localhost:3000/api/food-and-drink-count/?allTime=true",
+    );
+    const data = await request.json();
 
-      
-    }
-    catch (error) {
-      console.error(error.message);
-    }
-    
+    const itemNames = data.data.map((item) => item.name);
+    const numberSold = data.data.map((item) => item.number_of_orders);
+
+    const piData = {
+      labels: [itemNames],
+      datasets: [numberSold],
+    };
+
+    createPiChart(piData);
   }
-  
-  
+
+  function createPiChart(piData) {
+    const canvas = new Canvas(400,300);
+    const piChart = new Chart(canvas, {
+      type: "doughnut",
+      data: piData,
+    });
+  }
 }

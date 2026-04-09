@@ -32,6 +32,7 @@ export async function GET(request: Request) {
   }
 
   const auth0Id = session.user.sub;
+  console.log(auth0Id); 
 
   const result = await pool.query(
     "SELECT * FROM users WHERE auth0_user_id = $1",

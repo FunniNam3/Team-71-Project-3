@@ -1,27 +1,53 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import type { User } from "@auth0/nextjs-auth0/types";
+import type { SessionData, User } from "@auth0/nextjs-auth0/types";
 import { useEffect, useState } from "react";
 
-export default function NavClient({ user }: { user: User | undefined }) {
+export default function NavClient({
+  user,
+  session,
+}: {
+  user: User | undefined;
+  session: SessionData | null;
+}) {
   const LinkStyle =
     "flex gap-2 text-white m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
 
   const [role, setRole] = useState();
-
   useEffect(() => {
     fetch("/api/login")
       .then((result) => result.json())
       .then((res) => {
-        if (res.error) {
-          console.error(res.error);
-        }
         setRole(res.role);
       });
   }, []);
+
   return (
-    <>
+    <div className="w-fit flex gap-4">
+      {role && role === "manager" ? (
+        <Link className={LinkStyle} href="/Manager">
+          <Image
+            className="h-5 w-auto"
+            src="/Suitcase.svg"
+            alt=""
+            width={20}
+            height={18}
+          />
+          Manager
+        </Link>
+      ) : (
+        <Link className={LinkStyle} href="/Order">
+          <Image
+            className="h-5 w-auto"
+            src="/Cart.svg"
+            alt=""
+            width={22}
+            height={21}
+          />
+          Order
+        </Link>
+      )}
       {!user && (
         <Link className={LinkStyle} href="/auth/login">
           <Image
@@ -58,6 +84,6 @@ export default function NavClient({ user }: { user: User | undefined }) {
           </Link>
         </>
       )}
-    </>
+    </div>
   );
 }

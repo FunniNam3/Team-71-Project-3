@@ -4,9 +4,6 @@ import Link from "next/link";
 import NavClient from "./navClient";
 
 export default async function NavBar() {
-  const LinkStyle =
-    "flex gap-2 text-white m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
-
   const session = await auth0.getSession();
   const user = session?.user;
 
@@ -26,7 +23,7 @@ export default async function NavBar() {
           />
         </Link>
 
-        <NavClient user={user} session={session} />
+        <NavClient user={user} />
       </div>
     </nav>
   );

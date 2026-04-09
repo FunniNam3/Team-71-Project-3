@@ -1,16 +1,10 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import type { SessionData, User } from "@auth0/nextjs-auth0/types";
+import type { User } from "@auth0/nextjs-auth0/types";
 import { useEffect, useState } from "react";
 
-export default function NavClient({
-  user,
-  session,
-}: {
-  user: User | undefined;
-  session: SessionData | null;
-}) {
+export default function NavClient({ user }: { user: User | undefined }) {
   const LinkStyle =
     "flex gap-2 text-white m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
 
@@ -35,6 +29,17 @@ export default function NavClient({
             height={18}
           />
           Manager
+        </Link>
+      ) : role === "cashier" ? (
+        <Link className={LinkStyle} href="/POS">
+          <Image
+            className="h-5 w-auto"
+            src="/Screen.svg"
+            alt=""
+            width={20}
+            height={18}
+          />
+          POS
         </Link>
       ) : (
         <Link className={LinkStyle} href="/Order">

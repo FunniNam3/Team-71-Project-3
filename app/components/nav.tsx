@@ -25,29 +25,8 @@ export default async function NavBar() {
             height={105}
           />
         </Link>
-        <div className="w-fit flex gap-4">
-          <Link className={LinkStyle} href="/Order">
-            <Image
-              className="h-5 w-auto"
-              src="/Cart.svg"
-              alt=""
-              width={22}
-              height={21}
-            />
-            Order
-          </Link>
-          <Link className={LinkStyle} href="/Manager">
-            <Image
-              className="h-5 w-auto"
-              src="/Suitcase.svg"
-              alt=""
-              width={20}
-              height={18}
-            />
-            Manager
-          </Link>
-          {<NavClient user={user} />}
-        </div>
+
+        <NavClient user={user} session={session} />
       </div>
     </nav>
   );

@@ -142,6 +142,42 @@ export default function TrendsPage() {
 
   redrawBarChart();
 
+  // Receipt count
+  async function redrawReceiptLineChart() {
+    // get income
+    const request = await fetch(
+      "http://localhost:3000/api/receipt-count/?allTime=true",
+    );
+    const data = await request.json();
+
+    const receiptCount = data.data.map((item) => item.receipts);
+    const dates = data.data.map((item) => item.month + '/' + item.year);
+
+    const receiptLineData = {
+      labels: dates,
+      datasets: [
+        {
+          label: "Receipts",
+          data: receiptCount,
+        },
+      ],
+    };
+
+    createReceiptLineChart(receiptLineData);
+  }
+
+  function createReceiptLineChart(receiptLineData) {
+    const canvas = document.getElementById("receiptLineChart");
+    const receiptLineContext = canvas.getContext("2d");
+
+    const receiptLineChart = new Chart(receiptLineContext, {
+      type: "line",
+      data: receiptLineData,
+    });
+  }
+
+  redrawReceiptLineChart();
+
   return (
     <h1>
       TRENDS
@@ -150,6 +186,9 @@ export default function TrendsPage() {
       </div>
       <div>
         <canvas id="barChart"></canvas>
+      </div>
+      <div>
+        <canvas id="receiptLineChart"></canvas>
       </div>
     </h1>
   );

@@ -81,7 +81,7 @@ export default function TrendsPage() {
     const context = canvas.getContext('2d');
     
     const piChart = new Chart(context, {
-      type: "doughnut",
+      type: 'doughnut',
       data: piData,
     });
   }
@@ -90,32 +90,48 @@ export default function TrendsPage() {
 
   // Income and expenses
   async function redrawBarChart() {
+    // get income
     const incomeRequest = await fetch(
       "http://localhost:3000/api/income/?allTime=true",
     );
     const incomeData = await incomeRequest.json();
 
-    const incomes = data.data.map((item) => item.income);
-    const months = data.data.map((item) => item.month);
-    const years = data.data.map((item) => item.year);
+    const incomes = incomeData.data.map((item) => item.income);
+    const months = incomeData.data.map((item) => item.month);
+    const years = incomeData.data.map((item) => item.year);
 
-    const piData = {
-      labels: itemNames,
-      datasets: [{
-        data: numberSold,
-      }]
+    // get expenses
+    const expenseRequest = await fetch(
+      "http://localhost:3000/api/expenses/?allTime=true",
+    );
+    const expenseData = await expenseRequest.json();
+
+    const expenses = expenseData.data.map((item) => item.expense);
+
+    const barData = {
+      labels: [months,years],
+      datasets: [
+        {
+          label: 'Income',
+          data: incomes,
+        },
+        {
+          label: 'Expense',
+          data: expenses,
+        }
+      ]
     };
 
-    createPiChart(piData);
+    createBarChart(barData);
   }
 
-  function createBarChart(piData) {
-    const canvas = document.getElementById('piChart');
+  function createBarChart(barData) {
+    const canvas = document.getElementById('barChart');
     const context = canvas.getContext('2d');
     
-    const piChart = new Chart(context, {
-      type: "doughnut",
-      data: piData,
+    const barChart = new Chart(context, {
+      type: 'bar',
+      data: barData,
     });
   }
 
@@ -124,8 +140,13 @@ export default function TrendsPage() {
 
 
   return (
-    <div>
-      <canvas id="piChart"></canvas>
-    </div>
+    <h1>TRENDS
+      <div>
+        <canvas id="piChart"></canvas>
+      </div>
+      <div>
+        <canvas id="barChart"></canvas>
+      </div>
+    </h1>
   );
 }

@@ -15,6 +15,7 @@ import {
   Legend,
   Chart,
 } from "chart.js/auto";
+import { color } from "chart.js/helpers";
 import { create } from "domain";
 import { title } from "process";
 import { use, useState } from "react";
@@ -68,20 +69,22 @@ export default function TrendsPage() {
 
     const piData = {
       labels: itemNames,
-      datasets: [{
-        data: numberSold,
-      }]
+      datasets: [
+        {
+          data: numberSold,
+        },
+      ],
     };
 
     createPiChart(piData);
   }
 
   function createPiChart(piData) {
-    const canvas = document.getElementById('piChart');
-    const context = canvas.getContext('2d');
-    
-    const piChart = new Chart(context, {
-      type: 'doughnut',
+    const canvas = document.getElementById("piChart");
+    const piContext = canvas.getContext("2d");
+
+    const piChart = new Chart(piContext, {
+      type: "doughnut",
       data: piData,
     });
   }
@@ -97,8 +100,7 @@ export default function TrendsPage() {
     const incomeData = await incomeRequest.json();
 
     const incomes = incomeData.data.map((item) => item.income);
-    const months = incomeData.data.map((item) => item.month);
-    const years = incomeData.data.map((item) => item.year);
+    const dates = incomeData.data.map((item) => item.month + '/' + item.year);
 
     // get expenses
     const expenseRequest = await fetch(
@@ -109,38 +111,40 @@ export default function TrendsPage() {
     const expenses = expenseData.data.map((item) => item.expense);
 
     const barData = {
-      labels: [months,years],
+      labels: dates,
       datasets: [
         {
-          label: 'Income',
+          label: "Income",
           data: incomes,
+          backgroundColor: 'rgba(119, 221, 119, 1.0)'
+        
         },
         {
-          label: 'Expense',
+          label: "Expense",
           data: expenses,
-        }
-      ]
+          backgroundColor: 'rgba(255, 105, 97, 1.0)'
+        },
+      ],
     };
 
     createBarChart(barData);
   }
 
   function createBarChart(barData) {
-    const canvas = document.getElementById('barChart');
-    const context = canvas.getContext('2d');
-    
-    const barChart = new Chart(context, {
-      type: 'bar',
+    const canvas = document.getElementById("barChart");
+    const barContext = canvas.getContext("2d");
+
+    const barChart = new Chart(barContext, {
+      type: "bar",
       data: barData,
     });
   }
 
   redrawBarChart();
 
-
-
   return (
-    <h1>TRENDS
+    <h1>
+      TRENDS
       <div>
         <canvas id="piChart"></canvas>
       </div>

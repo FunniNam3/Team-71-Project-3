@@ -7,7 +7,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main>
+    <main className="flex flex-col gap-3">
       <h1 className="">Manager Page</h1>
       <div>
         <Link href="/Manager/Reports">Report Page</Link>

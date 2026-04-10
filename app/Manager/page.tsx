@@ -178,6 +178,42 @@ export default function TrendsPage() {
 
   redrawReceiptLineChart();
 
+  // Avg receipts per hour
+  async function redrawAverageReceiptChart() {
+    // get income
+    const request = await fetch(
+      "http://localhost:3000/api/receipts-per-hour/?allTime=true",
+    );
+    const data = await request.json();
+
+    const averageReceipts = data.data.map((item) => item.avg_receipts);
+    const hours = data.data.map((item) => item.hour);
+
+    const averageReceiptData = {
+      labels: hours,
+      datasets: [
+        {
+          label: "Average Receipts",
+          data: averageReceipts,
+        },
+      ],
+    };
+
+    createAverageReceiptChart(averageReceiptData);
+  }
+
+  function createAverageReceiptChart(averageReceiptData) {
+    const canvas = document.getElementById("averageReceiptChart");
+    const averageReceiptContext = canvas.getContext("2d");
+
+    const receiptLineChart = new Chart(averageReceiptContext, {
+      type: "line",
+      data: averageReceiptData,
+    });
+  }
+
+  redrawAverageReceiptChart();
+
   return (
     <h1>
       TRENDS
@@ -189,6 +225,9 @@ export default function TrendsPage() {
       </div>
       <div>
         <canvas id="receiptLineChart"></canvas>
+      </div>
+      <div>
+        <canvas id="averageReceiptChart"></canvas>
       </div>
     </h1>
   );

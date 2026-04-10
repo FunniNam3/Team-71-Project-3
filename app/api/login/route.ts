@@ -32,11 +32,13 @@ export async function GET(request: Request) {
   }
 
   const auth0Id = session.user.sub;
-  console.log(auth0Id); 
+  if (!auth0Id) {
+    return Response.json({ error: "User not found" }, { status: 401 });
+  }
 
   const result = await pool.query(
     "SELECT * FROM users WHERE auth0_user_id = $1",
-    [auth0Id]
+    [auth0Id],
   );
 
   if (result.rows.length === 0) {

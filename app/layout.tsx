@@ -30,6 +30,12 @@ export default function RootLayout({
       >
         <NavBar />
         {children}
+        {/* Elfsight Website Translator | Untitled Website Translator */}
+        <script src="https://elfsightcdn.com/platform.js" async></script>
+        <div
+          className="elfsight-app-72f9bd91-2a62-4d73-b116-1de5d755fd57"
+          data-elfsight-app-lazy
+        ></div>
       </body>
     </html>
   );

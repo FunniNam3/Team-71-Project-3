@@ -100,7 +100,7 @@ export default function TrendsPage() {
     const incomeData = await incomeRequest.json();
 
     const incomes = incomeData.data.map((item) => item.income);
-    const dates = incomeData.data.map((item) => item.month + '/' + item.year);
+    const dates = incomeData.data.map((item) => item.month + "/" + item.year);
 
     // get expenses
     const expenseRequest = await fetch(
@@ -116,13 +116,12 @@ export default function TrendsPage() {
         {
           label: "Income",
           data: incomes,
-          backgroundColor: 'rgba(119, 221, 119, 1.0)'
-        
+          backgroundColor: "rgba(119, 221, 119, 1.0)",
         },
         {
           label: "Expense",
           data: expenses,
-          backgroundColor: 'rgba(255, 105, 97, 1.0)'
+          backgroundColor: "rgba(255, 105, 97, 1.0)",
         },
       ],
     };
@@ -151,7 +150,7 @@ export default function TrendsPage() {
     const data = await request.json();
 
     const receiptCount = data.data.map((item) => item.receipts);
-    const dates = data.data.map((item) => item.month + '/' + item.year);
+    const dates = data.data.map((item) => item.month + "/" + item.year);
 
     const receiptLineData = {
       labels: dates,
@@ -195,6 +194,8 @@ export default function TrendsPage() {
         {
           label: "Average Receipts",
           data: averageReceipts,
+          backgroundColor: "rgba(128, 0, 128, 1.0)",
+          borderColor: "rgba(128, 0, 128, 1.0)",
         },
       ],
     };
@@ -215,20 +216,19 @@ export default function TrendsPage() {
   redrawAverageReceiptChart();
 
   return (
-    <h1>
-      TRENDS
+    <div className="flex flex-wrap">
       <div>
-        <canvas id="piChart"></canvas>
+        <canvas className="w-2/1 " id="piChart"></canvas>
       </div>
       <div>
-        <canvas id="barChart"></canvas>
+        <canvas className="w-2/1" id="barChart"></canvas>
       </div>
       <div>
-        <canvas id="receiptLineChart"></canvas>
+        <canvas className="w-2/1" id="receiptLineChart"></canvas>
       </div>
       <div>
-        <canvas id="averageReceiptChart"></canvas>
+        <canvas className="w-2/1" id="averageReceiptChart"></canvas>
       </div>
-    </h1>
+    </div>
   );
 }

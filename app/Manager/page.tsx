@@ -1,6 +1,6 @@
 // This work is dedicated to the Holy Family. To Jesus, Mary and St. Joseph!
 
-// installed chart.js skia-canvas and react-chartjs-2
+// installed chart.js skia-canvas react-day-picker and react-chartjs-2
 
 "use client";
 
@@ -30,6 +30,15 @@ type tableEntry = {
 };
 
 export default function TrendsPage() {
+  // make buttons for time frame selection
+  const [startMonth, setStartMonth] = useState('-');
+  const [startDay, setStartDay] = useState('-');
+  const [startYear, setStartYear] = useState('-');
+  const [endMonth, setEndMonth] = useState('-');
+  const [endDay, setEndDay] = useState('-');
+  const [endYear, setEndYear] = useState('-');
+
+
   // // create variables and functions to hold and set chart data
   // // pi chart for food and drink count sold in time period
   // const [piData, setPiData] = useState<any>(null);
@@ -84,17 +93,23 @@ export default function TrendsPage() {
     const canvas = document.getElementById("piChart");
     const piContext = canvas.getContext("2d");
 
-
     const piChart = new Chart(piContext, {
       type: "doughnut",
       data: piData,
       options: {
         plugins: {
+          title: {
+            display: true,
+            text: "Items Sold by Type",
+            font: {
+              size: 20,
+            },
+          },
           legend: {
             display: false,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -146,17 +161,26 @@ export default function TrendsPage() {
       type: "bar",
       data: barData,
       options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Monthly Revenue",
+            font: {
+              size: 20,
+            },
+          },
+        },
         scales: {
           y: {
             ticks: {
               // adds dollar sign to y values since measuring money
-              callback: function(value,index, ticks) {
-                return '$' + value;
-              }
-            }
-          }
-        }
-      }
+              callback: function (value, index, ticks) {
+                return "$" + value;
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -195,11 +219,18 @@ export default function TrendsPage() {
       data: receiptLineData,
       options: {
         plugins: {
+          title: {
+            display: true,
+            text: "Monthly Order Count",
+            font: {
+              size: 20,
+            },
+          },
           legend: {
             display: false,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -240,18 +271,64 @@ export default function TrendsPage() {
       data: averageReceiptData,
       options: {
         plugins: {
+          title: {
+            display: true,
+            text: "Average Orders per Hour",
+            font: {
+              size: 20,
+            },
+          },
           legend: {
             display: false,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
   redrawAverageReceiptChart();
 
   return (
-    <div className="flex flex-wrap justify-center">
+    <div>
+      <div className="flex flex-wrap">
+        <h3>Select Time Frame:</h3>
+        <label>
+          Start Month:
+          <select value={startMonth} onChange={e => setStartMonth(e.target.value)}>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </label>
+        <label>
+          Start Day:
+          <select value={startDay} onChange={e => setStartDay(e.target.value)}>
+            <option value="01">1</option>
+            <option value="02">2</option>
+            <option value="03">3</option>
+            <option value="04">4</option>
+            <option value="05">5</option>
+            <option value="06">6</option>
+            <option value="07">7</option>
+            <option value="08">8</option>
+            <option value="09">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+          </select>
+        </label>
+      </div>
+      
+      <div className="flex flex-wrap justify-center">
       <div>
         <canvas className="max-h-3/2 mx-33" id="piChart"></canvas>
       </div>
@@ -265,5 +342,7 @@ export default function TrendsPage() {
         <canvas className="w-2/1" id="averageReceiptChart"></canvas>
       </div>
     </div>
+    </div>
+    
   );
 }

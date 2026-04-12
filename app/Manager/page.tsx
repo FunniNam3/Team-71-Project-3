@@ -21,7 +21,9 @@ import { create } from "domain";
 import { title } from "process";
 import { use, useState } from "react";
 import { Line } from "react-chartjs-2";
+import { DateRange, DayPicker } from "react-day-picker";
 import { Canvas } from "skia-canvas";
+import "react-day-picker/dist/style.css";
 
 type tableEntry = {
   id: number;
@@ -30,14 +32,8 @@ type tableEntry = {
 };
 
 export default function TrendsPage() {
-  // make buttons for time frame selection
-  const [startMonth, setStartMonth] = useState('-');
-  const [startDay, setStartDay] = useState('-');
-  const [startYear, setStartYear] = useState('-');
-  const [endMonth, setEndMonth] = useState('-');
-  const [endDay, setEndDay] = useState('-');
-  const [endYear, setEndYear] = useState('-');
-
+  // make variable to hold time frame selected from the day picker object
+  const [timeFrame, setTimeFrame] = useState<DateRange>();
 
   // // create variables and functions to hold and set chart data
   // // pi chart for food and drink count sold in time period
@@ -290,59 +286,42 @@ export default function TrendsPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap">
+      <div>
         <h3>Select Time Frame:</h3>
-        <label>
-          Start Month:
-          <select value={startMonth} onChange={e => setStartMonth(e.target.value)}>
-            <option value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-        </label>
-        <label>
-          Start Day:
-          <select value={startDay} onChange={e => setStartDay(e.target.value)}>
-            <option value="01">1</option>
-            <option value="02">2</option>
-            <option value="03">3</option>
-            <option value="04">4</option>
-            <option value="05">5</option>
-            <option value="06">6</option>
-            <option value="07">7</option>
-            <option value="08">8</option>
-            <option value="09">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-          </select>
-        </label>
+        <div>
+          <DayPicker
+          animate
+          mode="range"
+          selected={timeFrame}
+          onSelect={setTimeFrame}
+          footer={
+            timeFrame
+              ? `${timeFrame.from?.toLocaleDateString()}-${timeFrame.to?.toLocaleDateString()}`
+              : "Pick the first day"
+          }
+        />
+        </div>
+        
       </div>
-      
       <div className="flex flex-wrap justify-center">
-      <div>
-        <canvas className="max-h-3/2 mx-33" id="piChart"></canvas>
-      </div>
-      <div>
-        <canvas className="w-2/1" id="barChart"></canvas>
-      </div>
-      <div>
-        <canvas className="w-2/1" id="receiptLineChart"></canvas>
-      </div>
-      <div>
-        <canvas className="w-2/1" id="averageReceiptChart"></canvas>
+        <div>
+          <canvas className="max-h-3/2 mx-33" id="piChart"></canvas>
+        </div>
+        <div>
+          <canvas className="w-2/1" id="barChart"></canvas>
+        </div>
+        <div>
+          <canvas className="w-2/1" id="receiptLineChart"></canvas>
+        </div>
+        <div>
+          <canvas className="w-2/1" id="averageReceiptChart"></canvas>
+        </div>
       </div>
     </div>
-    </div>
-    
   );
 }
+
+/*
+
+
+*/

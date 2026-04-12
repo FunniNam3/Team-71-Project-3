@@ -14,6 +14,7 @@ import {
   Tooltip,
   Legend,
   Chart,
+  plugins,
 } from "chart.js/auto";
 import { color } from "chart.js/helpers";
 import { create } from "domain";
@@ -83,9 +84,17 @@ export default function TrendsPage() {
     const canvas = document.getElementById("piChart");
     const piContext = canvas.getContext("2d");
 
+
     const piChart = new Chart(piContext, {
       type: "doughnut",
       data: piData,
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+          }
+        }
+      }
     });
   }
 
@@ -136,6 +145,18 @@ export default function TrendsPage() {
     const barChart = new Chart(barContext, {
       type: "bar",
       data: barData,
+      options: {
+        scales: {
+          y: {
+            ticks: {
+              // adds dollar sign to y values since measuring money
+              callback: function(value,index, ticks) {
+                return '$' + value;
+              }
+            }
+          }
+        }
+      }
     });
   }
 
@@ -172,6 +193,13 @@ export default function TrendsPage() {
     const receiptLineChart = new Chart(receiptLineContext, {
       type: "line",
       data: receiptLineData,
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+          }
+        }
+      }
     });
   }
 
@@ -207,18 +235,25 @@ export default function TrendsPage() {
     const canvas = document.getElementById("averageReceiptChart");
     const averageReceiptContext = canvas.getContext("2d");
 
-    const receiptLineChart = new Chart(averageReceiptContext, {
+    const averageReceiptChart = new Chart(averageReceiptContext, {
       type: "line",
       data: averageReceiptData,
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+          }
+        }
+      }
     });
   }
 
   redrawAverageReceiptChart();
 
   return (
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap justify-center">
       <div>
-        <canvas className="w-2/1 " id="piChart"></canvas>
+        <canvas className="max-h-3/2 mx-33" id="piChart"></canvas>
       </div>
       <div>
         <canvas className="w-2/1" id="barChart"></canvas>

@@ -5,6 +5,7 @@ import CashierItemCard from "@components/CashierItemCard";
 import CashierCustomization from "@components/CashierCustomization";
 import DiscountPopUp from "@components/DiscountPopUp";
 import PaymentMethodPopUp from "@components/PaymentMethodPopUp";
+import { useRouter } from "next/router";
 
 type DrinkItem = {
   id: number;
@@ -53,6 +54,16 @@ type CartItem = {
 };
 
 export default function CashierPOSPage() {
+  const router = useRouter();
+  useEffect(() => {
+    fetch("/api/login")
+      .then((result) => result.json())
+      .then((res) => {
+        if (res.role !== "") {
+          router.push("/Portal");
+        }
+      });
+  }, []);
   const [drinks, setDrinks] = useState<DrinkItem[]>([]);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -61,9 +72,13 @@ export default function CashierPOSPage() {
   const [customerSearch, setCustomerSearch] = useState("");
   const [itemSearch, setItemSearch] = useState("");
 
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  );
   const [selectedDrink, setSelectedDrink] = useState<DrinkItem | null>(null);
-  const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(null);
+  const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(
+    null,
+  );
 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
@@ -81,12 +96,13 @@ export default function CashierPOSPage() {
       try {
         setLoading(true);
 
-        const [drinksRes, foodsRes, customersRes, discountsRes] = await Promise.all([
-          fetch("/api/drinks?allDrinks=true"),
-          fetch("/api/foods?allFoods=true"),
-          fetch("/api/users"),
-          fetch("/api/discounts"),
-        ]);
+        const [drinksRes, foodsRes, customersRes, discountsRes] =
+          await Promise.all([
+            fetch("/api/drinks?allDrinks=true"),
+            fetch("/api/foods?allFoods=true"),
+            fetch("/api/users"),
+            fetch("/api/discounts"),
+          ]);
 
         const drinksJson = await drinksRes.json();
         const foodsJson = await foodsRes.json();
@@ -121,7 +137,6 @@ export default function CashierPOSPage() {
         const loginRes = await fetch("/api/login");
         const loginJson = await loginRes.json();
         setCashierId(loginJson.id);
-
       } catch (error) {
         console.error("Failed to load cashier POS data:", error);
         setDrinks([]);
@@ -142,23 +157,22 @@ export default function CashierPOSPage() {
 
   const filteredCustomers = useMemo(() => {
     if (!customerSearch.trim()) return [];
-    return customers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(customerSearch.toLowerCase())
+    return customers.filter((customer) =>
+      customer.name.toLowerCase().includes(customerSearch.toLowerCase()),
     );
   }, [customers, customerSearch]);
 
   const filteredDrinks = useMemo(() => {
     if (!itemSearch.trim()) return [];
     return drinks.filter((drink) =>
-      drink.name.toLowerCase().includes(itemSearch.toLowerCase())
+      drink.name.toLowerCase().includes(itemSearch.toLowerCase()),
     );
   }, [drinks, itemSearch]);
 
   const filteredFoods = useMemo(() => {
     if (!itemSearch.trim()) return [];
     return foods.filter((food) =>
-      food.name.toLowerCase().includes(itemSearch.toLowerCase())
+      food.name.toLowerCase().includes(itemSearch.toLowerCase()),
     );
   }, [foods, itemSearch]);
 
@@ -242,7 +256,7 @@ export default function CashierPOSPage() {
       discount_id: selectedDiscount?.id ?? null,
     };
 
-  const res = await fetch("/api/receipt", {
+    const res = await fetch("/api/receipt", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(receiptPayload),
@@ -268,7 +282,9 @@ export default function CashierPOSPage() {
 
   if (loading) {
     return (
-      <div className="mt-20 text-center text-gray-500">Loading cashier POS...</div>
+      <div className="mt-20 text-center text-gray-500">
+        Loading cashier POS...
+      </div>
     );
   }
 
@@ -283,19 +299,26 @@ export default function CashierPOSPage() {
             {selectedCustomer ? selectedCustomer.name : "No customer selected"}
           </p>
           {selectedCustomer && (
-            <p className="text-sm text-gray-500">Customer ID: {selectedCustomer.id}</p>
+            <p className="text-sm text-gray-500">
+              Customer ID: {selectedCustomer.id}
+            </p>
           )}
         </div>
 
         <div className="mb-5 rounded-lg border p-4">
-          <p className="mb-3 text-sm font-semibold text-gray-500">Current Items</p>
+          <p className="mb-3 text-sm font-semibold text-gray-500">
+            Current Items
+          </p>
 
           {cartItems.length === 0 ? (
             <p className="text-sm text-gray-500">No items added yet.</p>
           ) : (
             <div className="space-y-3">
               {cartItems.map((item, index) => (
-                <div key={`${item.itemType}-${item.id}-${index}`} className="rounded border p-3">
+                <div
+                  key={`${item.itemType}-${item.id}-${index}`}
+                  className="rounded border p-3"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-semibold text-gray-500">{item.name}</p>
@@ -374,7 +397,9 @@ export default function CashierPOSPage() {
 
       <section className="flex-1 p-6">
         <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold text-gray-500">Customer Search</h2>
+          <h2 className="mb-3 text-lg font-bold text-gray-500">
+            Customer Search
+          </h2>
           <input
             type="text"
             value={customerSearch}
@@ -397,14 +422,18 @@ export default function CashierPOSPage() {
                   </button>
                 ))
               ) : (
-                <p className="px-4 py-3 text-sm text-gray-500">No customers found.</p>
+                <p className="px-4 py-3 text-sm text-gray-500">
+                  No customers found.
+                </p>
               )}
             </div>
           )}
         </div>
 
         <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold text-gray-500">Product Search</h2>
+          <h2 className="mb-3 text-lg font-bold text-gray-500">
+            Product Search
+          </h2>
           <input
             type="text"
             value={itemSearch}
@@ -416,7 +445,9 @@ export default function CashierPOSPage() {
           {itemSearch.trim() && (
             <div className="mt-3 max-h-72 overflow-y-auto rounded-lg border">
               {filteredDrinks.length === 0 && filteredFoods.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-gray-500">No products found.</p>
+                <p className="px-4 py-3 text-sm text-gray-500">
+                  No products found.
+                </p>
               ) : (
                 <>
                   {filteredDrinks.map((drink) => (
@@ -451,10 +482,14 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-gray-500">Most Ordered Drinks</h2>
+          <h2 className="mb-4 text-lg font-bold text-gray-500">
+            Most Ordered Drinks
+          </h2>
 
           {mostOrderedDrinks.length === 0 ? (
-            <p className="text-sm text-gray-500">No most ordered drinks found.</p>
+            <p className="text-sm text-gray-500">
+              No most ordered drinks found.
+            </p>
           ) : (
             <div className="grid grid-cols-3 gap-4">
               {mostOrderedDrinks.map((drink) => (

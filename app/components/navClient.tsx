@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import type { SessionData, User } from "@auth0/nextjs-auth0/types";
+import type { User } from "@auth0/nextjs-auth0/types";
 import { useEffect, useState } from "react";
 
 export default function NavClient({ user }: { user: User | undefined }) {

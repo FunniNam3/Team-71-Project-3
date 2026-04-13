@@ -47,6 +47,7 @@ export async function GET(request: Request) {
         OR CAST(discount AS TEXT) ILIKE $1
         OR payment_method ILIKE $1
         OR CAST(z_closed AS TEXT) ILIKE $1
+        OR CAST(total AS TEXT) ILIKE $1
       `,
       [`%${q}%`]
     );

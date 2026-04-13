@@ -34,6 +34,7 @@ type tableEntry = {
 export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
+  const [allTime, setAllTime] = useState(true);
 
   // // create variables and functions to hold and set chart data
   // // pi chart for food and drink count sold in time period
@@ -62,6 +63,20 @@ export default function TrendsPage() {
   //   }
 
   // }
+
+  // button to toggle on view of calendar for date selection
+  function toggleCalendar() {
+    if (allTime) {
+      setAllTime(false);
+    }
+  }
+
+  // Button to toggle on all time data view
+  function toggleAllTime() {
+    if (!allTime) {
+      setAllTime(true);
+    }
+  }
 
   // set up pi chart for items bought
   async function redrawPiChart() {
@@ -286,22 +301,24 @@ export default function TrendsPage() {
 
   return (
     <div>
-      <div>
-        <h3>Select Time Frame:</h3>
-        <div>
-          <DayPicker
-          animate
-          mode="range"
-          selected={timeFrame}
-          onSelect={setTimeFrame}
-          footer={
-            timeFrame
-              ? `${timeFrame.from?.toLocaleDateString()}-${timeFrame.to?.toLocaleDateString()}`
-              : "Pick the first day"
-          }
-        />
-        </div>
-        
+      <div className="flex flex-wrap justify-center">
+        {allTime && (<button onClick={toggleCalendar} className="mx-5">Select Time Frame</button>)}
+        {!allTime && (
+          <div id="calendar">
+            <DayPicker
+              animate
+              mode="range"
+              selected={timeFrame}
+              onSelect={setTimeFrame}
+              footer={
+                timeFrame
+                  ? `${timeFrame.from?.toLocaleDateString()}-${timeFrame.to?.toLocaleDateString()}`
+                  : "Pick the first day"
+              }
+            />
+          </div>
+        )}
+        <button onClick={toggleAllTime} className="mx-5">All Time Data</button>
       </div>
       <div className="flex flex-wrap justify-center">
         <div>

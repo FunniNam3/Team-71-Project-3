@@ -141,7 +141,7 @@ function StatChip({
 }
 
 export default function WeatherCard() {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -322,7 +322,7 @@ export default function WeatherCard() {
     </button>
   ) : (
     <button
-      className="m-3 absolute top-0 left-0 p-3 z-10 w-18 bg-(--primary) rounded-full aspect-square hover:scale-105 active:scale-95 transition-transform duration-300"
+      className="p-3 h-full w-auto z-10 bg-(--primary) rounded-full aspect-square hover:scale-105 active:scale-95 transition-transform duration-300"
       onClick={() => setShow(true)}
     >
       <Image

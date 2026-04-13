@@ -87,25 +87,18 @@ export default function CashierCustomization({
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold">{item.name}</h2>
-            <p className="text-sm text-gray-600">${item.price.toFixed(2)}</p>
+            <h2 className="text-xl font-bold text-gray-500">{item.name}</h2>
+            <p className="text-sm text-gray-500">${item.price.toFixed(2)}</p>
           </div>
-
-          <button
-            onClick={onClose}
-            className="rounded border px-3 py-1 text-sm hover:bg-gray-100"
-          >
-            X
-          </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Ice</label>
+            <label className="mb-1 block text-sm font-medium text-gray-500">Ice</label>
             <select
               value={selectedIce}
               onChange={(e) => setSelectedIce(e.target.value)}
-              className="w-full rounded border p-2"
+              className="w-full rounded border p-2 text-gray-500"
             >
               {iceOptions.map((option) => (
                 <option key={option} value={option}>
@@ -116,11 +109,11 @@ export default function CashierCustomization({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Sweetness</label>
+            <label className="mb-1 block text-sm font-medium text-gray-500">Sweetness</label>
             <select
               value={selectedSweetness}
               onChange={(e) => setSelectedSweetness(e.target.value)}
-              className="w-full rounded border p-2"
+              className="w-full rounded border p-2 text-gray-500"
             >
               <option value="0%">0%</option>
               <option value="25%">25%</option>
@@ -131,11 +124,11 @@ export default function CashierCustomization({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Milk</label>
+            <label className="mb-1 block text-sm font-medium text-gray-500">Milk</label>
             <select
               value={selectedMilk}
               onChange={(e) => setSelectedMilk(e.target.value)}
-              className="w-full rounded border p-2"
+              className="w-full rounded border p-2 text-gray-500"
             >
               {milkOptions.map((option) => (
                 <option key={option} value={option}>
@@ -146,11 +139,11 @@ export default function CashierCustomization({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Boba</label>
+            <label className="mb-1 block text-sm font-medium text-gray-500">Boba</label>
             <select
               value={selectedBoba}
               onChange={(e) => setSelectedBoba(e.target.value)}
-              className="w-full rounded border p-2"
+              className="w-full rounded border p-2 text-gray-500"
             >
               {yesNoOptions.map((option) => (
                 <option key={option} value={option}>
@@ -161,13 +154,13 @@ export default function CashierCustomization({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">
+            <label className="mb-1 block text-sm font-medium text-gray-500">
               Popping Boba
             </label>
             <select
               value={selectedPoppingBoba}
               onChange={(e) => setSelectedPoppingBoba(e.target.value)}
-              className="w-full rounded border p-2"
+              className="w-full rounded border p-2 text-gray-500"
             >
               {yesNoOptions.map((option) => (
                 <option key={option} value={option}>
@@ -181,7 +174,7 @@ export default function CashierCustomization({
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="rounded border px-4 py-2 hover:bg-gray-100"
+            className="rounded border px-4 py-2 hover:bg-gray-100 text-gray-500"
           >
             Cancel
           </button>
@@ -190,7 +183,7 @@ export default function CashierCustomization({
             onClick={handleAdd}
             className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
           >
-            Add to Receipt
+            Add
           </button>
         </div>
       </div>

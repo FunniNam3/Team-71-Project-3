@@ -117,14 +117,11 @@ export default function CashierPOSPage() {
           setDiscounts([]);
         }
 
-        // Replace this with your real logged-in cashier fetch later.
-        // For now, this just leaves cashierId unset unless you manually set it.
-        // Example later:
-        // const loginRes = await fetch("/api/login");
-        // const loginJson = await loginRes.json();
-        // setCashierId(loginJson.data.id);
+        // add logged in cashier ot receipt data
+        const loginRes = await fetch("/api/login");
+        const loginJson = await loginRes.json();
+        setCashierId(loginJson.id);
 
-        setCashierId(null);
       } catch (error) {
         console.error("Failed to load cashier POS data:", error);
         setDrinks([]);
@@ -147,7 +144,6 @@ export default function CashierPOSPage() {
     if (!customerSearch.trim()) return [];
     return customers.filter(
       (customer) =>
-        customer.role === "customer" &&
         customer.name.toLowerCase().includes(customerSearch.toLowerCase())
     );
   }, [customers, customerSearch]);
@@ -246,24 +242,21 @@ export default function CashierPOSPage() {
       discount_id: selectedDiscount?.id ?? null,
     };
 
-    console.log("Checkout payload:", receiptPayload);
+  const res = await fetch("/api/receipt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(receiptPayload),
+    });
 
-    // Replace this with your real receipt API later.
-    // Example:
-    // const res = await fetch("/api/receipt", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(receiptPayload),
-    // });
-    //
-    // const json = await res.json();
-    // if (!res.ok) {
-    //   console.error(json);
-    //   alert("Checkout failed.");
-    //   return;
-    // }
+    const json = await res.json();
 
-    alert(`Checkout complete with ${selectedMethod}.`);
+    if (!res.ok) {
+      console.error(json);
+      alert("Checkout failed.");
+      return;
+    }
+
+    alert(`${selectedMethod} transaction completed.`);
 
     setCartItems([]);
     setSelectedDiscount(null);
@@ -282,11 +275,11 @@ export default function CashierPOSPage() {
   return (
     <main className="flex min-h-screen bg-gray-50">
       <section className="w-[32%] min-w-85 border-r bg-white p-5">
-        <h1 className="mb-6 text-2xl font-bold">Checkout</h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-500">Checkout</h1>
 
         <div className="mb-5 rounded-lg border p-4">
           <p className="text-sm font-semibold text-gray-500">Customer</p>
-          <p className="mt-1 text-lg">
+          <p className="mt-1 text-lg text-gray-500">
             {selectedCustomer ? selectedCustomer.name : "No customer selected"}
           </p>
           {selectedCustomer && (
@@ -305,13 +298,13 @@ export default function CashierPOSPage() {
                 <div key={`${item.itemType}-${item.id}-${index}`} className="rounded border p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold">{item.name}</p>
-                      <p className="text-sm text-gray-600">
-                        ${item.price.toFixed(2)} x {item.quantity}
+                      <p className="font-semibold text-gray-500">{item.name}</p>
+                      <p className="text-sm text-gray-500">
+                        ${item.price.toFixed(2)}
                       </p>
 
                       {item.itemType === "drink" && (
-                        <div className="mt-2 text-xs text-gray-600">
+                        <div className="mt-2 text-xs text-gray-500">
                           <p>Ice: {item.selectedIce}</p>
                           <p>Sweetness: {item.selectedSweetness}</p>
                           <p>Milk: {item.selectedMilk}</p>
@@ -323,7 +316,7 @@ export default function CashierPOSPage() {
 
                     <button
                       onClick={() => handleRemoveCartItem(index)}
-                      className="rounded border px-2 py-1 text-sm hover:bg-gray-100"
+                      className="rounded border px-2 py-1 text-sm text-gray-500 hover:bg-gray-100"
                     >
                       Remove
                     </button>
@@ -335,28 +328,28 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="mb-5 rounded-lg border p-4">
-          <div className="mb-2 flex justify-between">
+          <div className="mb-2 flex justify-between text-gray-500">
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
 
-          <div className="mb-2 flex justify-between">
+          <div className="mb-2 flex justify-between text-gray-500">
             <span>Tax</span>
             <span>${tax.toFixed(2)}</span>
           </div>
 
-          <div className="mb-2 flex justify-between">
+          <div className="mb-2 flex justify-between text-gray-500">
             <span>Discount</span>
             <span>- ${discountAmount.toFixed(2)}</span>
           </div>
 
           {selectedDiscount && (
-            <div className="mb-3 text-sm text-gray-600">
+            <div className="mb-3 text-sm text-gray-500">
               Applied: {selectedDiscount.type}
             </div>
           )}
 
-          <div className="mt-4 flex justify-between border-t pt-3 text-lg font-bold">
+          <div className="mt-4 flex justify-between border-t pt-3 text-lg font-bold text-gray-500">
             <span>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
@@ -365,7 +358,7 @@ export default function CashierPOSPage() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowDiscountPopup(true)}
-            className="w-full rounded-lg border px-4 py-3 font-semibold hover:bg-gray-100"
+            className="w-full rounded-lg border px-4 py-3 font-semibold text-gray-500 hover:bg-gray-100"
           >
             Discount
           </button>
@@ -381,13 +374,13 @@ export default function CashierPOSPage() {
 
       <section className="flex-1 p-6">
         <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold">Customer Search</h2>
+          <h2 className="mb-3 text-lg font-bold text-gray-500">Customer Search</h2>
           <input
             type="text"
             value={customerSearch}
             onChange={(e) => setCustomerSearch(e.target.value)}
             placeholder="Search customer name..."
-            className="w-full rounded-lg border p-3"
+            className="w-full rounded-lg border border-gray-500 p-3 text-gray-800 placeholder-gray-400"
           />
 
           {customerSearch.trim() && (
@@ -399,7 +392,7 @@ export default function CashierPOSPage() {
                     onClick={() => handleSelectCustomer(customer)}
                     className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100 last:border-b-0"
                   >
-                    <p className="font-medium">{customer.name}</p>
+                    <p className="font-medium text-gray-500">{customer.name}</p>
                     <p className="text-sm text-gray-500">ID: {customer.id}</p>
                   </button>
                 ))
@@ -411,13 +404,13 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold">Product Search</h2>
+          <h2 className="mb-3 text-lg font-bold text-gray-500">Product Search</h2>
           <input
             type="text"
             value={itemSearch}
             onChange={(e) => setItemSearch(e.target.value)}
             placeholder="Search drinks or foods..."
-            className="w-full rounded-lg border p-3"
+            className="w-full rounded-lg border border-gray-500 p-3 text-gray-800 placeholder-gray-400"
           />
 
           {itemSearch.trim() && (
@@ -432,7 +425,7 @@ export default function CashierPOSPage() {
                       onClick={() => handleSelectDrink(drink)}
                       className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100"
                     >
-                      <p className="font-medium">{drink.name}</p>
+                      <p className="font-medium text-gray-500">{drink.name}</p>
                       <p className="text-sm text-gray-500">
                         Drink • ${Number(drink.price).toFixed(2)}
                       </p>
@@ -445,7 +438,7 @@ export default function CashierPOSPage() {
                       onClick={() => handleAddFood(food)}
                       className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100 last:border-b-0"
                     >
-                      <p className="font-medium">{food.name}</p>
+                      <p className="font-medium text-gray-500">{food.name}</p>
                       <p className="text-sm text-gray-500">
                         Food • ${Number(food.price).toFixed(2)}
                       </p>
@@ -458,7 +451,7 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold">Most Ordered Drinks</h2>
+          <h2 className="mb-4 text-lg font-bold text-gray-500">Most Ordered Drinks</h2>
 
           {mostOrderedDrinks.length === 0 ? (
             <p className="text-sm text-gray-500">No most ordered drinks found.</p>

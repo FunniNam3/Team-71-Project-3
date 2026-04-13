@@ -30,26 +30,36 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q");
 
-    if (!q) {
-      return Response.json([]);
+    if (q) {
+      const result = await pool.query(
+        `
+        SELECT id, auth0_user_id, name, role, points, cart
+        FROM users
+        WHERE 
+            CAST(id AS TEXT) ILIKE $1
+            OR auth0_user_id ILIKE $1
+            OR name ILIKE $1
+        ORDER BY name
+        `,
+        [`%${q}%`]
+      );
+
+      return Response.json({ data: result.rows });
     }
 
     const result = await pool.query(
       `
       SELECT id, auth0_user_id, name, role, points, cart
       FROM users
-      WHERE
-        CAST(id AS TEXT) ILIKE $1
-        OR name ILIKE $1
-      `,
-      [`%${q}%`]
+      ORDER BY name
+      `
     );
 
-    return Response.json(result.rows);
+    return Response.json({ data: result.rows });
   } catch (err) {
     console.error(err);
     return Response.json(
-      { error: "Failed to search users" },
+      { error: "Failed to fetch customers" },
       { status: 500 }
     );
   }

@@ -39,6 +39,8 @@ export default function TrendsPage() {
   const [endDate, setEndDate] = useState<any>(null);
   const [piChart, setPiChart] = useState<Chart>();
   const [barChart, setBarChart] = useState<Chart>();
+  const [receiptLineChart, setReceiptLineChart] = useState<Chart>();
+  const [averageReceiptChart, setAverageReceiptChart] = useState<Chart>();
 
   useEffect(() => {
     redrawPiChart();
@@ -118,8 +120,10 @@ export default function TrendsPage() {
     }
 
     const data = await result.json();
-    const itemNames = data.data.map((item) => item.name);
+
+    console.log(data);
     const numberSold = data.data.map((item) => item.number_of_orders);
+    const itemNames = data.data.map((item) => item.name);
 
     const piData = {
       labels: itemNames,
@@ -251,10 +255,19 @@ export default function TrendsPage() {
 
   // Receipt count
   async function redrawReceiptLineChart() {
-    // get income
-    const request = await fetch(
-      "http://localhost:3000/api/receipt-count/?allTime=true",
-    );
+    let request;
+
+    if (allTime) {
+      request = await fetch(
+        "http://localhost:3000/api/receipt-count/?allTime=true",
+      );
+    } else {
+      request = await fetch(
+        "http://localhost:3000/api/receipt-count/?startDate=${startDate}&endDate=${endDate}",
+      );
+    }
+
+    // get receipts
     const data = await request.json();
 
     const receiptCount = data.data.map((item) => item.receipts);
@@ -277,32 +290,46 @@ export default function TrendsPage() {
     const canvas = document.getElementById("receiptLineChart");
     const receiptLineContext = canvas?.getContext("2d");
 
-    const receiptLineChart = new Chart(receiptLineContext, {
-      type: "line",
-      data: receiptLineData,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: "Monthly Order Count",
-            font: {
-              size: 20,
+    if (receiptLineChart) {
+      receiptLineChart.destroy();
+    }
+
+    setReceiptLineChart(
+      new Chart(receiptLineContext, {
+        type: "line",
+        data: receiptLineData,
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Monthly Order Count",
+              font: {
+                size: 20,
+              },
+            },
+            legend: {
+              display: false,
             },
           },
-          legend: {
-            display: false,
-          },
         },
-      },
-    });
+      }),
+    );
   }
 
   // Avg receipts per hour
   async function redrawAverageReceiptChart() {
-    // get income
-    const request = await fetch(
-      "http://localhost:3000/api/receipts-per-hour/?allTime=true",
-    );
+    let request;
+
+    if (allTime) {
+      request = await fetch(
+        "http://localhost:3000/api/receipts-per-hour/?allTime=true",
+      );
+    } else {
+      request = await fetch(
+        "http://localhost:3000/api/receipts-per-hour/?startDate=${startDate}&endDate=${endDate}",
+      );
+    }
+
     const data = await request.json();
 
     const averageReceipts = data.data.map((item) => item.avg_receipts);
@@ -327,7 +354,11 @@ export default function TrendsPage() {
     const canvas = document.getElementById("averageReceiptChart");
     const averageReceiptContext = canvas?.getContext("2d");
 
-    const averageReceiptChart = new Chart(averageReceiptContext, {
+    if (averageReceiptChart) {
+      averageReceiptChart.destroy();
+    }
+
+    setAverageReceiptChart(new Chart(averageReceiptContext, {
       type: "line",
       data: averageReceiptData,
       options: {
@@ -344,7 +375,7 @@ export default function TrendsPage() {
           },
         },
       },
-    });
+    }));
   }
 
   return (

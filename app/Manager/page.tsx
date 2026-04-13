@@ -35,10 +35,10 @@ export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
   const [allTime, setAllTime] = useState(true);
-  //const [piRequest, setPiRequest] = useState<tableEntry[]>();
   const [startDate, setStartDate] = useState<any>(null);
   const [endDate, setEndDate] = useState<any>(null);
   const [piChart, setPiChart] = useState<Chart>();
+  const [barChart, setBarChart] = useState<Chart>();
 
   useEffect(() => {
     redrawPiChart();
@@ -88,7 +88,10 @@ export default function TrendsPage() {
       setAllTime(true);
     }
 
-    updateDates();
+    redrawPiChart();
+    redrawBarChart();
+    redrawReceiptLineChart();
+    redrawAverageReceiptChart();
   }
 
   function updateDates() {
@@ -107,15 +110,14 @@ export default function TrendsPage() {
     if (allTime) {
       result = await fetch(
         "http://localhost:3000/api/food-and-drink-count/?allTime=true",
-      )
+      );
     } else {
       result = await fetch(
         `http://localhost:3000/api/food-and-drink-count/?startDate=${startDate}&endDate=${endDate}`,
-      )
+      );
     }
 
     const data = await result.json();
-;
     const itemNames = data.data.map((item) => item.name);
     const numberSold = data.data.map((item) => item.number_of_orders);
 
@@ -139,43 +141,56 @@ export default function TrendsPage() {
       piChart.destroy();
     }
 
-    setPiChart(new Chart(piContext, {
-      type: "doughnut",
-      data: piData,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: "Items Sold by Type",
-            font: {
-              size: 20,
+    setPiChart(
+      new Chart(piContext, {
+        type: "doughnut",
+        data: piData,
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Items Sold by Type",
+              font: {
+                size: 20,
+              },
+            },
+            legend: {
+              display: false,
             },
           },
-          legend: {
-            display: false,
-          },
         },
-      },
-    }));
+      }),
+    );
   }
 
   // Income and expenses
   async function redrawBarChart() {
-    // get income
-    const incomeRequest = await fetch(
-      "http://localhost:3000/api/income/?allTime=true",
-    );
-    const incomeData = await incomeRequest.json();
+    let incomeRequest;
+    let expenseRequest;
 
+    if (allTime) {
+      incomeRequest = await fetch(
+        "http://localhost:3000/api/income/?allTime=true",
+      );
+      expenseRequest = await fetch(
+        "http://localhost:3000/api/expenses/?allTime=true",
+      );
+    } else {
+      incomeRequest = await fetch(
+        "http://localhost:3000/api/income/?startDate=${startDate}&endDate=${endDate}",
+      );
+      expenseRequest = await fetch(
+        "http://localhost:3000/api/expenses/?startDate=${startDate}&endDate=${endDate}",
+      );
+    }
+
+    // get income
+    const incomeData = await incomeRequest.json();
     const incomes = incomeData.data.map((item) => item.income);
     const dates = incomeData.data.map((item) => item.month + "/" + item.year);
 
     // get expenses
-    const expenseRequest = await fetch(
-      "http://localhost:3000/api/expenses/?allTime=true",
-    );
     const expenseData = await expenseRequest.json();
-
     const expenses = expenseData.data.map((item) => item.expense);
 
     const barData = {
@@ -201,31 +216,37 @@ export default function TrendsPage() {
     const canvas = document.getElementById("barChart");
     const barContext = canvas?.getContext("2d");
 
-    const barChart = new Chart(barContext, {
-      type: "bar",
-      data: barData,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: "Monthly Revenue",
-            font: {
-              size: 20,
+    if (barChart) {
+      barChart.destroy();
+    }
+
+    setBarChart(
+      new Chart(barContext, {
+        type: "bar",
+        data: barData,
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Monthly Revenue",
+              font: {
+                size: 20,
+              },
             },
           },
-        },
-        scales: {
-          y: {
-            ticks: {
-              // adds dollar sign to y values since measuring money
-              callback: function (value, index, ticks) {
-                return "$" + value;
+          scales: {
+            y: {
+              ticks: {
+                // adds dollar sign to y values since measuring money
+                callback: function (value, index, ticks) {
+                  return "$" + value;
+                },
               },
             },
           },
         },
-      },
-    });
+      }),
+    );
   }
 
   // Receipt count

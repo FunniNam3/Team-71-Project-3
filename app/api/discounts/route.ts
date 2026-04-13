@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db"; //to connect  to out db
-import { auth0 } from "@/lib/auth0";
 
 /*
 HTTP Status Codes
@@ -24,32 +23,29 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
-// search functino for user table
-export async function GET(request: Request) {
+//returns all disocunts in talbe
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const q = searchParams.get("q");
-
-    if (!q) {
-      return Response.json([]);
-    }
-
     const result = await pool.query(
       `
-      SELECT id, auth0_user_id, name, role, points, cart
-      FROM users
-      WHERE
-        CAST(id AS TEXT) ILIKE $1
-        OR name ILIKE $1
-      `,
-      [`%${q}%`]
+      SELECT id, type, amount
+      FROM discount
+      ORDER BY type
+      `
     );
 
-    return Response.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    return Response.json(
-      { error: "Failed to search users" },
+    return NextResponse.json(
+      {
+        message: "GET discounts success",
+        data: result.rows,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("GET discounts error:", error);
+
+    return NextResponse.json(
+      { error: "Failed to fetch discounts" },
       { status: 500 }
     );
   }

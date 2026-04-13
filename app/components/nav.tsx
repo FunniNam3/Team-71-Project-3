@@ -40,7 +40,7 @@ export default async function NavBar() {
 
           <WeatherCard />
         </div>
-        <NavClient user={user} session={session} />
+        <NavClient user={user} />
       </div>
     </nav>
   );

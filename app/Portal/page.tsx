@@ -30,7 +30,7 @@ export default function Portal() {
             LinkStyle +
             " hover:scale-105 active:scale-95 transition-transform duration-300"
           }
-          href="/Cashier"
+          href="/CashierPOS"
         >
           Cashier Page
         </Link>

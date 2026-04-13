@@ -2,10 +2,15 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import MenuCard from "@components/menucard";
+import DigitalMenuBoard from "./Menu/page";
 
 export default function Home() {
    const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
    const [drinkItems, setDrinkItems] = useState<any[]>([]);
+   const menuItems = [
+  ...foodItems.map(item => ({ ...item, type: 'Food' })),
+  ...drinkItems.map(item => ({ ...item, type: 'Drink' }))
+];
    const [loading, setLoading] = useState(true);
    const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
@@ -143,34 +148,6 @@ export default function Home() {
         </div>
       </div>
       {/* menu table with 4 items per row*/}
-      <div className="max-w-5xl mx-auto px-8 py-12 border-2 bg-white rounded-2xl">
-        <h2 className="text-5xl font-semibold mb-8 text-center font-serif">
-          Our Menu
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 border-2 rounded-2xl p-8">
-          {foodItems.map((item) => (
-                    /* Your Product Card Content */
-                    // TODO Make all of the product cards the same size
-                    <MenuCard
-                      key={item.id}
-                      {...item}
-                      onCustomize={() => setSelectedProduct(item)}
-                    /> 
-
-                  ))}
-          {drinkItems.map((item) => (
-                    /* Your Product Card Content */
-                    // TODO Make all of the product cards the same size
-                    <MenuCard
-                      key={item.id}
-                      {...item}
-                      onCustomize={() => setSelectedProduct(item)}
-                    /> 
-
-                  ))}
-          </div>
-
-      </div>
     </main>
   );
 }

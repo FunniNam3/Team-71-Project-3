@@ -1,6 +1,6 @@
 "use client"; // Required for use of state and event handlers
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ProductCard from "@components/ProductCard";
 
 export default function OrderPage() {
@@ -9,7 +9,12 @@ export default function OrderPage() {
     TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
     Figure out what it is returning 
   */
-  const [menuItems, setMenuItems] = useState<any[]>([]); // This will hold all menu items
+  const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
+   const [drinkItems, setDrinkItems] = useState<any[]>([]);
+   const menuItems = useMemo(() => [
+    ...foodItems.map(item => ({ ...item, type: 'Food' })),
+    ...drinkItems.map(item => ({ ...item, type: 'Drink' }))
+  ], [foodItems, drinkItems])
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("most ordered");
   /* 
@@ -18,33 +23,36 @@ export default function OrderPage() {
   */
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-  useEffect(() => {
+ useEffect(() => {
     setLoading(true);
 
-    // 1. Fetch from your team's endpoint
-    fetch("/api/drinks?allDrinks=true")
-      .then((response) => response.json())
-      .then((res) => {
-        // 2. Check if the data exists and is an array
-        if (res.data && Array.isArray(res.data)) {
-          // 3. ADD THE IMAGE HERE:
-          // We transform the data to include your placeholder image path
-          const itemsWithPlaceholder = res.data.map((item: any) => ({
-            ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
-          }));
+    // Define both fetch operations
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then(res => res.json());
+    const fetchFoods = fetch("/api/drinks?allFoods=true").then(res => res.json());
 
-          setMenuItems(itemsWithPlaceholder);
-        } else {
-          console.error("Received something that isn't an array:", res);
-          setMenuItems([]);
+    // Execute both and wait for completion
+    Promise.all([fetchDrinks, fetchFoods])
+      .then(([drinksRes, foodsRes]) => {
+        // Handle Drinks
+        if (drinksRes.data && Array.isArray(drinksRes.data)) {
+          setDrinkItems(drinksRes.data.map((item: any) => ({
+            ...item,
+            imageUrl: "/Template Image.png",
+            category: item.category || "milk tea", // Default for drinks
+          })));
         }
-        setLoading(false);
+
+        // Handle Foods (The table without categories)
+        if (foodsRes.data && Array.isArray(foodsRes.data)) {
+          setFoodItems(foodsRes.data.map((item: any) => ({
+            ...item,
+            imageUrl: "/Template Image.png",
+            category: "food", // Force 'food' since it's missing in DB
+          })));
+        }
       })
-      .catch((error) => {
-        console.error("Fetch error:", error);
-        setLoading(false);
-      });
+      .catch((error) => console.error("Fetch error:", error))
+      .finally(() => setLoading(false)); // Guaranteed to run last
   }, []);
 
   if (loading) {
@@ -65,7 +73,7 @@ export default function OrderPage() {
   // 3. Filter the items based on the activeTab
   const filteredItems =
     activeTab === "most ordered"
-      ? menuItems.filter((item) => item.category?.includes("most ordered")) // Show everything (or a specific "featured" list)
+      ? menuItems
       : menuItems.filter((item) => item.category?.includes(activeTab));
 
   return (

@@ -5,7 +5,7 @@ import CashierItemCard from "@components/CashierItemCard";
 import CashierCustomization from "@components/CashierCustomization";
 import DiscountPopUp from "@components/DiscountPopUp";
 import PaymentMethodPopUp from "@components/PaymentMethodPopUp";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 type DrinkItem = {
   id: number;
@@ -64,6 +64,7 @@ export default function CashierPOSPage() {
         }
       });
   }, []);
+
   const [drinks, setDrinks] = useState<DrinkItem[]>([]);
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);

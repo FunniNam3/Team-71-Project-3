@@ -59,7 +59,7 @@ export default function CashierPOSPage() {
     fetch("/api/login")
       .then((result) => result.json())
       .then((res) => {
-        if (res.role !== "") {
+        if (res.role !== "cashier") {
           router.push("/Portal");
         }
       });

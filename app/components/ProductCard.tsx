@@ -8,7 +8,8 @@ interface ProductCardProps {
   description: string;
   price: number;
   imageUrl: string;
-  onAddToCart: (item: any) => void; // Add this prop to handle the save
+  onAddToCart: (item: any) => void;
+  onCustomize: () => void; // Add this prop to handle the save
 }
 
 export default function ProductCard({
@@ -17,13 +18,17 @@ export default function ProductCard({
   price,
   imageUrl,
   onAddToCart,
+  onCustomize,
 }: ProductCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          onCustomize();
+          setIsOpen(true);
+        }}
         className="bg-white p-4 rounded-2xl border-2 border-[#00A67E] hover:shadow-lg transition-all gap-4 flex flex-col text-left"
       >
         <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-3 bg-gray-100">
@@ -40,18 +45,6 @@ export default function ProductCard({
           </div>
         </div>
       </button>
-
-      {/* Logic moved outside the button to avoid event bubbling issues */}
-      {isOpen && (
-        <Modal 
-          item={{ name, description, price, imageUrl }} // Pass item data
-          onClose={() => setIsOpen(false)} 
-          onConfirm={(customizedItem) => {
-            onAddToCart(customizedItem);
-            setIsOpen(false);
-          }}
-        />
-      )}
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { on } from "events";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -50,6 +51,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
       // Generates a unique ID for this specific drink instance in the cart
       instanceId: Math.random().toString(36).substring(2, 9),
     });
+    onClose();
   };
 
   if (typeof document === 'undefined') return null;

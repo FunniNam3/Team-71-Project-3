@@ -1,93 +1,115 @@
-"use client"; // Required for use of state and event handlers
+"use client";
 
 import { useState, useEffect, useMemo } from "react";
 import ProductCard from "@components/ProductCard";
+import Modal from "@components/Modal";
+import CartModal from "@components/CartModal";
+
+// 1. THE "STRUCTS" (Interfaces)
+
+interface Customizations {
+  ice: string;
+  sugar: string;
+  toppings: string[];
+}
+
+interface MenuItem {
+  id: string | number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  type: 'Food' | 'Drink';
+  // These are added only when the item is in the cart
+  customizations?: Customizations;
+  instanceId?: string; 
+}
+
+interface CartItem {
+  instanceId: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  customizations: Customizations;
+}
 
 export default function OrderPage() {
-  // 1. Create the state (default to 'Most Ordered' or 'All')
-  /* 
-    TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
-    Figure out what it is returning 
-  */
-  const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
-   const [drinkItems, setDrinkItems] = useState<any[]>([]);
-   const menuItems = useMemo(() => [
-    ...foodItems.map(item => ({ ...item, type: 'Food' })),
-    ...drinkItems.map(item => ({ ...item, type: 'Drink' }))
-  ], [foodItems, drinkItems])
+  const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
+  const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
+  
+  // 2. THE CART STATE (The "Memory" for your checkout)
+  const [cart, setCart] = useState<CartItem[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("most ordered");
-  /* 
-    TODO CHANGE THIS FROM ANY TO AN ACTUAL STRUCT
-    Figure out what it is returning 
-  */
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
 
- useEffect(() => {
+  const menuItems = useMemo(() => [
+    ...foodItems.map(item => ({ ...item, type: 'Food' as const })),
+    ...drinkItems.map(item => ({ ...item, type: 'Drink' as const }))
+  ], [foodItems, drinkItems]);
+
+  // 3. THE HANDLER (Saves the customized drink to the cart)
+  // ...existing code...
+
+// 3. THE HANDLER (Saves the customized drink to the cart)
+const handleAddToCart = (customizedItem: MenuItem) => {
+  const cartItem: CartItem = {
+    ...customizedItem,
+    instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+    customizations: customizedItem.customizations || { ice: '', sugar: '', toppings: [] },
+  };
+  setCart((prev) => [...prev, cartItem]);
+  setSelectedProduct(null); // Close the customization modal
+};
+
+// ...existing code...
+  useEffect(() => {
     setLoading(true);
-
-    // Define both fetch operations
     const fetchDrinks = fetch("/api/drinks?allDrinks=true").then(res => res.json());
     const fetchFoods = fetch("/api/drinks?allFoods=true").then(res => res.json());
 
-    // Execute both and wait for completion
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
-        // Handle Drinks
-        if (drinksRes.data && Array.isArray(drinksRes.data)) {
+        if (drinksRes.data) {
           setDrinkItems(drinksRes.data.map((item: any) => ({
             ...item,
             imageUrl: "/Template Image.png",
-            category: item.category || "milk tea", // Default for drinks
+            category: item.category || "milk tea",
           })));
         }
-
-        // Handle Foods (The table without categories)
-        if (foodsRes.data && Array.isArray(foodsRes.data)) {
+        if (foodsRes.data) {
           setFoodItems(foodsRes.data.map((item: any) => ({
             ...item,
             imageUrl: "/Template Image.png",
-            category: "food", // Force 'food' since it's missing in DB
+            category: "food",
           })));
         }
       })
       .catch((error) => console.error("Fetch error:", error))
-      .finally(() => setLoading(false)); // Guaranteed to run last
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="text-center mt-20 text-gray-500">Loading menu...</div>
-    );
-  }
+  if (loading) return <div className="text-center mt-20 text-gray-500">Loading menu...</div>;
 
-  // 2. Define your categories exactly as they appear in your data
-  const categories = [
-    "most ordered",
-    "milk tea",
-    "fruit tea",
-    "specialty tea",
-    "food",
-  ];
+  const categories = ["most ordered", "milk tea", "fruit tea", "specialty tea", "food"];
 
-  // 3. Filter the items based on the activeTab
-  const filteredItems =
-    activeTab === "most ordered"
+  const filteredItems = activeTab === "most ordered"
       ? menuItems
       : menuItems.filter((item) => item.category?.includes(activeTab));
 
   return (
-    <main className="p-8 ]">
+    <main className="p-8">
       {/* Navigation Tabs */}
       <nav className="flex justify-center gap-8 mb-12 border-b border-gray-300">
         {categories.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)} // Change the category on click
+            onClick={() => setActiveTab(tab)}
             className={`pb-2 text-lg transition-all ${
-              activeTab === tab
-                ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]"
-                : "text-gray-600 hover:text-black"
+              activeTab === tab ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]" : "text-gray-600 hover:text-black"
             }`}
           >
             {tab}
@@ -95,18 +117,49 @@ export default function OrderPage() {
         ))}
       </nav>
 
-      {/* Re-arranged Grid */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Product Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredItems.map((item) => (
-          /* Your Product Card Content */
-          // TODO Make all of the product cards the same size
           <ProductCard
             key={item.id}
             {...item}
-            onCustomize={() => setSelectedProduct(item)} // This opens the modal
-          />
+            // Only open the modal. Do NOT call setCart here.
+            onAddToCart={() => setSelectedProduct(item)} 
+            onCustomize={() => setSelectedProduct(item)}
+            />
         ))}
       </div>
+
+      {/* ITEM CUSTOMIZATION MODAL */}
+      {selectedProduct && (
+        <Modal
+          item={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onConfirm={handleAddToCart} // This is the connection!
+        />
+      )}
+
+      {/* FLOATING CHECKOUT BUTTON */}
+      {cart.length > 0 && (
+        <button 
+          onClick={() => setIsCartOpen(true)}
+          className="fixed bottom-8 right-8 bg-[#00A67E] text-white p-4 rounded-full shadow-2xl flex items-center gap-3 hover:scale-105 transition-transform z-40"
+        >
+          <div className="bg-white text-[#00A67E] w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">
+            {cart.length}
+          </div>
+          <span className="font-bold">Check Out</span>
+        </button>
+      )}
+
+      {/* CHECKOUT LIST MODAL */}
+      {isCartOpen && (
+        <CartModal 
+          cart={cart} 
+          onClose={() => setIsCartOpen(false)} 
+          setCart={setCart} 
+        />
+      )}
     </main>
   );
 }

@@ -19,7 +19,7 @@ import {
 import { color } from "chart.js/helpers";
 import { create } from "domain";
 import { title } from "process";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { DateRange, DayPicker } from "react-day-picker";
 import { Canvas } from "skia-canvas";
@@ -28,13 +28,24 @@ import "react-day-picker/dist/style.css";
 type tableEntry = {
   id: number;
   name: String;
-  frequency: number;
+  number_of_orders: String;
 };
 
 export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
   const [allTime, setAllTime] = useState(true);
+  //const [piRequest, setPiRequest] = useState<tableEntry[]>();
+  const [startDate, setStartDate] = useState<any>(null);
+  const [endDate, setEndDate] = useState<any>(null);
+  const [piChart, setPiChart] = useState<Chart>();
+
+  useEffect(() => {
+    redrawPiChart();
+    redrawBarChart();
+    redrawReceiptLineChart();
+    redrawAverageReceiptChart();
+  }, []);
 
   // // create variables and functions to hold and set chart data
   // // pi chart for food and drink count sold in time period
@@ -76,15 +87,35 @@ export default function TrendsPage() {
     if (!allTime) {
       setAllTime(true);
     }
+
+    updateDates();
+  }
+
+  function updateDates() {
+    setStartDate(`${timeFrame?.from?.toISOString().split("T")[0]}`);
+    setEndDate(`${timeFrame?.to?.toISOString().split("T")[0]}`);
+    redrawPiChart();
+    redrawBarChart();
+    redrawReceiptLineChart();
+    redrawAverageReceiptChart();
   }
 
   // set up pi chart for items bought
   async function redrawPiChart() {
-    const request = await fetch(
-      "http://localhost:3000/api/food-and-drink-count/?allTime=true",
-    );
-    const data = await request.json();
+    let result;
 
+    if (allTime) {
+      result = await fetch(
+        "http://localhost:3000/api/food-and-drink-count/?allTime=true",
+      )
+    } else {
+      result = await fetch(
+        `http://localhost:3000/api/food-and-drink-count/?startDate=${startDate}&endDate=${endDate}`,
+      )
+    }
+
+    const data = await result.json();
+;
     const itemNames = data.data.map((item) => item.name);
     const numberSold = data.data.map((item) => item.number_of_orders);
 
@@ -102,9 +133,13 @@ export default function TrendsPage() {
 
   function createPiChart(piData) {
     const canvas = document.getElementById("piChart");
-    const piContext = canvas.getContext("2d");
+    const piContext = canvas?.getContext("2d");
 
-    const piChart = new Chart(piContext, {
+    if (piChart) {
+      piChart.destroy();
+    }
+
+    setPiChart(new Chart(piContext, {
       type: "doughnut",
       data: piData,
       options: {
@@ -121,10 +156,8 @@ export default function TrendsPage() {
           },
         },
       },
-    });
+    }));
   }
-
-  redrawPiChart();
 
   // Income and expenses
   async function redrawBarChart() {
@@ -166,7 +199,7 @@ export default function TrendsPage() {
 
   function createBarChart(barData) {
     const canvas = document.getElementById("barChart");
-    const barContext = canvas.getContext("2d");
+    const barContext = canvas?.getContext("2d");
 
     const barChart = new Chart(barContext, {
       type: "bar",
@@ -195,8 +228,6 @@ export default function TrendsPage() {
     });
   }
 
-  redrawBarChart();
-
   // Receipt count
   async function redrawReceiptLineChart() {
     // get income
@@ -223,7 +254,7 @@ export default function TrendsPage() {
 
   function createReceiptLineChart(receiptLineData) {
     const canvas = document.getElementById("receiptLineChart");
-    const receiptLineContext = canvas.getContext("2d");
+    const receiptLineContext = canvas?.getContext("2d");
 
     const receiptLineChart = new Chart(receiptLineContext, {
       type: "line",
@@ -244,8 +275,6 @@ export default function TrendsPage() {
       },
     });
   }
-
-  redrawReceiptLineChart();
 
   // Avg receipts per hour
   async function redrawAverageReceiptChart() {
@@ -275,7 +304,7 @@ export default function TrendsPage() {
 
   function createAverageReceiptChart(averageReceiptData) {
     const canvas = document.getElementById("averageReceiptChart");
-    const averageReceiptContext = canvas.getContext("2d");
+    const averageReceiptContext = canvas?.getContext("2d");
 
     const averageReceiptChart = new Chart(averageReceiptContext, {
       type: "line",
@@ -296,8 +325,6 @@ export default function TrendsPage() {
       },
     });
   }
-
-  redrawAverageReceiptChart();
 
   return (
     <div>
@@ -320,6 +347,7 @@ export default function TrendsPage() {
                   : "Pick the first day"
               }
             />
+            <button onClick={updateDates}>Update Graphs</button>
           </div>
         )}
         <button onClick={toggleAllTime} className="mx-5">
@@ -344,8 +372,7 @@ export default function TrendsPage() {
         {allTime && <h1>Selected: All Time Data</h1>}
         {!allTime && (
           <h1>
-            Selected: {timeFrame?.from?.toLocaleDateString()}-
-            {timeFrame?.to?.toLocaleDateString()}
+            Selected: {startDate} to {endDate}
           </h1>
         )}
       </div>

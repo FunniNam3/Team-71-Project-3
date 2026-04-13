@@ -51,11 +51,12 @@ export async function POST(request: Request) {
       tax,
       discount,
       payment_method,
-      z_closed
+      z_closed,
+      total,
     } = body;
 
     // basic validation
-    if (!cashier_id || !payment_method) {
+    if (!cashier_id || !payment_method || total == null) {
       return Response.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -71,7 +72,8 @@ export async function POST(request: Request) {
         tax,
         discount,
         payment_method,
-        z_closed
+        z_closed,
+        total
       )
       VALUES (
         $1,
@@ -80,7 +82,8 @@ export async function POST(request: Request) {
         $4,
         $5,
         $6,
-        COALESCE($7, false)
+        COALESCE($7, false),
+        $8
       )
       RETURNING *
       `,
@@ -91,7 +94,8 @@ export async function POST(request: Request) {
         tax ?? 0,
         discount ?? 0,
         payment_method,
-        z_closed ?? null
+        z_closed ?? null,
+        total,
       ]
     );
 

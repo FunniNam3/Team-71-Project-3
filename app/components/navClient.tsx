@@ -75,7 +75,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
               width={18}
               height={18}
             />
-            {user.given_name}
+            {user.given_name ? user.given_name : "User"}
           </Link>
           <Link className={LinkStyle} href="/auth/logout">
             <Image

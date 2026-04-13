@@ -302,7 +302,11 @@ export default function TrendsPage() {
   return (
     <div>
       <div className="flex flex-wrap justify-center">
-        {allTime && (<button onClick={toggleCalendar} className="mx-5">Select Time Frame</button>)}
+        {allTime && (
+          <button onClick={toggleCalendar} className="mx-5">
+            Select Time Frame
+          </button>
+        )}
         {!allTime && (
           <div id="calendar">
             <DayPicker
@@ -318,7 +322,9 @@ export default function TrendsPage() {
             />
           </div>
         )}
-        <button onClick={toggleAllTime} className="mx-5">All Time Data</button>
+        <button onClick={toggleAllTime} className="mx-5">
+          All Time Data
+        </button>
       </div>
       <div className="flex flex-wrap justify-center">
         <div>
@@ -333,6 +339,15 @@ export default function TrendsPage() {
         <div>
           <canvas className="w-2/1" id="averageReceiptChart"></canvas>
         </div>
+      </div>
+      <div className="flex justify-center font-size-medium">
+        {allTime && <h1>Selected: All Time Data</h1>}
+        {!allTime && (
+          <h1>
+            Selected: {timeFrame?.from?.toLocaleDateString()}-
+            {timeFrame?.to?.toLocaleDateString()}
+          </h1>
+        )}
       </div>
     </div>
   );

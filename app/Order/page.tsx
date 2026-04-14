@@ -56,10 +56,17 @@ export default function OrderPage() {
 
 // 3. THE HANDLER (Saves the customized drink to the cart)
 const handleAddToCart = (customizedItem: MenuItem) => {
+  const customizations = customizedItem.customizations || { ice: '', sugar: '', toppings: [] };
   const cartItem: CartItem = {
-    ...customizedItem,
     instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
-    customizations: customizedItem.customizations || { ice: '', sugar: '', toppings: [] },
+    name: customizedItem.name,
+    price: customizedItem.price,
+    imageUrl: customizedItem.imageUrl,
+    customizations: {
+      ice: customizations.ice,
+      sugar: customizations.sugar,
+      toppings: customizations.toppings,
+    },
   };
   setCart((prev) => [...prev, cartItem]);
   setSelectedProduct(null); // Close the customization modal
@@ -69,7 +76,7 @@ const handleAddToCart = (customizedItem: MenuItem) => {
   useEffect(() => {
     setLoading(true);
     const fetchDrinks = fetch("/api/drinks?allDrinks=true").then(res => res.json());
-    const fetchFoods = fetch("/api/drinks?allFoods=true").then(res => res.json());
+    const fetchFoods = fetch("/api/foods?allFoods=true").then(res => res.json());
 
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
@@ -99,6 +106,9 @@ const handleAddToCart = (customizedItem: MenuItem) => {
   const filteredItems = activeTab === "most ordered"
       ? menuItems
       : menuItems.filter((item) => item.category?.includes(activeTab));
+    console.log("Current Tab:", activeTab);
+    console.log("All Items:", menuItems);
+    console.log("Filtered Results:", filteredItems);
 
   return (
     <main className="p-8">

@@ -1,20 +1,19 @@
 "use client";
-import Image from "next/image";
-import { useState, useEffect } from 'react';
-import MenuCard from '@components/menucard';
+import { useState, useEffect } from "react";
+import MenuCard from "@components/menucard";
 
 const ITEMS_PER_PAGE = 6; // How many items fit on one screen
 
 export default function DigitalMenuBoard() {
   const [currentPage, setCurrentPage] = useState(0);
-     const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
-   const [drinkItems, setDrinkItems] = useState<any[]>([]);
-   const menuItems = [
-  ...foodItems.map(item => ({ ...item, type: 'Food' })),
-  ...drinkItems.map(item => ({ ...item, type: 'Drink' }))
-];
-   const [loading, setLoading] = useState(true);
-   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
+  const [drinkItems, setDrinkItems] = useState<any[]>([]);
+  const menuItems = [
+    ...foodItems.map((item) => ({ ...item, type: "Food" })),
+    ...drinkItems.map((item) => ({ ...item, type: "Drink" })),
+  ];
+  const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // 1. Calculate how many pages you have total
   const totalPages = Math.ceil(menuItems.length / ITEMS_PER_PAGE);
@@ -31,7 +30,7 @@ export default function DigitalMenuBoard() {
   // 3. Slice the data to show only the current "bulk"
   const displayItems = menuItems.slice(
     currentPage * ITEMS_PER_PAGE,
-    (currentPage + 1) * ITEMS_PER_PAGE
+    (currentPage + 1) * ITEMS_PER_PAGE,
   );
   useEffect(() => {
     setLoading(true);
@@ -82,7 +81,7 @@ export default function DigitalMenuBoard() {
       .catch((error) => {
         console.error("Fetch error:", error);
         setLoading(false);
-      });  
+      });
   }, []);
   if (loading) {
     return (
@@ -93,7 +92,9 @@ export default function DigitalMenuBoard() {
   return (
     <div className="h-screen w-full bg-black text-white p-10 overflow-hidden">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-5xl font-bold uppercase tracking-widest">Current Specials</h1>
+        <h1 className="text-5xl font-bold uppercase tracking-widest">
+          Current Specials
+        </h1>
         <div className="text-xl text-gray-400">
           Page {currentPage + 1} of {totalPages}
         </div>
@@ -102,16 +103,16 @@ export default function DigitalMenuBoard() {
       {/* The Grid */}
       <div className="grid grid-cols-3 gap-10">
         {displayItems.map((item) => (
-          <MenuCard key={item.id} 
-          { ...item}
-          onCustomize={() => selectedProduct(item)} />
+          <MenuCard key={item.id} {...item} />
         ))}
       </div>
 
       {/* Progress Bar (Visual flair) */}
-      <div className="absolute bottom-0 left-0 h-2 bg-orange-500 transition-all duration-[8000ms] ease-linear"
-           style={{ width: '100%' }}
-           key={currentPage} />
+      <div
+        className="absolute bottom-0 left-0 h-2 bg-orange-500 transition-all duration-8000 ease-linear"
+        style={{ width: "100%" }}
+        key={currentPage}
+      />
     </div>
   );
 }

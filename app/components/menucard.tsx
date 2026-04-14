@@ -6,7 +6,6 @@ interface MenuCardProps {
   description: string;
   price: number;
   imageUrl: string;
-  onCustomize: () => void; // Function to call when '+' is clicked
 }
 
 export default function MenuCard({
@@ -14,7 +13,6 @@ export default function MenuCard({
   description,
   price,
   imageUrl,
-  onCustomize,
 }: MenuCardProps) {
   /*
     FIXME
@@ -24,10 +22,7 @@ export default function MenuCard({
 
   */
   return (
-    <div
-      onClick={onCustomize}
-      className="bg-#C4AF9A p-4 rounded-2xl border-[none] hover:border-[#00A67E] cursor-pointer transition-all"
-    >
+    <div className="bg-#C4AF9A p-4 rounded-2xl border-[none] hover:border-[#00A67E] cursor-pointer transition-all">
       {/* Product Image */}
       <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-3 bg-(--secondary)">
         <Image src={imageUrl} alt={name} fill className="object-cover" />
@@ -42,7 +37,6 @@ export default function MenuCard({
         <span className="text-(--dark) text-xl font-bold">
           ${price.toFixed(2)}
         </span>
-        
       </div>
     </div>
   );

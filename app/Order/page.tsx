@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import ProductCard from "@components/ProductCard";
 import Modal from "@components/Modal";
 import CartModal from "@components/CartModal";
+import { CartItem } from "@components/CartModal";
 
 // 1. THE "STRUCTS" (Interfaces)
 
@@ -24,14 +25,6 @@ interface MenuItem {
   // These are added only when the item is in the cart
   customizations?: Customizations;
   instanceId?: string; 
-}
-
-interface CartItem {
-  instanceId: string;
-  name: string;
-  price: number;
-  imageUrl: string;
-  customizations: Customizations;
 }
 
 export default function OrderPage() {
@@ -81,15 +74,17 @@ const handleAddToCart = (customizedItem: MenuItem) => {
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
         if (drinksRes.data) {
-          setDrinkItems(drinksRes.data.map((item: any) => ({
-            ...item,
+            setDrinkItems(drinksRes.data.map((item: any, index: number) => ({
+           ...item,
+            id: item.id || item._id || `drink-${index}`,
             imageUrl: "/Template Image.png",
             category: item.category || "milk tea",
           })));
         }
         if (foodsRes.data) {
-          setFoodItems(foodsRes.data.map((item: any) => ({
+          setFoodItems(foodsRes.data.map((item: any, index: number) => ({
             ...item,
+            id: item.id || item._id || `food-${index}`, // Ensure there's a unique ID
             imageUrl: "/Template Image.png",
             category: "food",
           })));

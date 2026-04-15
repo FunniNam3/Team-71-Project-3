@@ -50,38 +50,11 @@ export default function TrendsPage() {
 
   useEffect(() => {
     createPiChart();
-    redrawBarChart();
+    createBarChart();
     redrawReceiptLineChart();
     redrawAverageReceiptChart();
   }, []);
 
-  // // create variables and functions to hold and set chart data
-  // // pi chart for food and drink count sold in time period
-  // const [piData, setPiData] = useState<any>(null);
-  // // line chart of avg receipt purchase time in time period
-  // const [timeData, setTimeData] = useState<any>(null);
-  // // bar chart of monthly revenue and expense in time period
-  // const [salesData, setSalesData] = useState<any>(null);
-  // // line chart of number of receipts per month in time period
-  // const [receiptData, setReceiptData] = useState<any>(null);
-  // // Fill in data for weekly most frequently purchased table
-  // const [tableEntry, setTableEntry] = useState<tableEntry[]>([]);
-
-  // // loading variable to keep track of if still waiting on api request
-  // // When set to false, safe to create graphs and display
-  // const [loading, setLoading] = useState(true);
-
-  // async function getWeeklyData() {
-  //   try {
-  //     // get weekly most frequently purchased items
-  //     const weeklyData = await fetch('http://localhost:3000/api/food-and-drink-count?weekly=true');
-
-  //   }
-  //   catch (error) {
-  //     console.error(error.message);
-  //   }
-
-  // }
 
   // button to toggle on view of calendar for date selection
   function toggleCalendar() {
@@ -97,7 +70,7 @@ export default function TrendsPage() {
     }
 
     redrawPiChart();
-    // redrawBarChart();
+    redrawBarChart();
     // redrawReceiptLineChart();
     // redrawAverageReceiptChart();
   }
@@ -110,20 +83,17 @@ export default function TrendsPage() {
     endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
 
     redrawPiChart();
-    // redrawBarChart();
+    redrawBarChart();
     // redrawReceiptLineChart();
     // redrawAverageReceiptChart();
   }
-
-
-  
 
   // function called on first creation of piChart
   // first time is always allTime data
   async function createPiChart() {
     const result = await fetch(
-        "http://localhost:3000/api/food-and-drink-count/?allTime=true",
-      );
+      "http://localhost:3000/api/food-and-drink-count/?allTime=true",
+    );
 
     const data = await result.json();
 
@@ -139,31 +109,32 @@ export default function TrendsPage() {
         },
       ],
     };
-    
+
     const canvas = document.getElementById("piChart");
     const piContext = canvas?.getContext("2d");
 
     // pi chart does not exist. create one
-    setPiChart(new Chart(piContext, {
-      type: "doughnut",
-      data: piData,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: "Items Sold by Type",
-            font: {
-              size: 20,
+    setPiChart(
+      new Chart(piContext, {
+        type: "doughnut",
+        data: piData,
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Items Sold by Type",
+              font: {
+                size: 20,
+              },
+            },
+            legend: {
+              display: false,
             },
           },
-          legend: {
-            display: false,
-          },
         },
-      },
-    }));
+      }),
+    );
   }
-  
 
   // function in charge of getting new data and redrawing the chart
   async function redrawPiChart() {
@@ -181,7 +152,7 @@ export default function TrendsPage() {
 
     const data = await result.json();
 
-    console.log(data);
+    // console.log(data);
 
     let itemNames = [];
     let numberSold = [];
@@ -189,14 +160,8 @@ export default function TrendsPage() {
       // data exists
       itemNames = data.data.map((item) => item.name);
       numberSold = data.data.map((item) => item.number_of_orders);
-    } 
-    // else {
-    //   piChart?.clear();
-    //   piChart?.destroy();
-    //   piChart?.update();
-    //   return;
-    // }
-    
+    }
+
     let piData = {
       labels: itemNames,
       datasets: [
@@ -206,39 +171,24 @@ export default function TrendsPage() {
       ],
     };
 
-    console.log("made it");
+    //console.log("made it");
     //console.log(piChart);
 
     if (piChart) {
-      console.log("updating");
+      //console.log("updating");
       piChart.data.labels = piData.labels;
-      piChart.data.datasets = [{data: numberSold}];
+      piChart.data.datasets = [{ data: numberSold }];
       piChart.update();
     }
   }
-    
 
-
-  // Income and expenses
-  async function redrawBarChart() {
-    let incomeRequest;
-    let expenseRequest;
-
-    if (allTime) {
-      incomeRequest = await fetch(
-        "http://localhost:3000/api/income/?allTime=true",
-      );
-      expenseRequest = await fetch(
-        "http://localhost:3000/api/expenses/?allTime=true",
-      );
-    } else {
-      incomeRequest = await fetch(
-        "http://localhost:3000/api/income/?startDate=${startDate}&endDate=${endDate}",
-      );
-      expenseRequest = await fetch(
-        "http://localhost:3000/api/expenses/?startDate=${startDate}&endDate=${endDate}",
-      );
-    }
+  async function createBarChart() {
+    let incomeRequest = await fetch(
+      "http://localhost:3000/api/income/?allTime=true",
+    );
+    let expenseRequest = await fetch(
+      "http://localhost:3000/api/expenses/?allTime=true",
+    );
 
     // get income
     const incomeData = await incomeRequest.json();
@@ -265,16 +215,8 @@ export default function TrendsPage() {
       ],
     };
 
-    createBarChart(barData);
-  }
-
-  function createBarChart(barData) {
     const canvas = document.getElementById("barChart");
     const barContext = canvas?.getContext("2d");
-
-    if (barChart) {
-      barChart.destroy();
-    }
 
     setBarChart(
       new Chart(barContext, {
@@ -303,6 +245,79 @@ export default function TrendsPage() {
         },
       }),
     );
+  }
+
+  // Income and expenses
+  async function redrawBarChart() {
+    let incomeRequest;
+    let expenseRequest;
+
+    if (allTime) {
+      incomeRequest = await fetch(
+        "http://localhost:3000/api/income/?allTime=true",
+      );
+      expenseRequest = await fetch(
+        "http://localhost:3000/api/expenses/?allTime=true",
+      );
+    } else {
+      incomeRequest = await fetch(
+        `http://localhost:3000/api/income?startDate=${startDate}&endDate=${endDate}`,
+      );
+      expenseRequest = await fetch(
+        `http://localhost:3000/api/expenses?startDate=${startDate}&endDate=${endDate}`,
+      );
+    }
+
+    let incomes = [];
+    let expenses = [];
+    let dates = [];
+
+    // get income
+    const incomeData = await incomeRequest.json();
+    console.log(incomeData);
+
+    if (incomeData.data && incomeData.data.length !== 0) {
+      // data exists
+      incomes = incomeData.data.map((item) => item.income);
+      dates = incomeData.data.map((item) => item.month + "/" + item.year);
+    }
+
+    // get expenses
+    const expenseData = await expenseRequest.json();
+    console.log(expenseData);
+
+    if (expenseData.data && expenseData.data.length !== 0) {
+      // data exists
+      expenses = expenseData.data.map((item) => item.expense);
+    }
+
+    const barData = {
+      labels: dates,
+      datasets: [
+        {
+          label: "Income",
+          data: incomes,
+          backgroundColor: "rgba(119, 221, 119, 1.0)",
+        },
+        {
+          label: "Expense",
+          data: expenses,
+          backgroundColor: "rgba(255, 105, 97, 1.0)",
+        },
+      ],
+    };
+
+    if (barChart) {
+      console.log("updating");
+      console.log(dates);
+      console.log(incomes);
+      console.log(expenses);
+      barChart.data.labels = barData.labels;
+      barChart.data.datasets.forEach((dataset, i) => {
+        dataset.data = barData.datasets[i].data;
+      });
+      barChart.update();
+    }
   }
 
   // Receipt count
@@ -410,24 +425,26 @@ export default function TrendsPage() {
       averageReceiptChart.destroy();
     }
 
-    setAverageReceiptChart(new Chart(averageReceiptContext, {
-      type: "line",
-      data: averageReceiptData,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: "Average Orders per Hour",
-            font: {
-              size: 20,
+    setAverageReceiptChart(
+      new Chart(averageReceiptContext, {
+        type: "line",
+        data: averageReceiptData,
+        options: {
+          plugins: {
+            title: {
+              display: true,
+              text: "Average Orders per Hour",
+              font: {
+                size: 20,
+              },
+            },
+            legend: {
+              display: false,
             },
           },
-          legend: {
-            display: false,
-          },
         },
-      },
-    }));
+      }),
+    );
   }
 
   return (

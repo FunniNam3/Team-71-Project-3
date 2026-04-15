@@ -174,7 +174,8 @@ export async function GET(request: Request) {
             INNER JOIN receipt ON receipt.id = food_to_receipt.receipt_id 
             WHERE receipt.purchase_date BETWEEN $1 AND $2 
         ) 
-        GROUP BY name`,
+        GROUP BY name 
+        ORDER BY number_of_orders DESC`,
       [startDate, endDate],
     );
 

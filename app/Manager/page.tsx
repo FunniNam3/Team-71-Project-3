@@ -49,7 +49,7 @@ export default function TrendsPage() {
     createPiChart();
     createBarChart();
     createReceiptLineChart();
-    redrawAverageReceiptChart();
+    createAverageReceiptChart();
   }, []);
 
 
@@ -69,7 +69,7 @@ export default function TrendsPage() {
     redrawPiChart();
     redrawBarChart();
     redrawReceiptLineChart();
-    // redrawAverageReceiptChart();
+    redrawAverageReceiptChart();
   }
 
   function updateDates() {
@@ -79,7 +79,7 @@ export default function TrendsPage() {
     redrawPiChart();
     redrawBarChart();
     redrawReceiptLineChart();
-    // redrawAverageReceiptChart();
+    redrawAverageReceiptChart();
   }
 
   // function called on first creation of piChart
@@ -403,27 +403,21 @@ export default function TrendsPage() {
     }
   }
 
-  
-
-  // Avg receipts per hour
-  async function redrawAverageReceiptChart() {
-    let request;
-
-    if (allTime) {
-      request = await fetch(
+  // function to create average receipt chart for first time. Displays all time data
+  async function createAverageReceiptChart() {
+    const request = await fetch(
         "http://localhost:3000/api/receipts-per-hour/?allTime=true",
       );
-    } else {
-      request = await fetch(
-        "http://localhost:3000/api/receipts-per-hour/?startDate=${startDate}&endDate=${endDate}",
-      );
-    }
 
     const data = await request.json();
+    let averageReceipts = [];
+    let hours = [];
 
-    const averageReceipts = data.data.map((item) => item.avg_receipts);
-    const hours = data.data.map((item) => item.hour);
-
+    if (data.data && data.data.length !== 0) {
+      averageReceipts = data.data.map((item) => item.avg_receipts);
+      hours = data.data.map((item) => item.hour);
+    }
+    
     const averageReceiptData = {
       labels: hours,
       datasets: [
@@ -436,16 +430,8 @@ export default function TrendsPage() {
       ],
     };
 
-    createAverageReceiptChart(averageReceiptData);
-  }
-
-  function createAverageReceiptChart(averageReceiptData) {
     const canvas = document.getElementById("averageReceiptChart");
     const averageReceiptContext = canvas?.getContext("2d");
-
-    if (averageReceiptChart) {
-      averageReceiptChart.destroy();
-    }
 
     setAverageReceiptChart(
       new Chart(averageReceiptContext, {
@@ -467,6 +453,48 @@ export default function TrendsPage() {
         },
       }),
     );
+  }
+
+  // Avg receipts per hour
+  async function redrawAverageReceiptChart() {
+    let request;
+
+    if (allTime) {
+      request = await fetch(
+        "http://localhost:3000/api/receipts-per-hour/?allTime=true",
+      );
+    } else {
+      request = await fetch(
+        `http://localhost:3000/api/receipts-per-hour/?startDate=${startDate}&endDate=${endDate}`,
+      );
+    }
+
+    const data = await request.json();
+    let averageReceipts = [];
+    let hours = [];
+
+    if (data.data && data.data.length !== 0) {
+      averageReceipts = data.data.map((item) => item.avg_receipts);
+      hours = data.data.map((item) => item.hour);
+    }
+    
+    const averageReceiptData = {
+      labels: hours,
+      datasets: [
+        {
+          label: "Average Receipts",
+          data: averageReceipts,
+          backgroundColor: "rgba(128, 0, 128, 1.0)",
+          borderColor: "rgba(128, 0, 128, 1.0)",
+        },
+      ],
+    };
+
+    if (averageReceiptChart) {
+      averageReceiptChart.data.labels = averageReceiptData.labels;
+      averageReceiptChart.data.datasets[0].data = averageReceiptData.datasets[0].data;
+      averageReceiptChart.update();
+    }
   }
 
   return (

@@ -24,6 +24,8 @@ import { Line } from "react-chartjs-2";
 import { DateRange, DayPicker } from "react-day-picker";
 import { Canvas } from "skia-canvas";
 import "react-day-picker/dist/style.css";
+import { el } from "react-day-picker/locale";
+import { start } from "repl";
 
 type tableEntry = {
   id: number;
@@ -35,15 +37,19 @@ export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
   const [allTime, setAllTime] = useState(true);
-  const [startDate, setStartDate] = useState<any>(null);
-  const [endDate, setEndDate] = useState<any>(null);
+
+  // const [startDate, setStartDate] = useState<any>(null);
+  // const [endDate, setEndDate] = useState<any>(null);
+  let startDate: String | null = null;
+  let endDate: String | null = null;
+
   const [piChart, setPiChart] = useState<Chart>();
   const [barChart, setBarChart] = useState<Chart>();
   const [receiptLineChart, setReceiptLineChart] = useState<Chart>();
   const [averageReceiptChart, setAverageReceiptChart] = useState<Chart>();
 
   useEffect(() => {
-    redrawPiChart();
+    createPiChart();
     redrawBarChart();
     redrawReceiptLineChart();
     redrawAverageReceiptChart();
@@ -91,21 +97,75 @@ export default function TrendsPage() {
     }
 
     redrawPiChart();
-    redrawBarChart();
-    redrawReceiptLineChart();
-    redrawAverageReceiptChart();
+    // redrawBarChart();
+    // redrawReceiptLineChart();
+    // redrawAverageReceiptChart();
   }
 
   function updateDates() {
-    setStartDate(`${timeFrame?.from?.toISOString().split("T")[0]}`);
-    setEndDate(`${timeFrame?.to?.toISOString().split("T")[0]}`);
+    // setStartDate(`${timeFrame?.from?.toISOString().split("T")[0]}`);
+    // setEndDate(`${timeFrame?.to?.toISOString().split("T")[0]}`);
+
+    startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
+    endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
+
     redrawPiChart();
-    redrawBarChart();
-    redrawReceiptLineChart();
-    redrawAverageReceiptChart();
+    // redrawBarChart();
+    // redrawReceiptLineChart();
+    // redrawAverageReceiptChart();
   }
 
-  // set up pi chart for items bought
+
+  
+
+  // function called on first creation of piChart
+  // first time is always allTime data
+  async function createPiChart() {
+    const result = await fetch(
+        "http://localhost:3000/api/food-and-drink-count/?allTime=true",
+      );
+
+    const data = await result.json();
+
+    //console.log(data);
+    const numberSold = data.data.map((item) => item.number_of_orders);
+    const itemNames = data.data.map((item) => item.name);
+
+    const piData = {
+      labels: itemNames,
+      datasets: [
+        {
+          data: numberSold,
+        },
+      ],
+    };
+    
+    const canvas = document.getElementById("piChart");
+    const piContext = canvas?.getContext("2d");
+
+    // pi chart does not exist. create one
+    setPiChart(new Chart(piContext, {
+      type: "doughnut",
+      data: piData,
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Items Sold by Type",
+            font: {
+              size: 20,
+            },
+          },
+          legend: {
+            display: false,
+          },
+        },
+      },
+    }));
+  }
+  
+
+  // function in charge of getting new data and redrawing the chart
   async function redrawPiChart() {
     let result;
 
@@ -122,10 +182,22 @@ export default function TrendsPage() {
     const data = await result.json();
 
     console.log(data);
-    const numberSold = data.data.map((item) => item.number_of_orders);
-    const itemNames = data.data.map((item) => item.name);
 
-    const piData = {
+    let itemNames = [];
+    let numberSold = [];
+    if (data.data && data.data.length !== 0) {
+      // data exists
+      itemNames = data.data.map((item) => item.name);
+      numberSold = data.data.map((item) => item.number_of_orders);
+    } 
+    // else {
+    //   piChart?.clear();
+    //   piChart?.destroy();
+    //   piChart?.update();
+    //   return;
+    // }
+    
+    let piData = {
       labels: itemNames,
       datasets: [
         {
@@ -134,38 +206,18 @@ export default function TrendsPage() {
       ],
     };
 
-    createPiChart(piData);
-  }
-
-  function createPiChart(piData) {
-    const canvas = document.getElementById("piChart");
-    const piContext = canvas?.getContext("2d");
+    console.log("made it");
+    //console.log(piChart);
 
     if (piChart) {
-      piChart.destroy();
+      console.log("updating");
+      piChart.data.labels = piData.labels;
+      piChart.data.datasets = [{data: numberSold}];
+      piChart.update();
     }
-
-    setPiChart(
-      new Chart(piContext, {
-        type: "doughnut",
-        data: piData,
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: "Items Sold by Type",
-              font: {
-                size: 20,
-              },
-            },
-            legend: {
-              display: false,
-            },
-          },
-        },
-      }),
-    );
   }
+    
+
 
   // Income and expenses
   async function redrawBarChart() {

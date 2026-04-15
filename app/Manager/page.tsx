@@ -38,11 +38,8 @@ export default function TrendsPage() {
   const [timeFrame, setTimeFrame] = useState<DateRange>();
   const [allTime, setAllTime] = useState(true);
 
-  // const [startDate, setStartDate] = useState<any>(null);
-  // const [endDate, setEndDate] = useState<any>(null);
   let startDate: String | null = null;
   let endDate: String | null = null;
-
   const [piChart, setPiChart] = useState<Chart>();
   const [barChart, setBarChart] = useState<Chart>();
   const [receiptLineChart, setReceiptLineChart] = useState<Chart>();
@@ -51,7 +48,7 @@ export default function TrendsPage() {
   useEffect(() => {
     createPiChart();
     createBarChart();
-    redrawReceiptLineChart();
+    createReceiptLineChart();
     redrawAverageReceiptChart();
   }, []);
 
@@ -71,20 +68,17 @@ export default function TrendsPage() {
 
     redrawPiChart();
     redrawBarChart();
-    // redrawReceiptLineChart();
+    redrawReceiptLineChart();
     // redrawAverageReceiptChart();
   }
 
   function updateDates() {
-    // setStartDate(`${timeFrame?.from?.toISOString().split("T")[0]}`);
-    // setEndDate(`${timeFrame?.to?.toISOString().split("T")[0]}`);
-
     startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
     endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
 
     redrawPiChart();
     redrawBarChart();
-    // redrawReceiptLineChart();
+    redrawReceiptLineChart();
     // redrawAverageReceiptChart();
   }
 
@@ -274,7 +268,6 @@ export default function TrendsPage() {
 
     // get income
     const incomeData = await incomeRequest.json();
-    console.log(incomeData);
 
     if (incomeData.data && incomeData.data.length !== 0) {
       // data exists
@@ -284,7 +277,6 @@ export default function TrendsPage() {
 
     // get expenses
     const expenseData = await expenseRequest.json();
-    console.log(expenseData);
 
     if (expenseData.data && expenseData.data.length !== 0) {
       // data exists
@@ -308,10 +300,6 @@ export default function TrendsPage() {
     };
 
     if (barChart) {
-      console.log("updating");
-      console.log(dates);
-      console.log(incomes);
-      console.log(expenses);
       barChart.data.labels = barData.labels;
       barChart.data.datasets.forEach((dataset, i) => {
         dataset.data = barData.datasets[i].data;
@@ -320,25 +308,21 @@ export default function TrendsPage() {
     }
   }
 
-  // Receipt count
-  async function redrawReceiptLineChart() {
-    let request;
-
-    if (allTime) {
-      request = await fetch(
+  // function to create receipt line chart for the first time. Displays all time data
+  async function createReceiptLineChart() {
+    const request = await fetch(
         "http://localhost:3000/api/receipt-count/?allTime=true",
       );
-    } else {
-      request = await fetch(
-        "http://localhost:3000/api/receipt-count/?startDate=${startDate}&endDate=${endDate}",
-      );
-    }
 
     // get receipts
     const data = await request.json();
 
-    const receiptCount = data.data.map((item) => item.receipts);
-    const dates = data.data.map((item) => item.month + "/" + item.year);
+    let receiptCount = [];
+    let dates = [];
+    if (data.data && data.data.length !== 0) {
+      receiptCount = data.data.map((item) => item.receipts);
+      dates = data.data.map((item) => item.month + "/" + item.year);
+    }
 
     const receiptLineData = {
       labels: dates,
@@ -349,17 +333,9 @@ export default function TrendsPage() {
         },
       ],
     };
-
-    createReceiptLineChart(receiptLineData);
-  }
-
-  function createReceiptLineChart(receiptLineData) {
+    
     const canvas = document.getElementById("receiptLineChart");
     const receiptLineContext = canvas?.getContext("2d");
-
-    if (receiptLineChart) {
-      receiptLineChart.destroy();
-    }
 
     setReceiptLineChart(
       new Chart(receiptLineContext, {
@@ -382,6 +358,52 @@ export default function TrendsPage() {
       }),
     );
   }
+
+  // Receipt count
+  async function redrawReceiptLineChart() {
+    let request;
+
+    if (allTime) {
+      request = await fetch(
+        "http://localhost:3000/api/receipt-count/?allTime=true",
+      );
+    } else {
+      request = await fetch(
+        `http://localhost:3000/api/receipt-count/?startDate=${startDate}&endDate=${endDate}`,
+      );
+    }
+
+    // get receipts
+    const data = await request.json();
+
+    let receiptCount = [];
+    let dates = [];
+    if (data.data && data.data.length !== 0) {
+      receiptCount = data.data.map((item) => item.receipts);
+      dates = data.data.map((item) => item.month + "/" + item.year);
+    }
+    
+    const receiptLineData = {
+      labels: dates,
+      datasets: [
+        {
+          label: "Receipts",
+          data: receiptCount,
+        },
+      ],
+    };
+
+    if (receiptLineChart) {
+      receiptLineChart.data.labels = receiptLineData.labels;
+      receiptLineChart.data.datasets.forEach((dataset) => {
+        dataset.label = receiptLineData.datasets[0].label;
+        dataset.data = receiptLineData.datasets[0].data;
+      });
+      receiptLineChart.update();
+    }
+  }
+
+  
 
   // Avg receipts per hour
   async function redrawAverageReceiptChart() {

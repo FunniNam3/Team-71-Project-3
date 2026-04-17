@@ -37,6 +37,7 @@ export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
   const [allTime, setAllTime] = useState(true);
+  const [viewCalendar, setViewCalendar] = useState(false);
 
   let startDate: String | null = null;
   let endDate: String | null = null;
@@ -52,20 +53,19 @@ export default function TrendsPage() {
     createAverageReceiptChart();
   }, []);
 
-
   // button to toggle on view of calendar for date selection
   function toggleCalendar() {
-    if (allTime) {
+    if (viewCalendar) {
+      setViewCalendar(false);
+    } else {
+      setViewCalendar(true);
       setAllTime(false);
     }
   }
 
   // Button to toggle on all time data view
   function toggleAllTime() {
-    if (!allTime) {
-      setAllTime(true);
-    }
-
+    setAllTime(true);
     redrawPiChart();
     redrawBarChart();
     redrawReceiptLineChart();
@@ -171,7 +171,7 @@ export default function TrendsPage() {
     if (piChart) {
       //console.log("updating");
       piChart.data.labels = piData.labels;
-      piChart.data.datasets = [{ data: numberSold }];
+      piChart.data.datasets = piData.datasets;
       piChart.update();
     }
   }
@@ -311,8 +311,8 @@ export default function TrendsPage() {
   // function to create receipt line chart for the first time. Displays all time data
   async function createReceiptLineChart() {
     const request = await fetch(
-        "http://localhost:3000/api/receipt-count/?allTime=true",
-      );
+      "http://localhost:3000/api/receipt-count/?allTime=true",
+    );
 
     // get receipts
     const data = await request.json();
@@ -333,7 +333,7 @@ export default function TrendsPage() {
         },
       ],
     };
-    
+
     const canvas = document.getElementById("receiptLineChart");
     const receiptLineContext = canvas?.getContext("2d");
 
@@ -382,7 +382,7 @@ export default function TrendsPage() {
       receiptCount = data.data.map((item) => item.receipts);
       dates = data.data.map((item) => item.month + "/" + item.year);
     }
-    
+
     const receiptLineData = {
       labels: dates,
       datasets: [
@@ -406,8 +406,8 @@ export default function TrendsPage() {
   // function to create average receipt chart for first time. Displays all time data
   async function createAverageReceiptChart() {
     const request = await fetch(
-        "http://localhost:3000/api/receipts-per-hour/?allTime=true",
-      );
+      "http://localhost:3000/api/receipts-per-hour/?allTime=true",
+    );
 
     const data = await request.json();
     let averageReceipts = [];
@@ -417,7 +417,7 @@ export default function TrendsPage() {
       averageReceipts = data.data.map((item) => item.avg_receipts);
       hours = data.data.map((item) => item.hour);
     }
-    
+
     const averageReceiptData = {
       labels: hours,
       datasets: [
@@ -477,7 +477,7 @@ export default function TrendsPage() {
       averageReceipts = data.data.map((item) => item.avg_receipts);
       hours = data.data.map((item) => item.hour);
     }
-    
+
     const averageReceiptData = {
       labels: hours,
       datasets: [
@@ -492,20 +492,21 @@ export default function TrendsPage() {
 
     if (averageReceiptChart) {
       averageReceiptChart.data.labels = averageReceiptData.labels;
-      averageReceiptChart.data.datasets[0].data = averageReceiptData.datasets[0].data;
+      averageReceiptChart.data.datasets[0].data =
+        averageReceiptData.datasets[0].data;
       averageReceiptChart.update();
     }
   }
 
   return (
     <div>
-      <div className="flex flex-wrap justify-center">
-        {allTime && (
+      <div className="flex flex-wrap justify-center border-3  border-white">
+        {!viewCalendar && (
           <button onClick={toggleCalendar} className="mx-5">
             Select Time Frame
           </button>
         )}
-        {!allTime && (
+        {viewCalendar && (
           <div id="calendar">
             <DayPicker
               animate
@@ -519,11 +520,14 @@ export default function TrendsPage() {
               }
             />
             <button onClick={updateDates}>Update Graphs</button>
+            <button onClick={toggleCalendar}>Close Calendar</button>
           </div>
         )}
-        <button onClick={toggleAllTime} className="mx-5">
-          All Time Data
-        </button>
+        {!viewCalendar && (
+          <button onClick={toggleAllTime} className="mx-5">
+            All Time Data
+          </button>
+        )}
       </div>
       <div className="flex flex-wrap justify-center">
         <div>

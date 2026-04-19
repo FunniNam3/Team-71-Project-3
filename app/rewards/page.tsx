@@ -135,11 +135,11 @@ export default function RewardsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#d7c5b1] p-6">
+    <main className="min-h-screen #C4AF9A; p-6">
       <div className="mx-auto flex max-w-7xl gap-6">
         {/* Left Side */}
-        <section className="w-full max-w-70 rounded-2xl bg-[#f5f5f5] p-6 shadow-sm">
-          <h1 className="mb-2 text-3xl font-bold text-[#2f4d73]">Rewards</h1>
+        <section className="w-full max-w-70 max-h-83 rounded-2xl bg-[#f5f5f5] p-6 shadow-sm">
+          <h1 className="mb-2 text-3xl font-bold text-gray-600">Rewards</h1>
           <p className="mb-8 text-sm text-gray-600">
             Redeem your points for gifts, drinks, and toys.
           </p>
@@ -200,7 +200,7 @@ type RewardSectionProps = {
 function RewardSection({ title, rewards, onSelect }: RewardSectionProps) {
   return (
     <div className="rounded-2xl bg-[#f5f5f5] p-5 shadow-sm">
-      <h2 className="mb-4 text-2xl font-bold text-[#2f4d73]">{title}</h2>
+      <h2 className="mb-4 text-2xl font-bold text-gray-600">{title}</h2>
 
       {rewards.length === 0 ? (
         <p className="text-sm text-gray-500">No rewards found in this section.</p>

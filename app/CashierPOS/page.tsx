@@ -291,7 +291,7 @@ export default function CashierPOSPage() {
 
   return (
     <main className="flex min-h-screen #C4AF9A">
-      <section className="w-[32%] min-w-85 bg-white p-5 rounded-tr-2x1">
+      <section className="w-[32%] min-w-85 bg-white p-5 rounded-tr-2xl">
         <h1 className="mb-6 text-2xl font-bold text-gray-500">Checkout</h1>
 
         <div className="mb-5 rounded-lg border p-4">

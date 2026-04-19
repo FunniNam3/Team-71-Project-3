@@ -14,6 +14,10 @@ export default function ManagerDashboard() {
           <h2 className="text-2xl font-semibold mb-4">End of Shift</h2>
           <ReportModule type="Z" />
         </div>
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Sales Report</h2>
+          <ReportModule type="Sales" />
+        </div>
       </section>
     </main>
   );

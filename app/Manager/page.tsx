@@ -551,18 +551,18 @@ export default function TrendsPage() {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 justify-center">
+      <div className="grid grid-cols-2 min-h-7 justify-center">
         <div>
-          <canvas className=" max-h-3/2" id="piChart"></canvas>
+          <canvas  id="piChart"></canvas>
         </div>
         <div>
-          <canvas className=" w-2/1" id="barChart"></canvas>
+          <canvas id="barChart"></canvas>
         </div>
         <div>
-          <canvas className="w-2/1" id="receiptLineChart"></canvas>
+          <canvas id="receiptLineChart"></canvas>
         </div>
         <div>
-          <canvas className="w-2/1" id="averageReceiptChart"></canvas>
+          <canvas id="averageReceiptChart"></canvas>
         </div>
       </div>
       <div className="flex justify-center font-size-large font-bold border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">

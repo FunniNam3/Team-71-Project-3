@@ -290,8 +290,8 @@ export default function CashierPOSPage() {
   }
 
   return (
-    <main className="flex min-h-screen bg-gray-50">
-      <section className="w-[32%] min-w-85 border-r bg-white p-5">
+    <main className="flex min-h-screen #C4AF9A">
+      <section className="w-[32%] min-w-85 bg-white p-5 rounded-tr-2xl">
         <h1 className="mb-6 text-2xl font-bold text-gray-500">Checkout</h1>
 
         <div className="mb-5 rounded-lg border p-4">
@@ -389,7 +389,7 @@ export default function CashierPOSPage() {
 
           <button
             onClick={() => setShowPaymentPopup(true)}
-            className="w-full rounded-lg bg-green-600 px-4 py-3 font-semibold text-white hover:bg-green-700"
+            className="w-full rounded-lg bg-[#21A179] px-4 py-3 font-semibold text-white hover:bg-green-700"
           >
             Checkout
           </button>

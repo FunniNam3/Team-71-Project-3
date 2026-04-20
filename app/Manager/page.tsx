@@ -500,15 +500,30 @@ export default function TrendsPage() {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-center border-3  border-white">
+      <div>
         {!viewCalendar && (
-          <button onClick={toggleCalendar} className="mx-5">
-            Select Time Frame
+          <div className="flex flex-wrap justify-center border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
+            <button
+              onClick={toggleCalendar}
+              className="px-3 py-1.5 gap-3 bg-[#00A67E] w-fit h-fit rounded-full"
+            >
+              Select Time Frame
+            </button>
+            <button
+            onClick={toggleAllTime}
+            className="px-3 py-1.5 gap-3 bg-[#00A67E] w-fit h-fit rounded-full"
+          >
+            All Time Data
           </button>
+          </div>
         )}
         {viewCalendar && (
-          <div id="calendar">
+          <div
+            id="calendar"
+            className="flex flex-col justify-center border-3 m-auto border-white px-3 py-3 gap-3 bg-white w-fit h-fit rounded-xl"
+          >
             <DayPicker
+              className="m-auto px-3 py-3 bg-[#00A67E] w-fit h-fit rounded-xl"
               animate
               mode="range"
               selected={timeFrame}
@@ -519,14 +534,22 @@ export default function TrendsPage() {
                   : "Pick the first day"
               }
             />
-            <button onClick={updateDates}>Update Graphs</button>
-            <button onClick={toggleCalendar}>Close Calendar</button>
+            <div>
+              <button
+              onClick={updateDates}
+              className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
+            >
+              Update Graphs
+            </button>
+            <button
+              onClick={toggleCalendar}
+              className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
+            >
+              Close Calendar
+            </button>
+            </div>
+            
           </div>
-        )}
-        {!viewCalendar && (
-          <button onClick={toggleAllTime} className="mx-5">
-            All Time Data
-          </button>
         )}
       </div>
       <div className="flex flex-wrap justify-center">

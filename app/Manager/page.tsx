@@ -510,11 +510,11 @@ export default function TrendsPage() {
               Select Time Frame
             </button>
             <button
-            onClick={toggleAllTime}
-            className="px-3 py-1.5 gap-3 bg-[#00A67E] w-fit h-fit rounded-full"
-          >
-            All Time Data
-          </button>
+              onClick={toggleAllTime}
+              className="px-3 py-1.5 gap-3 bg-[#00A67E] w-fit h-fit rounded-full"
+            >
+              All Time Data
+            </button>
           </div>
         )}
         {viewCalendar && (
@@ -536,28 +536,27 @@ export default function TrendsPage() {
             />
             <div>
               <button
-              onClick={updateDates}
-              className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
-            >
-              Update Graphs
-            </button>
-            <button
-              onClick={toggleCalendar}
-              className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
-            >
-              Close Calendar
-            </button>
+                onClick={updateDates}
+                className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
+              >
+                Update Graphs
+              </button>
+              <button
+                onClick={toggleCalendar}
+                className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
+              >
+                Close Calendar
+              </button>
             </div>
-            
           </div>
         )}
       </div>
-      <div className="flex flex-wrap justify-center">
+      <div className="grid grid-cols-2 justify-center">
         <div>
-          <canvas className="max-h-3/2 mx-33" id="piChart"></canvas>
+          <canvas className=" max-h-3/2" id="piChart"></canvas>
         </div>
         <div>
-          <canvas className="w-2/1" id="barChart"></canvas>
+          <canvas className=" w-2/1" id="barChart"></canvas>
         </div>
         <div>
           <canvas className="w-2/1" id="receiptLineChart"></canvas>
@@ -566,10 +565,14 @@ export default function TrendsPage() {
           <canvas className="w-2/1" id="averageReceiptChart"></canvas>
         </div>
       </div>
-      <div className="flex justify-center font-size-medium">
-        {allTime && <h1>Selected: All Time Data</h1>}
+      <div className="flex justify-center font-size-large font-bold border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
+        {allTime && (
+          <h1 className="text-[#00A67E] font-size-large font-bold">
+            Selected: All Time Data
+          </h1>
+        )}
         {!allTime && (
-          <h1>
+          <h1 className="text-[#00A67E] font-size-large font-bold">
             Selected: {startDate} to {endDate}
           </h1>
         )}

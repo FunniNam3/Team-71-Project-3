@@ -39,8 +39,6 @@ export default function TrendsPage() {
   const [allTime, setAllTime] = useState(true);
   const [viewCalendar, setViewCalendar] = useState(false);
 
-  let startDate: String | null = null;
-  let endDate: String | null = null;
   const [piChart, setPiChart] = useState<Chart>();
   const [barChart, setBarChart] = useState<Chart>();
   const [receiptLineChart, setReceiptLineChart] = useState<Chart>();
@@ -66,16 +64,10 @@ export default function TrendsPage() {
   // Button to toggle on all time data view
   function toggleAllTime() {
     setAllTime(true);
-    redrawPiChart();
-    redrawBarChart();
-    redrawReceiptLineChart();
-    redrawAverageReceiptChart();
+    redrawCharts();
   }
 
-  function updateDates() {
-    startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
-    endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
-
+  function redrawCharts() {
     redrawPiChart();
     redrawBarChart();
     redrawReceiptLineChart();
@@ -85,9 +77,7 @@ export default function TrendsPage() {
   // function called on first creation of piChart
   // first time is always allTime data
   async function createPiChart() {
-    const result = await fetch(
-      "http://localhost:3000/api/food-and-drink-count/?allTime=true",
-    );
+    const result = await fetch("/api/food-and-drink-count/?allTime=true");
 
     const data = await result.json();
 
@@ -135,18 +125,17 @@ export default function TrendsPage() {
     let result;
 
     if (allTime) {
-      result = await fetch(
-        "http://localhost:3000/api/food-and-drink-count/?allTime=true",
-      );
+      result = await fetch("/api/food-and-drink-count/?allTime=true");
     } else {
+      const startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
+      const endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
+
       result = await fetch(
-        `http://localhost:3000/api/food-and-drink-count/?startDate=${startDate}&endDate=${endDate}`,
+        `/api/food-and-drink-count/?startDate=${startDate}&endDate=${endDate}`,
       );
     }
 
     const data = await result.json();
-
-    // console.log(data);
 
     let itemNames = [];
     let numberSold = [];
@@ -165,11 +154,7 @@ export default function TrendsPage() {
       ],
     };
 
-    //console.log("made it");
-    //console.log(piChart);
-
     if (piChart) {
-      //console.log("updating");
       piChart.data.labels = piData.labels;
       piChart.data.datasets = piData.datasets;
       piChart.update();
@@ -177,12 +162,8 @@ export default function TrendsPage() {
   }
 
   async function createBarChart() {
-    let incomeRequest = await fetch(
-      "http://localhost:3000/api/income/?allTime=true",
-    );
-    let expenseRequest = await fetch(
-      "http://localhost:3000/api/expenses/?allTime=true",
-    );
+    let incomeRequest = await fetch("/api/income/?allTime=true");
+    let expenseRequest = await fetch("/api/expenses/?allTime=true");
 
     // get income
     const incomeData = await incomeRequest.json();
@@ -247,18 +228,17 @@ export default function TrendsPage() {
     let expenseRequest;
 
     if (allTime) {
-      incomeRequest = await fetch(
-        "http://localhost:3000/api/income/?allTime=true",
-      );
-      expenseRequest = await fetch(
-        "http://localhost:3000/api/expenses/?allTime=true",
-      );
+      incomeRequest = await fetch("/api/income/?allTime=true");
+      expenseRequest = await fetch("/api/expenses/?allTime=true");
     } else {
+      const startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
+      const endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
+
       incomeRequest = await fetch(
-        `http://localhost:3000/api/income?startDate=${startDate}&endDate=${endDate}`,
+        `/api/income?startDate=${startDate}&endDate=${endDate}`,
       );
       expenseRequest = await fetch(
-        `http://localhost:3000/api/expenses?startDate=${startDate}&endDate=${endDate}`,
+        `/api/expenses?startDate=${startDate}&endDate=${endDate}`,
       );
     }
 
@@ -310,9 +290,7 @@ export default function TrendsPage() {
 
   // function to create receipt line chart for the first time. Displays all time data
   async function createReceiptLineChart() {
-    const request = await fetch(
-      "http://localhost:3000/api/receipt-count/?allTime=true",
-    );
+    const request = await fetch("/api/receipt-count/?allTime=true");
 
     // get receipts
     const data = await request.json();
@@ -364,12 +342,13 @@ export default function TrendsPage() {
     let request;
 
     if (allTime) {
-      request = await fetch(
-        "http://localhost:3000/api/receipt-count/?allTime=true",
-      );
+      request = await fetch("/api/receipt-count/?allTime=true");
     } else {
+      const startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
+      const endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
+
       request = await fetch(
-        `http://localhost:3000/api/receipt-count/?startDate=${startDate}&endDate=${endDate}`,
+        `/api/receipt-count/?startDate=${startDate}&endDate=${endDate}`,
       );
     }
 
@@ -405,9 +384,7 @@ export default function TrendsPage() {
 
   // function to create average receipt chart for first time. Displays all time data
   async function createAverageReceiptChart() {
-    const request = await fetch(
-      "http://localhost:3000/api/receipts-per-hour/?allTime=true",
-    );
+    const request = await fetch("/api/receipts-per-hour/?allTime=true");
 
     const data = await request.json();
     let averageReceipts = [];
@@ -460,12 +437,13 @@ export default function TrendsPage() {
     let request;
 
     if (allTime) {
-      request = await fetch(
-        "http://localhost:3000/api/receipts-per-hour/?allTime=true",
-      );
+      request = await fetch("/api/receipts-per-hour/?allTime=true");
     } else {
+      const startDate = `${timeFrame?.from?.toISOString().split("T")[0]}`;
+      const endDate = `${timeFrame?.to?.toISOString().split("T")[0]}`;
+
       request = await fetch(
-        `http://localhost:3000/api/receipts-per-hour/?startDate=${startDate}&endDate=${endDate}`,
+        `/api/receipts-per-hour/?startDate=${startDate}&endDate=${endDate}`,
       );
     }
 
@@ -505,13 +483,13 @@ export default function TrendsPage() {
           <div className="flex flex-wrap justify-center border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
             <button
               onClick={toggleCalendar}
-              className="px-3 py-1.5 gap-3 bg-[#00A67E] w-fit h-fit rounded-full"
+              className="px-3 py-1.5 gap-3 bg-(--primary) w-fit h-fit rounded-full"
             >
               Select Time Frame
             </button>
             <button
               onClick={toggleAllTime}
-              className="px-3 py-1.5 gap-3 bg-[#00A67E] w-fit h-fit rounded-full"
+              className="px-3 py-1.5 gap-3 bg-(--primary) w-fit h-fit rounded-full"
             >
               All Time Data
             </button>
@@ -523,7 +501,7 @@ export default function TrendsPage() {
             className="flex flex-col justify-center border-3 m-auto border-white px-3 py-3 gap-3 bg-white w-fit h-fit rounded-xl"
           >
             <DayPicker
-              className="m-auto px-3 py-3 bg-[#00A67E] w-fit h-fit rounded-xl"
+              className="m-auto px-3 py-3 bg-(--primary) w-fit h-fit rounded-xl"
               animate
               mode="range"
               selected={timeFrame}
@@ -536,14 +514,14 @@ export default function TrendsPage() {
             />
             <div>
               <button
-                onClick={updateDates}
-                className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
+                onClick={redrawCharts}
+                className="m-1 px-3 py-1.5 bg-(--primary) w-fit h-fit rounded-full"
               >
                 Update Graphs
               </button>
               <button
                 onClick={toggleCalendar}
-                className="m-1 px-3 py-1.5 bg-[#00A67E] w-fit h-fit rounded-full"
+                className="m-1 px-3 py-1.5 bg-(--primary) w-fit h-fit rounded-full"
               >
                 Close Calendar
               </button>
@@ -553,7 +531,7 @@ export default function TrendsPage() {
       </div>
       <div className="grid grid-cols-2 min-h-7 justify-center">
         <div>
-          <canvas  id="piChart"></canvas>
+          <canvas id="piChart"></canvas>
         </div>
         <div>
           <canvas id="barChart"></canvas>
@@ -567,13 +545,13 @@ export default function TrendsPage() {
       </div>
       <div className="flex justify-center font-size-large font-bold border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
         {allTime && (
-          <h1 className="text-[#00A67E] font-size-large font-bold">
+          <h1 className="text-(--primary) font-size-large font-bold">
             Selected: All Time Data
           </h1>
         )}
         {!allTime && (
-          <h1 className="text-[#00A67E] font-size-large font-bold">
-            Selected: {startDate} to {endDate}
+          <h1 className="text-(--primary) font-size-large font-bold">
+            Selected: {`${timeFrame?.from?.toISOString().split("T")[0]}`} to {`${timeFrame?.to?.toISOString().split("T")[0]}`}
           </h1>
         )}
       </div>

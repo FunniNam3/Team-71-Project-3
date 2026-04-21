@@ -1,17 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "./components/nav";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { LensClient } from "./components/magnifier";
 
 export const metadata: Metadata = {
   title: "Team 71 App",
@@ -25,11 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`antialiased`}>
         <NavBar />
-        {children}
+        <LensClient>{children}</LensClient>
+
         {/* Elfsight Website Translator | Untitled Website Translator */}
         <script src="https://elfsightcdn.com/platform.js" async></script>
         <div

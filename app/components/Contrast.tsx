@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type Theme = "original" | "highContrast";
@@ -56,11 +57,17 @@ export default function ThemeProvider({
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className="fixed top-4 right-4 z-[9999] bg-(--primary) text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2 font-medium"
+        className="fixed top-4 right-4 z-[9999] w-10 bg-(--primary) text-white p-2 rounded-full hover:scale-105 active:scale-95 flex items-center gap-2 font-medium"
         aria-label={`Switch to ${theme === "original" ? "high contrast" : "original"} theme`}
         title={`Current: ${theme === "original" ? "Original" : "High Contrast"} Theme`}
       >
-        {theme === "original" ? "🎨 High Contrast" : "✨ Original"}
+        <Image
+          src="/Contrast.svg"
+          alt="Contrast"
+          width={20}
+          height={20}
+          className="w-full h-auto"
+        />
       </button>
 
       {children}

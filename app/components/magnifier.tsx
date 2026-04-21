@@ -55,7 +55,7 @@ interface LensProps {
 export function Lens({
   children,
   zoomFactor = 1.3,
-  lensSize = 170,
+  lensSize = 250,
   isStatic = false,
   position = { x: 0, y: 0 },
   defaultPosition,
@@ -141,13 +141,9 @@ export function Lens({
       tabIndex={0}
     >
       {children}
-      {isStatic || defaultPosition ? (
-        LensContent
-      ) : (
-        <AnimatePresence mode="popLayout">
-          {isHovering && LensContent}
-        </AnimatePresence>
-      )}
+      <AnimatePresence mode="popLayout">
+        {isHovering && LensContent}
+      </AnimatePresence>
     </div>
   );
 }

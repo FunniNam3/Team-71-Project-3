@@ -1,149 +1,171 @@
 "use client";
 
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { AnimatePresence, motion, useMotionTemplate } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
-export function LensClient({ children }: { children: React.ReactNode }) {
-  const [active, setActive] = useState(false);
+export default function LensProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [enabled, setEnabled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const sourceRef = useRef<HTMLDivElement>(null);
+  const mouse = useRef({ x: 0, y: 0 });
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Cursor tracking
+  useEffect(() => {
+    const move = (e: MouseEvent) => {
+      mouse.current.x = e.clientX;
+      mouse.current.y = e.clientY;
+    };
+
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
+  }, []);
+
+  if (!mounted) return <div ref={sourceRef}>{children}</div>;
+
   return (
     <>
+      {/* Accessibility toggle */}
       <button
-        onClick={() => setActive(!active)}
-        className={`absolute top-0 left-0 p-2 rounded-full m-3 ${!active ? "bg-(--primary)" : "bg-(--accent)"}`}
+        onClick={() => setEnabled((v) => !v)}
+        className="fixed top-4 left-4 z-[9999] bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
+        aria-label={
+          enabled ? "Disable magnifying glass" : "Enable magnifying glass"
+        }
+        title="Press to toggle magnifying glass for accessibility"
       >
-        <Image
-          src="/Magnify.svg"
-          alt="Magnifying glass"
-          width={18}
-          height={18}
-        />
+        🔍 {enabled ? "Disable" : "Enable"} Magnifier
       </button>
-      {active ? <Lens>{children}</Lens> : children}
+
+      {/* SOURCE DOM */}
+      <div ref={sourceRef}>{children}</div>
+
+      {/* LENS MIRROR */}
+      {enabled && <LensMirror sourceRef={sourceRef} mouse={mouse} />}
     </>
   );
 }
 
-interface Position {
-  /** The x coordinate of the lens */
-  x: number;
-  /** The y coordinate of the lens */
-  y: number;
-}
+function LensMirror({
+  sourceRef,
+  mouse,
+}: {
+  sourceRef: React.RefObject<HTMLDivElement | null>;
+  mouse: React.MutableRefObject<{ x: number; y: number }>;
+}) {
+  const zoom = 2;
+  const lensRadius = 120;
+  const lensRef = useRef<HTMLDivElement>(null);
+  const mirrorRef = useRef<HTMLDivElement>(null);
 
-interface LensProps {
-  /** The children of the lens */
-  children: React.ReactNode;
-  /** The zoom factor of the lens */
-  zoomFactor?: number;
-  /** The size of the lens */
-  lensSize?: number;
-  /** The position of the lens */
-  position?: Position;
-  /** The default position of the lens */
-  defaultPosition?: Position;
-  /** Whether the lens is static */
-  isStatic?: boolean;
-  /** The duration of the animation */
-  duration?: number;
-  /** The color of the lens */
-  lensColor?: string;
-  /** The aria label of the lens */
-  ariaLabel?: string;
-}
+  // Sync mirror DOM
+  useEffect(() => {
+    if (!sourceRef.current || !mirrorRef.current) return;
 
-export function Lens({
-  children,
-  zoomFactor = 1.3,
-  lensSize = 250,
-  isStatic = false,
-  position = { x: 0, y: 0 },
-  defaultPosition,
-  duration = 0.1,
-  lensColor = "black",
-  ariaLabel = "Zoom Area",
-}: LensProps) {
-  if (zoomFactor < 1) {
-    throw new Error("zoomFactor must be greater than 1");
-  }
-  if (lensSize < 0) {
-    throw new Error("lensSize must be greater than 0");
-  }
+    const sync = () => {
+      const clone = sourceRef.current!.cloneNode(true) as HTMLElement;
+      mirrorRef.current!.innerHTML = "";
+      mirrorRef.current!.appendChild(clone);
+    };
 
-  const [isHovering, setIsHovering] = useState(false);
-  const [mousePosition, setMousePosition] = useState<Position>(position);
-  const containerRef = useRef<HTMLDivElement>(null);
+    sync();
 
-  const currentPosition = useMemo(() => {
-    if (isStatic) return position;
-    if (defaultPosition && !isHovering) return defaultPosition;
-    return mousePosition;
-  }, [isStatic, position, defaultPosition, isHovering, mousePosition]);
+    let timeout: NodeJS.Timeout;
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+    // Watch for DOM changes
+    const observer = new MutationObserver(() => {
+      clearTimeout(timeout);
+      timeout = setTimeout(sync, 100);
     });
-  }, []);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") setIsHovering(false);
-  }, []);
+    observer.observe(sourceRef.current, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      characterData: true, // Catch text changes
+    });
 
-  const maskImage = useMotionTemplate`radial-gradient(circle ${
-    lensSize / 2
-  }px at ${currentPosition.x}px ${
-    currentPosition.y
-  }px, ${lensColor} 100%, transparent 100%)`;
+    // ✅ Also sync on input/change events (for form values)
+    const handleInputChange = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(sync, 50);
+    };
 
-  const LensContent = useMemo(() => {
-    const { x, y } = currentPosition;
+    sourceRef.current.addEventListener("input", handleInputChange, true);
+    sourceRef.current.addEventListener("change", handleInputChange, true);
+    sourceRef.current.addEventListener("click", handleInputChange, true);
 
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.58 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.8 }}
-        transition={{ duration }}
-        className="absolute inset-0 overflow-hidden bg-(--secondary)"
-        style={{
-          maskImage,
-          WebkitMaskImage: maskImage,
-          transformOrigin: `${x}px ${y}px`,
-          zIndex: 50,
-        }}
-      >
-        <div
-          className="absolute inset-0"
-          style={{
-            transform: `scale(${zoomFactor})`,
-            transformOrigin: `${x}px ${y}px`,
-          }}
-        >
-          {children}
-        </div>
-      </motion.div>
-    );
-  }, [currentPosition, maskImage, zoomFactor, children, duration]);
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+      sourceRef.current?.removeEventListener("input", handleInputChange, true);
+      sourceRef.current?.removeEventListener("change", handleInputChange, true);
+      sourceRef.current?.removeEventListener("click", handleInputChange, true);
+    };
+  }, [sourceRef]);
+
+  // RAF lens position update
+  useEffect(() => {
+    let frameId: number;
+
+    const update = () => {
+      if (!lensRef.current || !mirrorRef.current) return;
+
+      const x = mouse.current.x;
+      const y = mouse.current.y;
+
+      lensRef.current.style.maskImage = `radial-gradient(circle ${lensRadius}px at ${x}px ${y}px, black 100%, transparent 100%)`;
+      lensRef.current.style.webkitMaskImage = `radial-gradient(circle ${lensRadius}px at ${x}px ${y}px, black 100%, transparent 100%)`;
+
+      mirrorRef.current.style.transform = `scale(${zoom})`;
+      mirrorRef.current.style.transformOrigin = `${x}px ${y}px`;
+
+      frameId = requestAnimationFrame(update);
+    };
+
+    frameId = requestAnimationFrame(update);
+
+    return () => cancelAnimationFrame(frameId);
+  }, [zoom, lensRadius]);
 
   return (
     <div
-      ref={containerRef}
-      className="relative z-20 overflow-hidden rounded-xl"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onMouseMove={handleMouseMove}
-      onKeyDown={handleKeyDown}
-      role="region"
-      aria-label={ariaLabel}
-      tabIndex={0}
+      className="fixed inset-0 z-[9998] pointer-events-none overflow-hidden"
+      role="complementary"
+      aria-label="Magnifying glass overlay"
+      style={{
+        maskImage:
+          "radial-gradient(circle 0px at 0px 0px, black 100%, transparent 100%)",
+        WebkitMaskImage:
+          "radial-gradient(circle 0px at 0px 0px, black 100%, transparent 100%)",
+      }}
+      ref={lensRef}
     >
-      {children}
-      <AnimatePresence mode="popLayout">
-        {isHovering && LensContent}
-      </AnimatePresence>
+      <div
+        ref={mirrorRef}
+        className="absolute inset-0"
+        style={{
+          transformOrigin: "0 0",
+        }}
+      />
+
+      <div
+        className="absolute pointer-events-none rounded-full shadow-lg"
+        style={{
+          width: lensRadius * 2,
+          height: lensRadius * 2,
+          left: mouse.current.x - lensRadius,
+          top: mouse.current.y - lensRadius,
+        }}
+      />
     </div>
   );
 }

@@ -36,7 +36,7 @@ export default function RewardPurchasePopUp({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-800">Redeem Reward</h2>
+          <h2 className="text-xl font-bold text-(--gray)">Redeem Reward</h2>
           <button
             onClick={onClose}
             className="rounded border px-3 py-1 hover:bg-gray-100"
@@ -47,7 +47,7 @@ export default function RewardPurchasePopUp({
 
         {hasEnoughPoints ? (
           <>
-            <p className="text-gray-700">
+            <p className="text-(--gray)">
               Are you sure you want to purchase a{" "}
               <span className="font-semibold">{reward.item}</span> for{" "}
               <span className="font-semibold">{reward.points}</span> points?
@@ -71,13 +71,14 @@ export default function RewardPurchasePopUp({
           </>
         ) : (
           <>
-            <p className="text-gray-700">
+            <p className="text-(--gray)">
               You do not have enough points yet to redeem{" "}
               <span className="font-semibold">{reward.item}</span>.
             </p>
 
-            <p className="mt-2 text-sm text-gray-500">
-              You have {userPoints} points, but this reward costs {reward.points} points.
+            <p className="mt-2 text-sm text-(--gray)">
+              You have {userPoints} points, but this reward costs{" "}
+              {reward.points} points.
             </p>
 
             <div className="mt-6 flex justify-end">

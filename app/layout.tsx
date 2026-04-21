@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "./components/nav";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import ThemeProvider from "@components/Contrast";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Team 71 App",
@@ -20,22 +11,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NavBar />
-        {children}
-        {/* Elfsight Website Translator | Untitled Website Translator */}
-        <script src="https://elfsightcdn.com/platform.js" async></script>
+      <body className="antialiased">
+        <ThemeProvider>
+          <NavBar />
+          {children}
+        </ThemeProvider>
+
+        <Script
+          src="https://elfsightcdn.com/platform.js"
+          strategy="afterInteractive"
+        />
+
         <div
           className="elfsight-app-72f9bd91-2a62-4d73-b116-1de5d755fd57"
           data-elfsight-app-lazy
-        ></div>
+        />
       </body>
     </html>
   );

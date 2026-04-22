@@ -27,12 +27,6 @@ import "react-day-picker/dist/style.css";
 import { el } from "react-day-picker/locale";
 import { start } from "repl";
 
-type tableEntry = {
-  id: number;
-  name: String;
-  number_of_orders: String;
-};
-
 export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
@@ -81,7 +75,7 @@ export default function TrendsPage() {
 
     const data = await result.json();
 
-    //console.log(data);
+    console.log(data);
     const numberSold = data.data.map((item) => item.number_of_orders);
     const itemNames = data.data.map((item) => item.name);
 
@@ -94,12 +88,9 @@ export default function TrendsPage() {
       ],
     };
 
-    const canvas = document.getElementById("piChart");
-    const piContext = canvas?.getContext("2d");
-
     // pi chart does not exist. create one
     setPiChart(
-      new Chart(piContext, {
+      new Chart("piChart", {
         type: "doughnut",
         data: piData,
         options: {
@@ -190,11 +181,8 @@ export default function TrendsPage() {
       ],
     };
 
-    const canvas = document.getElementById("barChart");
-    const barContext = canvas?.getContext("2d");
-
     setBarChart(
-      new Chart(barContext, {
+      new Chart("barChart", {
         type: "bar",
         data: barData,
         options: {
@@ -312,11 +300,8 @@ export default function TrendsPage() {
       ],
     };
 
-    const canvas = document.getElementById("receiptLineChart");
-    const receiptLineContext = canvas?.getContext("2d");
-
     setReceiptLineChart(
-      new Chart(receiptLineContext, {
+      new Chart("receiptLineChart", {
         type: "line",
         data: receiptLineData,
         options: {
@@ -407,11 +392,8 @@ export default function TrendsPage() {
       ],
     };
 
-    const canvas = document.getElementById("averageReceiptChart");
-    const averageReceiptContext = canvas?.getContext("2d");
-
     setAverageReceiptChart(
-      new Chart(averageReceiptContext, {
+      new Chart("averageReceiptChart", {
         type: "line",
         data: averageReceiptData,
         options: {

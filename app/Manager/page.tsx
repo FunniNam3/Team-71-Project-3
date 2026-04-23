@@ -5,7 +5,7 @@
 "use client";
 
 import { Chart } from "chart.js/auto";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
@@ -15,10 +15,14 @@ export default function TrendsPage() {
   const [allTime, setAllTime] = useState(true);
   const [viewCalendar, setViewCalendar] = useState(false);
 
-  const [piChart, setPiChart] = useState<Chart>();
-  const [barChart, setBarChart] = useState<Chart>();
-  const [receiptLineChart, setReceiptLineChart] = useState<Chart>();
-  const [averageReceiptChart, setAverageReceiptChart] = useState<Chart>();
+  // const [piChart, setPiChart] = useState<Chart>();
+  // const [barChart, setBarChart] = useState<Chart>();
+  // const [receiptLineChart, setReceiptLineChart] = useState<Chart>();
+  // const [averageReceiptChart, setAverageReceiptChart] = useState<Chart>();
+  const piChart = useRef<Chart | null>(null);
+  const barChart = useRef<Chart | null>(null);
+  const receiptLineChart = useRef<Chart | null>(null);
+  const averageReceiptChart = useRef<Chart | null>(null);
 
   useEffect(() => {
     createPiChart();
@@ -71,26 +75,25 @@ export default function TrendsPage() {
     };
 
     // pi chart does not exist. create one
-    setPiChart(
-      new Chart("piChart", {
-        type: "doughnut",
-        data: piData,
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: "Items Sold by Type",
-              font: {
-                size: 20,
-              },
-            },
-            legend: {
-              display: false,
+    piChart?.current?.destroy();
+    piChart.current = new Chart("piChart", {
+      type: "doughnut",
+      data: piData,
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Items Sold by Type",
+            font: {
+              size: 20,
             },
           },
+          legend: {
+            display: false,
+          },
         },
-      }),
-    );
+      },
+    });
   }
 
   // function in charge of getting new data and redrawing the chart
@@ -127,10 +130,10 @@ export default function TrendsPage() {
       ],
     };
 
-    if (piChart) {
-      piChart.data.labels = piData.labels;
-      piChart.data.datasets = piData.datasets;
-      piChart.update();
+    if (piChart.current) {
+      piChart.current.data.labels = piData.labels;
+      piChart.current.data.datasets = piData.datasets;
+      piChart.current.update();
     }
   }
 
@@ -165,33 +168,32 @@ export default function TrendsPage() {
       ],
     };
 
-    setBarChart(
-      new Chart("barChart", {
-        type: "bar",
-        data: barData,
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: "Monthly Revenue",
-              font: {
-                size: 20,
-              },
+    barChart?.current?.destroy();
+    barChart.current = new Chart("barChart", {
+      type: "bar",
+      data: barData,
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Monthly Revenue",
+            font: {
+              size: 20,
             },
           },
-          scales: {
-            y: {
-              ticks: {
-                // adds dollar sign to y values since measuring money
-                callback: function (value, index, ticks) {
-                  return "$" + value;
-                },
+        },
+        scales: {
+          y: {
+            ticks: {
+              // adds dollar sign to y values since measuring money
+              callback: function (value, index, ticks) {
+                return "$" + value;
               },
             },
           },
         },
-      }),
-    );
+      },
+    });
   }
 
   // Income and expenses
@@ -251,12 +253,12 @@ export default function TrendsPage() {
       ],
     };
 
-    if (barChart) {
-      barChart.data.labels = barData.labels;
-      barChart.data.datasets.forEach((dataset, i) => {
+    if (barChart.current) {
+      barChart.current.data.labels = barData.labels;
+      barChart.current.data.datasets.forEach((dataset, i) => {
         dataset.data = barData.datasets[i].data;
       });
-      barChart.update();
+      barChart.current.update();
     }
   }
 
@@ -284,26 +286,25 @@ export default function TrendsPage() {
       ],
     };
 
-    setReceiptLineChart(
-      new Chart("receiptLineChart", {
-        type: "line",
-        data: receiptLineData,
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: "Monthly Order Count",
-              font: {
-                size: 20,
-              },
-            },
-            legend: {
-              display: false,
+    receiptLineChart?.current?.destroy();
+    receiptLineChart.current = new Chart("receiptLineChart", {
+      type: "line",
+      data: receiptLineData,
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Monthly Order Count",
+            font: {
+              size: 20,
             },
           },
+          legend: {
+            display: false,
+          },
         },
-      }),
-    );
+      },
+    });
   }
 
   // Receipt count
@@ -341,13 +342,13 @@ export default function TrendsPage() {
       ],
     };
 
-    if (receiptLineChart) {
-      receiptLineChart.data.labels = receiptLineData.labels;
-      receiptLineChart.data.datasets.forEach((dataset) => {
+    if (receiptLineChart.current) {
+      receiptLineChart.current.data.labels = receiptLineData.labels;
+      receiptLineChart.current.data.datasets.forEach((dataset) => {
         dataset.label = receiptLineData.datasets[0].label;
         dataset.data = receiptLineData.datasets[0].data;
       });
-      receiptLineChart.update();
+      receiptLineChart.current.update();
     }
   }
 
@@ -376,26 +377,25 @@ export default function TrendsPage() {
       ],
     };
 
-    setAverageReceiptChart(
-      new Chart("averageReceiptChart", {
-        type: "line",
-        data: averageReceiptData,
-        options: {
-          plugins: {
-            title: {
-              display: true,
-              text: "Average Orders per Hour",
-              font: {
-                size: 20,
-              },
-            },
-            legend: {
-              display: false,
+    averageReceiptChart?.current?.destroy();
+    averageReceiptChart.current = new Chart("averageReceiptChart", {
+      type: "line",
+      data: averageReceiptData,
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: "Average Orders per Hour",
+            font: {
+              size: 20,
             },
           },
+          legend: {
+            display: false,
+          },
         },
-      }),
-    );
+      },
+    });
   }
 
   // Avg receipts per hour
@@ -434,11 +434,11 @@ export default function TrendsPage() {
       ],
     };
 
-    if (averageReceiptChart) {
-      averageReceiptChart.data.labels = averageReceiptData.labels;
-      averageReceiptChart.data.datasets[0].data =
+    if (averageReceiptChart.current) {
+      averageReceiptChart.current.data.labels = averageReceiptData.labels;
+      averageReceiptChart.current.data.datasets[0].data =
         averageReceiptData.datasets[0].data;
-      averageReceiptChart.update();
+      averageReceiptChart.current.update();
     }
   }
 

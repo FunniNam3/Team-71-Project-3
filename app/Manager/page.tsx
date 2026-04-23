@@ -4,28 +4,10 @@
 
 "use client";
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Chart,
-  plugins,
-} from "chart.js/auto";
-import { color } from "chart.js/helpers";
-import { create } from "domain";
-import { title } from "process";
-import { use, useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import { Chart } from "chart.js/auto";
+import { useEffect, useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
-import { Canvas } from "skia-canvas";
 import "react-day-picker/dist/style.css";
-import { el } from "react-day-picker/locale";
-import { start } from "repl";
 
 export default function TrendsPage() {
   // make variable to hold time frame selected from the day picker object
@@ -75,9 +57,9 @@ export default function TrendsPage() {
 
     const data = await result.json();
 
-    console.log(data);
-    const numberSold = data.data.map((item) => item.number_of_orders);
-    const itemNames = data.data.map((item) => item.name);
+    //console.log(data);
+    const numberSold = data.data.map((item: any) => item.number_of_orders);
+    const itemNames = data.data.map((item: any) => item.name);
 
     const piData = {
       labels: itemNames,
@@ -132,8 +114,8 @@ export default function TrendsPage() {
     let numberSold = [];
     if (data.data && data.data.length !== 0) {
       // data exists
-      itemNames = data.data.map((item) => item.name);
-      numberSold = data.data.map((item) => item.number_of_orders);
+      itemNames = data.data.map((item: any) => item.name);
+      numberSold = data.data.map((item: any) => item.number_of_orders);
     }
 
     let piData = {
@@ -158,12 +140,14 @@ export default function TrendsPage() {
 
     // get income
     const incomeData = await incomeRequest.json();
-    const incomes = incomeData.data.map((item) => item.income);
-    const dates = incomeData.data.map((item) => item.month + "/" + item.year);
+    const incomes = incomeData.data.map((item: any) => item.income);
+    const dates = incomeData.data.map(
+      (item: any) => item.month + "/" + item.year,
+    );
 
     // get expenses
     const expenseData = await expenseRequest.json();
-    const expenses = expenseData.data.map((item) => item.expense);
+    const expenses = expenseData.data.map((item: any) => item.expense);
 
     const barData = {
       labels: dates,
@@ -239,8 +223,8 @@ export default function TrendsPage() {
 
     if (incomeData.data && incomeData.data.length !== 0) {
       // data exists
-      incomes = incomeData.data.map((item) => item.income);
-      dates = incomeData.data.map((item) => item.month + "/" + item.year);
+      incomes = incomeData.data.map((item: any) => item.income);
+      dates = incomeData.data.map((item: any) => item.month + "/" + item.year);
     }
 
     // get expenses
@@ -248,7 +232,7 @@ export default function TrendsPage() {
 
     if (expenseData.data && expenseData.data.length !== 0) {
       // data exists
-      expenses = expenseData.data.map((item) => item.expense);
+      expenses = expenseData.data.map((item: any) => item.expense);
     }
 
     const barData = {
@@ -286,8 +270,8 @@ export default function TrendsPage() {
     let receiptCount = [];
     let dates = [];
     if (data.data && data.data.length !== 0) {
-      receiptCount = data.data.map((item) => item.receipts);
-      dates = data.data.map((item) => item.month + "/" + item.year);
+      receiptCount = data.data.map((item: any) => item.receipts);
+      dates = data.data.map((item: any) => item.month + "/" + item.year);
     }
 
     const receiptLineData = {
@@ -343,8 +327,8 @@ export default function TrendsPage() {
     let receiptCount = [];
     let dates = [];
     if (data.data && data.data.length !== 0) {
-      receiptCount = data.data.map((item) => item.receipts);
-      dates = data.data.map((item) => item.month + "/" + item.year);
+      receiptCount = data.data.map((item: any) => item.receipts);
+      dates = data.data.map((item: any) => item.month + "/" + item.year);
     }
 
     const receiptLineData = {
@@ -376,8 +360,8 @@ export default function TrendsPage() {
     let hours = [];
 
     if (data.data && data.data.length !== 0) {
-      averageReceipts = data.data.map((item) => item.avg_receipts);
-      hours = data.data.map((item) => item.hour);
+      averageReceipts = data.data.map((item: any) => item.avg_receipts);
+      hours = data.data.map((item: any) => item.hour);
     }
 
     const averageReceiptData = {
@@ -434,8 +418,8 @@ export default function TrendsPage() {
     let hours = [];
 
     if (data.data && data.data.length !== 0) {
-      averageReceipts = data.data.map((item) => item.avg_receipts);
-      hours = data.data.map((item) => item.hour);
+      averageReceipts = data.data.map((item: any) => item.avg_receipts);
+      hours = data.data.map((item: any) => item.hour);
     }
 
     const averageReceiptData = {
@@ -459,7 +443,7 @@ export default function TrendsPage() {
   }
 
   return (
-    <div>
+    <main className="my-10">
       <div>
         {!viewCalendar && (
           <div className="flex flex-wrap justify-center border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
@@ -511,7 +495,7 @@ export default function TrendsPage() {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 min-h-7 justify-center">
+      <div className="grid grid-cols-2 gap-5 min-h-7 justify-center max-w-7/8 mx-auto">
         <div>
           <canvas id="piChart"></canvas>
         </div>
@@ -525,7 +509,7 @@ export default function TrendsPage() {
           <canvas id="averageReceiptChart"></canvas>
         </div>
       </div>
-      <div className="flex justify-center font-size-large font-bold border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
+      <div className="mt-10 flex justify-center font-size-large font-bold border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
         {allTime && (
           <h1 className="text-(--primary) font-size-large font-bold">
             Selected: All Time Data
@@ -533,11 +517,12 @@ export default function TrendsPage() {
         )}
         {!allTime && (
           <h1 className="text-(--primary) font-size-large font-bold">
-            Selected: {`${timeFrame?.from?.toISOString().split("T")[0]}`} to {`${timeFrame?.to?.toISOString().split("T")[0]}`}
+            Selected: {`${timeFrame?.from?.toISOString().split("T")[0]}`} to{" "}
+            {`${timeFrame?.to?.toISOString().split("T")[0]}`}
           </h1>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

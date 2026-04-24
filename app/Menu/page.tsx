@@ -91,26 +91,32 @@ export default function DigitalMenuBoard() {
 
   return (
     <div className="h-screen w-full bg-(--secondary) text-(--primary) p-10 overflow-hidden">
-      <div className="flex justify-between items-center mb-10 border w-full p-2 bg-white border-white rounded-full">
+      <div className="flex justify-between items-center mb-5 border w-full p-2 bg-white border-white rounded-full">
         <h1 className="text-5xl font-bold uppercase tracking-widest ">
           Current Specials
         </h1>
-        <div className="text-xl text-(--accent)">
+        <div className="text-xl text-(--dark) font-bold">
           Page {currentPage + 1} of {totalPages}
         </div>
       </div>
 
       {/* The Grid */}
-      <div className="grid grid-cols-3 gap-17 bg-white rounded">
+      <div>
+        
+      </div>
+      <div className="grid grid-cols-3 gap-14 bg-white rounded bottom-1 border-4 border-(--accent) h-5/6">
         {displayItems.map((item) => (
           <MenuCard key={item.id} {...item} />
         ))}
+        {/* Progress Bar (Visual flair) */}
+      {/* <div className="absolute left-25% h-3 bg-orange-500 transition-all duration-8000 ease-linear"
+        style={{ width: "100%" }}
+        key={currentPage}/> */}
       </div>
 
-      {/* Progress Bar (Visual flair) */}
-      <div className="absolute bottom-0 left-25% h-3 bg-orange-500 transition-all duration-8000 ease-linear"
-        style={{ width: "91.2%" }}
-        key={currentPage}/>
+      
+
+      
     </div>
   );
 }

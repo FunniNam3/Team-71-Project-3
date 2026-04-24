@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db"; //to connect  to out db
-import { auth0 } from "@/lib/auth0";
 
 /*
 HTTP Status Codes
@@ -25,38 +24,38 @@ DELETE - Remove data
 */
 
 // will return all table lines the match the parameter enetered, 
-// searches by any of the attributes of the receipt table
+// searches by any of the attributes of the drink table
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q");
 
     if (!q) {
-      return Response.json([]);
+      return NextResponse.json([]);
     }
 
     const result = await pool.query(
       `
-      SELECT * FROM receipt
+      SELECT * FROM drink
       WHERE
         CAST(id AS TEXT) ILIKE $1
-        OR CAST(customer_id AS TEXT) ILIKE $1
-        OR CAST(cashier_id AS TEXT) ILIKE $1
-        OR CAST(purchase_date AS TEXT) ILIKE $1
-        OR CAST(tax AS TEXT) ILIKE $1
-        OR CAST(discount AS TEXT) ILIKE $1
-        OR payment_method ILIKE $1
-        OR CAST(z_closed AS TEXT) ILIKE $1
-        OR CAST(total AS TEXT) ILIKE $1
+        OR name ILIKE $1
+        OR ice ILIKE $1
+        OR CAST(sweetness AS TEXT) ILIKE $1
+        OR milk ILIKE $1
+        OR boba ILIKE $1
+        OR popping_boba ILIKE $1
+        OR CAST(price AS TEXT) ILIKE $1
+        OR CAST(category AS TEXT) ILIKE $1
       `,
       [`%${q}%`]
     );
 
-    return Response.json(result.rows);
+    return NextResponse.json(result.rows);
   } catch (err) {
     console.error(err);
-    return Response.json(
-      { error: "Failed to search receipt table" },
+    return NextResponse.json(
+      { error: "Failed to search drink table" },
       { status: 500 }
     );
   }

@@ -26,7 +26,7 @@ DELETE - Remove data
 */
 
 // This function queries the database for single specified drink with its information,
-// or returns all the names of the drinks.
+// or returns all drinks for their id, name, price and category.
 // Uses Query parameter
 // For use, please indicate the desired drink id in the url using key value. (ex: .../drinks/?id=12)
 // If you would like all of the drink names, set allDrinks to true. (ex: .../drinks/?allDrinks=true)
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
     if (allDrinks == "true") {
       // Request and return all names of drinks
-      const result = await pool.query("SELECT name, price FROM drink");
+      const result = await pool.query("SELECT * FROM drink");
 
       return NextResponse.json(
         { message: "GET success", data: result.rows },
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 
 // This function adds a new drink to the drink table in the database,
 // Uses request body
-// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
+// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price, and category
 export async function POST(request: Request) {
   try {
     // TODO: test
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     await pool.query(
-      "INSERT INTO drink VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      "INSERT INTO drink VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
       [
         body.id,
         body.name,
@@ -84,6 +84,7 @@ export async function POST(request: Request) {
         body.boba,
         body.popping_boba,
         body.price,
+        body.category
       ],
     );
 
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
 // This function replaces a drink with a new drink in the database.
 // Note that this destroys the original drink.
 // Uses request body
-// Include key values pairs for oldId, newId, name, ice, sweetness, milk, boba, popping_boba, price
+// Include key values pairs for oldId, newId, name, ice, sweetness, milk, boba, popping_boba, price, and category
 // replaces drink with provided oldId.
 export async function PUT(request: Request) {
   try {
@@ -105,8 +106,19 @@ export async function PUT(request: Request) {
 
     const body = await request.json();
 
-    await pool.query(
-      "UPDATE drink SET id = $1, name = $2, ice = $3, sweetness = $4, milk = $5, boba = $6, popping_boba = $7, price = $8 WHERE id = $9",
+    await pool.query(`
+      "UPDATE drink 
+      SET 
+        id = $1, 
+        name = $2, 
+        ice = $3, 
+        sweetness = $4, 
+        milk = $5, 
+        boba = $6, 
+        popping_boba = $7, 
+        price = $8, 
+        category = $9 
+      WHERE id = $10`,
       [
         body.newId,
         body.name,
@@ -116,6 +128,7 @@ export async function PUT(request: Request) {
         body.boba,
         body.popping_boba,
         body.price,
+        body.category,
         body.oldId,
       ],
     );
@@ -129,7 +142,7 @@ export async function PUT(request: Request) {
 
 // This function modifies the properties of a drink in the database.
 // Uses request body
-// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price
+// Include key values pairs for id, name, ice, sweetness, milk, boba, popping_boba, price, and category
 // updates drink with provided id. Cannot update id itself
 export async function PATCH(request: Request) {
   try {
@@ -138,7 +151,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
 
     await pool.query(
-      "UPDATE drink SET name = $1, ice = $2, sweetness = $3, milk = $4, boba = $5, popping_boba = $6, price = $7 WHERE id = $8",
+      "UPDATE drink SET name = $1, ice = $2, sweetness = $3, milk = $4, boba = $5, popping_boba = $6, price = $7, category = $8 WHERE id = $9",
       [
         body.name,
         body.ice,
@@ -147,6 +160,7 @@ export async function PATCH(request: Request) {
         body.boba,
         body.popping_boba,
         body.price,
+        body.category,
         body.id,
       ],
     );

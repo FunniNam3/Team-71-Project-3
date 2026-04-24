@@ -1,11 +1,86 @@
+"use client";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import MenuCard from "@components/menucard";
+import DigitalMenuBoard from "./Menu/page";
 
 export default function Home() {
+   const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
+   const [drinkItems, setDrinkItems] = useState<any[]>([]);
+   const menuItems = [
+  ...foodItems.map(item => ({ ...item, type: 'Food' })),
+  ...drinkItems.map(item => ({ ...item, type: 'Drink' }))
+];
+   const [loading, setLoading] = useState(true);
+   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+
+
+   useEffect(() => {
+    setLoading(true);
+
+    // 1. Fetch from your team's endpoint
+    fetch("/api/drinks?allDrinks=true")
+      .then((response) => response.json())
+      .then((res) => {
+        // 2. Check if the data exists and is an array
+        if (res.data && Array.isArray(res.data)) {
+          // 3. ADD THE IMAGE HERE:
+          // We transform the data to include your placeholder image path
+          const itemsWithPlaceholder = res.data.map((item: any) => ({
+            ...item,
+            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+          }));
+
+          setDrinkItems(itemsWithPlaceholder);
+        } else {
+          console.error("Received something that isn't an array:", res);
+          setDrinkItems([]);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+        setLoading(false);
+      });
+    fetch("/api/foods?allFoods=true")
+      .then((response) => response.json())
+      .then((res) => {
+        // 2. Check if the data exists and is an array
+        if (res.data && Array.isArray(res.data)) {
+          // 3. ADD THE IMAGE HERE:
+          // We transform the data to include your placeholder image path
+          const itemsWithPlaceholder = res.data.map((item: any) => ({
+            ...item,
+            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+          }));
+
+          setFoodItems(itemsWithPlaceholder);
+        } else {
+          console.error("Received something that isn't an array:", res);
+          setFoodItems([]);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+        setLoading(false);
+      });  
+  }, []);
+
+
+  if (loading) {
+    return (
+      <div className="text-center mt-20 text-gray-500">Loading menu...</div>
+    );
+  }
+
+
   return (
     <main className="min-h-screen text-black">
       {/* 2. Hero Title */}
       <header className="pt-32 pb-10 text-center">
         <h1 className="text-6xl font-serif">Boba shop</h1>
+
       </header>
 
       {/* 3. Content Sections */}
@@ -73,6 +148,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* menu table with 4 items per row*/}
     </main>
   );
 }

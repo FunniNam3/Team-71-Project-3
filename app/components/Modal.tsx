@@ -91,7 +91,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Ice Level</h4>
               <div className="flex gap-2">
-                {["None", "Less", "Regular"].map((level) => (
+                {["None", "Less", "Regular", "Extra"].map((level) => (
                   <button
                     key={level}
                     onClick={() => setIce(level)}
@@ -110,7 +110,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Sugar Level</h4>
               <div className="flex flex-wrap gap-2">
-                {["0%", "50%", "100%"].map((level) => (
+                {["0%", "25%", "50%", "75%", "100%", "125%"].map((level) => (
                   <button
                     key={level}
                     onClick={() => setSugar(level)}

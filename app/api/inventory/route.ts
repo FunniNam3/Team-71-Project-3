@@ -25,7 +25,7 @@ DELETE - Remove data
 // return h=]the whole invenotry table
 export async function GET() {
   try {
-    const result = await pool.query("SELECT * FROM inventory");
+    const result = await pool.query("SELECT * FROM inventory ORDER BY id");
 
     return Response.json(result.rows);
   } catch (err) {
@@ -105,6 +105,34 @@ export async function POST(request: Request) {
     console.error(err);
     return Response.json(
       { error: "Failed to add inventory item" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+
+    const { id } = body;
+
+    // can tbe null so fails the attempt
+    if (!id) {
+      return Response.json({ error: "Id is required" }, { status: 400 });
+    }
+
+    await pool.query(
+      `
+      DELETE FROM inventory WHERE ID = $1
+      `,
+      [id],
+    );
+
+    return Response.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return Response.json(
+      { success: false, error: "Failed to add inventory item" },
       { status: 500 },
     );
   }

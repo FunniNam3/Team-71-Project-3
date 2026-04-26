@@ -43,6 +43,7 @@ export async function GET(request: Request) {
         OR name ILIKE $1
         OR supplier_name ILIKE $1
         OR supplier_contact ILIKE $1
+      ORDER BY id
       `,
       [`%${q}%`],
     );

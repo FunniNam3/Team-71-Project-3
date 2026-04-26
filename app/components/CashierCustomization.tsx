@@ -120,6 +120,7 @@ export default function CashierCustomization({
               <option value="50%">50%</option>
               <option value="75%">75%</option>
               <option value="100%">100%</option>
+              <option value="125%">125%</option>
             </select>
           </div>
 

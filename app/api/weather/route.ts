@@ -3,18 +3,34 @@
 // Almost all work copied form the set up guide on open meteo weather website
 
 import { fetchWeatherApi } from "openmeteo";
+import { NextRequest } from "next/server";
 
-// This GET function will receive the weather data for College Station
+// This GET function will receive the weather data for the latitude/longidute given and defaults to Texas A&M if one is not given
 // It returns weatherData object containing the daily max and min temp as well as
 // current temp, apparent temp, whether it is day or night, and cloud cover
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
+    const locationParams = request.nextUrl.searchParams;
+    const lat = locationParams.get("latitude");
+    const long = locationParams.get("longitude");
+
+    if (!lat || !long) {
+      return Response.json(
+        { error: "Missing latitude or longitude" },
+        { status: 404 },
+      );
+    }
 
     const params = {
-      latitude: 30.628,
-      longitude: -96.3344,
+      latitude: lat,
+      longitude: long,
       daily: ["temperature_2m_max", "temperature_2m_min"],
-      current: ["temperature_2m", "apparent_temperature", "is_day", "cloud_cover"],
+      current: [
+        "temperature_2m",
+        "apparent_temperature",
+        "is_day",
+        "cloud_cover",
+      ],
       timezone: "America/Chicago",
       wind_speed_unit: "mph",
       temperature_unit: "fahrenheit",
@@ -34,18 +50,25 @@ export async function GET(request: Request) {
     const timezoneAbbreviation = response.timezoneAbbreviation();
     const utcOffsetSeconds = response.utcOffsetSeconds();
 
-    console.log(
-      `\nCoordinates: ${latitude}°N ${longitude}°E`,
-      `\nElevation: ${elevation}m asl`,
-      `\nTimezone: ${timezone} ${timezoneAbbreviation}`,
-      `\nTimezone difference to GMT+0: ${utcOffsetSeconds}s`,
-    );
+    // console.log(
+    //   `\nCoordinates: ${latitude}°N ${longitude}°E`,
+    //   `\nElevation: ${elevation}m asl`,
+    //   `\nTimezone: ${timezone} ${timezoneAbbreviation}`,
+    //   `\nTimezone difference to GMT+0: ${utcOffsetSeconds}s`,
+    // );
 
     const current = response.current()!;
     const daily = response.daily()!;
 
     // Note: The order of weather variables in the URL query and the indices below need to match!
     const weatherData = {
+      location: {
+        latitude: latitude,
+        longitude: longitude,
+        elevation: elevation,
+        timezone: timezone,
+        timezoneAbbreviation: timezoneAbbreviation,
+      },
       current: {
         time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
         temperature_2m: current.variables(0)!.value(),
@@ -55,8 +78,16 @@ export async function GET(request: Request) {
       },
       daily: {
         time: Array.from(
-          { length: (Number(daily.timeEnd()) - Number(daily.time())) / daily.interval() }, 
-          (_ , i) => new Date((Number(daily.time()) + i * daily.interval() + utcOffsetSeconds) * 1000)
+          {
+            length:
+              (Number(daily.timeEnd()) - Number(daily.time())) /
+              daily.interval(),
+          },
+          (_, i) =>
+            new Date(
+              (Number(daily.time()) + i * daily.interval() + utcOffsetSeconds) *
+                1000,
+            ),
         ),
         temperature_2m_max: daily.variables(0)!.valuesArray(),
         temperature_2m_min: daily.variables(1)!.valuesArray(),
@@ -64,15 +95,14 @@ export async function GET(request: Request) {
     };
 
     // The 'weatherData' object now contains a simple structure, with arrays of datetimes and weather information
-    console.log(
-      `\nCurrent time: ${weatherData.current.time}\n`,
-      `\nCurrent temperature_2m: ${weatherData.current.temperature_2m}`,
-      `\nCurrent apparent_temperature: ${weatherData.current.apparent_temperature}`,
-      `\nCurrent is_day: ${weatherData.current.is_day}`,
-      `\nCurrent cloud_cover: ${weatherData.current.cloud_cover}`,
-    );
-    console.log("\nDaily data:\n", weatherData.daily)
-
+    // console.log(
+    //   `\nCurrent time: ${weatherData.current.time}\n`,
+    //   `\nCurrent temperature_2m: ${weatherData.current.temperature_2m}`,
+    //   `\nCurrent apparent_temperature: ${weatherData.current.apparent_temperature}`,
+    //   `\nCurrent is_day: ${weatherData.current.is_day}`,
+    //   `\nCurrent cloud_cover: ${weatherData.current.cloud_cover}`,
+    // );
+    // console.log("\nDaily data:\n", weatherData.daily);
 
     return Response.json(
       { message: "GET success", data: weatherData },

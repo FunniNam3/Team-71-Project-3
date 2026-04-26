@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db"; //to connect  to out db
-import { auth0 } from "@/lib/auth0";
 
 /*
 HTTP Status Codes
@@ -24,42 +23,33 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
-// search functino for user table
+// will return all table lines from the  
+// drink table the match the category parameter enetered
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get("q");
+    const category = searchParams.get("category");
 
-    if (q) {
-      const result = await pool.query(
-        `
-        SELECT id, auth0_user_id, name, role, points, cart
-        FROM users
-        WHERE 
-            CAST(id AS TEXT) ILIKE $1
-            OR auth0_user_id ILIKE $1
-            OR name ILIKE $1
-        ORDER BY name
-        `,
-        [`%${q}%`]
-      );
-
-      return Response.json({ data: result.rows });
+    if (!category) {
+      return NextResponse.json([]);
     }
 
     const result = await pool.query(
       `
-      SELECT id, auth0_user_id, name, role, points, cart
-      FROM users
-      ORDER BY name
-      `
+      SELECT * FROM drink
+      WHERE EXISTS (
+        SELECT 1 FROM unnest(category) AS c
+        WHERE c ILIKE $1
+      )
+      `,
+      [`%${category}%`]
     );
 
-    return Response.json({ data: result.rows });
+    return NextResponse.json(result.rows);
   } catch (err) {
     console.error(err);
-    return Response.json(
-      { error: "Failed to fetch customers" },
+    return NextResponse.json(
+      { error: "Failed to search drink by category" },
       { status: 500 }
     );
   }

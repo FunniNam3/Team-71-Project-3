@@ -1,6 +1,4 @@
-import { NextResponse } from "next/server";
 import { pool } from "@/lib/db"; //to connect  to out db
-import { auth0 } from "@/lib/auth0";
 
 /*
 HTTP Status Codes
@@ -27,44 +25,48 @@ DELETE - Remove data
 // return h=]the whole invenotry table
 export async function GET() {
   try {
-    const result = await pool.query("SELECT * FROM inventory");
+    const result = await pool.query("SELECT * FROM inventory ORDER BY id");
 
     return Response.json(result.rows);
   } catch (err) {
     console.error(err);
     return Response.json(
       { error: "Failed to fetch inventory" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-//alter a line in inventory idenofied by name attribute, 
+//alter a line in inventory idenofied by name attribute,
 //only changes the fields given, not whole line
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
 
-    const { name, amount, supplier_name, supplier_contact } = body;
+    const { id, name, amount, supplier_name, supplier_contact } = body;
 
     const result = await pool.query(
-    `
+      `
     UPDATE inventory
     SET
-        amount = COALESCE($1, amount),
-        supplier_name = COALESCE($2, supplier_name),
-        supplier_contact = COALESCE($3, supplier_contact)
-    WHERE name = $4
+        name = COALESCE($1, name),
+        amount = COALESCE($2, amount),
+        supplier_name = COALESCE($3, supplier_name),
+        supplier_contact = COALESCE($4, supplier_contact)
+    WHERE id = $5
     RETURNING *
     `,
-    [amount ?? null, supplier_name ?? null, supplier_contact ?? null, name]
+      [
+        name ?? null,
+        amount ?? null,
+        supplier_name ?? null,
+        supplier_contact ?? null,
+        id,
+      ],
     );
 
     if (result.rows.length === 0) {
-      return Response.json(
-        { error: "Item not found" },
-        { status: 404 }
-      );
+      return Response.json({ error: "Item not found" }, { status: 404 });
     }
 
     return Response.json(result.rows[0]);
@@ -72,7 +74,7 @@ export async function PATCH(request: Request) {
     console.error(err);
     return Response.json(
       { error: "Failed to update inventory" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -86,10 +88,7 @@ export async function POST(request: Request) {
 
     // can tbe null so fails the attempt
     if (!name) {
-      return Response.json(
-        { error: "Name is required" },
-        { status: 400 }
-      );
+      return Response.json({ error: "Name is required" }, { status: 400 });
     }
 
     const result = await pool.query(
@@ -98,7 +97,7 @@ export async function POST(request: Request) {
       VALUES ($1, $2, $3, $4)
       RETURNING *
       `,
-      [name, amount ?? null, supplier_name ?? null, supplier_contact ?? null]
+      [name, amount ?? null, supplier_name ?? null, supplier_contact ?? null],
     );
 
     return Response.json(result.rows[0]);
@@ -106,7 +105,35 @@ export async function POST(request: Request) {
     console.error(err);
     return Response.json(
       { error: "Failed to add inventory item" },
-      { status: 500 }
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+
+    const { id } = body;
+
+    // can tbe null so fails the attempt
+    if (!id) {
+      return Response.json({ error: "Id is required" }, { status: 400 });
+    }
+
+    await pool.query(
+      `
+      DELETE FROM inventory WHERE ID = $1
+      `,
+      [id],
+    );
+
+    return Response.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    return Response.json(
+      { success: false, error: "Failed to add inventory item" },
+      { status: 500 },
     );
   }
 }

@@ -22,7 +22,7 @@ export default function ProfileClient({
       });
   }, []);
   return (
-    <main className="flex flex-col gap-3 p-6">
+    <main className="flex text-black flex-col gap-3 p-6">
       <h1 className="text-2xl ">Name: {user?.name}</h1>
       <h1 className="text-2xl ">Role: {user?.role}</h1>
       <h1 className="text-2xl ">Points: {user?.points}</h1>

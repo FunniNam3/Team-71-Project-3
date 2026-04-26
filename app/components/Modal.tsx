@@ -1,4 +1,3 @@
-
 "use client";
 import { on } from "events";
 import { useState } from "react";
@@ -49,7 +48,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
 
   const handleToppingToggle = (name: string) => {
     setToppings((prev) =>
-      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name],
     );
   };
 
@@ -58,7 +57,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
       ...item,
       customizations: isFood
         ? { notes: specialInstructions, toppings } // Food data
-        : { ice, sugar, toppings },                // Drink data
+        : { ice, sugar, toppings }, // Drink data
       instanceId: Math.random().toString(36).substring(2, 9),
     });
     onClose();
@@ -70,13 +69,15 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-1 text-gray-900">{item.name}</h2>
-        <p className="text-gray-500 mb-6">{item.description}</p>
+        <p className="text-(--gray) mb-6">{item.description}</p>
 
         {/* --- DYNAMIC SECTION --- */}
         {isFood ? (
           /* FOOD LAYOUT */
           <div className="mb-6">
-            <h4 className="font-bold mb-2 text-gray-800">Special Instructions</h4>
+            <h4 className="font-bold mb-2 text-gray-800">
+              Special Instructions
+            </h4>
             <textarea
               className="w-full border border-gray-200 rounded-xl p-3 text-gray-700 focus:ring-2 focus:ring-[#00A67E] outline-none"
               rows={3}
@@ -160,7 +161,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
         <div className="flex gap-4 mt-8">
           <button
             onClick={onClose}
-            className="flex-1 py-3 text-gray-500 font-medium hover:text-gray-800"
+            className="flex-1 py-3 text-(--gray) font-medium hover:text-gray-800"
           >
             Cancel
           </button>
@@ -173,6 +174,6 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

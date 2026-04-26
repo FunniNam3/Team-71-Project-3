@@ -20,7 +20,9 @@ export default function PaymentMethodPopUp({
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
         {/* Header */}
         <div className="mb-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-500">Select Payment Method</h2>
+          <h2 className="text-xl font-bold text-(--gray)">
+            Select Payment Method
+          </h2>
         </div>
 
         {/* Payment Options */}
@@ -29,7 +31,7 @@ export default function PaymentMethodPopUp({
             <button
               key={method}
               onClick={() => onSelect(method)}
-              className="w-full border rounded p-3 text-left hover:bg-gray-100 transition text-gray-500"
+              className="w-full border rounded p-3 text-left hover:bg-gray-100 transition text-(--gray)"
             >
               {method}
             </button>
@@ -40,7 +42,7 @@ export default function PaymentMethodPopUp({
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="border rounded px-4 py-2 hover:bg-gray-100 text-gray-500"
+            className="border rounded px-4 py-2 hover:bg-gray-100 text-(--gray)"
           >
             Cancel
           </button>

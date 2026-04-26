@@ -18,7 +18,7 @@ export default function OptionButton({
         ${
           isSelected
             ? "bg-[#00A67E] text-white border-[#00A67E]"
-            : "bg-white text-gray-700 border-[#00A67E] hover:bg-[#00A67E]/10"
+            : "bg-white text-(--gray) border-[#00A67E] hover:bg-[#00A67E]/10"
         }`}
     >
       {label}

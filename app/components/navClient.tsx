@@ -31,7 +31,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
           Manager
         </Link>
       ) : role === "cashier" ? (
-        <Link href="/CashierPOS">
+        <Link className={LinkStyle} href="/CashierPOS">
           <Image
             className="h-5 w-auto"
             src="/Money.svg"

@@ -16,8 +16,8 @@ export default function CashierItemCard({
       onClick={onSelect}
       className="w-full rounded-lg border bg-white p-3 text-left shadow-sm transition hover:bg-gray-100"
     >
-      <p className="text-sm font-semibold text-gray-500">{item.name}</p>
-      <p className="mt-1 text-xs text-gray-500">${item.price.toFixed(2)}</p>
+      <p className="text-sm font-semibold text-(--gray)">{item.name}</p>
+      <p className="mt-1 text-xs text-(--gray)">${item.price.toFixed(2)}</p>
     </button>
   );
 }

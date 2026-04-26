@@ -2,10 +2,16 @@ import Link from "next/link";
 
 export default function Portal() {
   const LinkStyle =
-    "flex flex-col text-center gap-2 text-white m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
+    "flex flex-col text-center gap-2 m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
   return (
-    <main className="flex flex-col gap-10">
-      <h1 className="text-center text-5xl">Portal Page</h1>
+    <main className="flex flex-col gap-10 text-white">
+      <h1 className="text-center text-5xl text-black mt-5">Portal Page</h1>
+      <p className="text-wrap text-black max-w-3/4 text-center mx-auto">
+        This page is not supposed to exist in production, it only exists for
+        easy access to the necessary pages for the person grading our website.
+        The NavBar updates based on who is logged in and that is typically how
+        users will get to their respective pages.
+      </p>
       <div className="flex flex-col gap-5">
         <Link
           className={
@@ -24,9 +30,7 @@ export default function Portal() {
           href="/Manager"
         >
           Manager Page{" "}
-          <small className="text-xs text-black">
-            You have to be logged in to access
-          </small>
+          <small className="text-xs">You have to be logged in to access</small>
         </Link>
         <Link
           className={
@@ -36,9 +40,7 @@ export default function Portal() {
           href="/CashierPOS"
         >
           Cashier Page{" "}
-          <small className="text-xs text-black">
-            You have to be logged in to access
-          </small>
+          <small className="text-xs">You have to be logged in to access</small>
         </Link>
       </div>
       <div className="flex flex-col gap-3 p-3 bg-(--primary) rounded-3xl w-fit mx-auto">

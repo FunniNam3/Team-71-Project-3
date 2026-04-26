@@ -26,7 +26,7 @@ export default async function NavBar() {
           </Link>
           <Link
             href="/Portal"
-            className="flex gap-2 text-center p-3 h-full w-fit z-10 bg-(--primary) rounded-full hover:scale-105 active:scale-95 transition-transform duration-300"
+            className="flex text-white gap-2 text-center p-3 h-full w-fit z-10 bg-(--primary) rounded-full hover:scale-105 active:scale-95 transition-transform duration-300"
           >
             <Image
               src="/Portal.svg"

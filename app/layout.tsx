@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import NavBar from "./components/nav";
+import ThemeProvider from "@components/Contrast";
 import LensProvider from "./components/magnifier";
 import Script from "next/script";
 
@@ -17,13 +18,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {/* 🔥 Lens wraps ONLY app UI */}
-        <LensProvider>
-          <NavBar />
-          {children}
-        </LensProvider>
-
-        {/* 🔥 External scripts OUTSIDE capture scope */}
+        <ThemeProvider>
+          <LensProvider>
+            <NavBar />
+            {children}
+          </LensProvider>
+        </ThemeProvider>
         <Script
           src="https://elfsightcdn.com/platform.js"
           strategy="afterInteractive"

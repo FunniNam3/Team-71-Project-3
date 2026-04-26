@@ -28,12 +28,12 @@ export default function RewardCard({ reward, onSelect }: RewardCardProps) {
             className="h-full w-full object-contain"
           />
         ) : (
-          <span className="text-sm text-gray-400">No Image</span>
+          <span className="text-sm text-(--gray)">No Image</span>
         )}
       </div>
 
       {/* Title */}
-      <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
+      <h3 className="text-sm font-semibold text-(--gray) line-clamp-2">
         {reward.item}
       </h3>
 

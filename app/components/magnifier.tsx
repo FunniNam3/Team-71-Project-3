@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 export default function LensProvider({
   children,
@@ -36,13 +37,18 @@ export default function LensProvider({
       {/* Accessibility toggle */}
       <button
         onClick={() => setEnabled((v) => !v)}
-        className="fixed top-4 left-4 z-[9999] bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
+        className={`fixed top-4 left-4 z-9999 ${enabled ? "bg-(--accent)" : "bg-(--primary)"} text-white p-4 rounded-full hover:scale-110 transition`}
         aria-label={
           enabled ? "Disable magnifying glass" : "Enable magnifying glass"
         }
         title="Press to toggle magnifying glass for accessibility"
       >
-        🔍 {enabled ? "Disable" : "Enable"} Magnifier
+        <Image
+          src="/Magnify.svg"
+          alt="Magnifying Glass"
+          width={20}
+          height={20}
+        />
       </button>
 
       {/* SOURCE DOM */}
@@ -138,7 +144,7 @@ function LensMirror({
 
   return (
     <div
-      className="fixed inset-0 z-[9998] pointer-events-none overflow-hidden"
+      className="fixed inset-0 z-9998 pointer-events-none overflow-hidden"
       role="complementary"
       aria-label="Magnifying glass overlay"
       style={{
@@ -151,19 +157,9 @@ function LensMirror({
     >
       <div
         ref={mirrorRef}
-        className="absolute inset-0"
+        className="absolute inset-0 bg-(--secondary)"
         style={{
           transformOrigin: "0 0",
-        }}
-      />
-
-      <div
-        className="absolute pointer-events-none rounded-full shadow-lg"
-        style={{
-          width: lensRadius * 2,
-          height: lensRadius * 2,
-          left: mouse.current.x - lensRadius,
-          top: mouse.current.y - lensRadius,
         }}
       />
     </div>

@@ -126,7 +126,7 @@ const handleAddToCart = (customizedItem: MenuItem) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredItems.map((item) => (
           <ProductCard
-            key={item.id}
+            key={`${item.type}-${item.id}`}
             {...item}
             // Only open the modal. Do NOT call setCart here.
             onAddToCart={() => setSelectedProduct(item)} 

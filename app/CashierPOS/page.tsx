@@ -324,7 +324,8 @@ export default function CashierPOSPage() {
                     <div>
                       <p className="font-semibold text-gray-500">{item.name}</p>
                       <p className="text-sm text-gray-500">
-                        ${item.price.toFixed(2)}
+                        ${item.price.toFixed(2)} x {item.quantity} = $
+                        {(item.price * item.quantity).toFixed(2)}
                       </p>
 
                       {item.itemType === "drink" && (

@@ -45,6 +45,7 @@ export default function CashierCustomization({
   const [selectedMilk, setSelectedMilk] = useState("");
   const [selectedBoba, setSelectedBoba] = useState("");
   const [selectedPoppingBoba, setSelectedPoppingBoba] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const iceOptions = ["No Ice", "Less Ice", "Normal", "Extra Ice"];
   const milkOptions = ["Cow", "Oat", "Almond", "Soy"];
@@ -58,6 +59,7 @@ export default function CashierCustomization({
     setSelectedMilk(item.milk || "Cow");
     setSelectedBoba(item.boba || "False");
     setSelectedPoppingBoba(item.popping_boba || "False");
+    setQuantity(1);
   }, [item]);
 
   if (!isOpen || !item) return null;
@@ -69,7 +71,7 @@ export default function CashierCustomization({
       id: item.id,
       name: item.name,
       price: item.price,
-      quantity: 1,
+      quantity,
       itemType: "drink",
       selectedIce,
       selectedSweetness,
@@ -170,6 +172,19 @@ export default function CashierCustomization({
               ))}
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-500">
+            Quantity
+          </label>
+          <input
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+            className="w-full rounded border p-2 text-gray-500"
+          />
         </div>
 
         <div className="mt-6 flex justify-end gap-3">

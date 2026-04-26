@@ -6,6 +6,7 @@
   --secondary: #C4AF9A;
   --accent: #FB9F89;
   --gray: #6a7282;
+  --header_bg: transparent;
 }
 
 body {

@@ -166,7 +166,7 @@ export default function WeatherCard() {
 
       try {
         const res = await fetch(
-          `api/weather?latitude=${location.latitude}&longitude=${location.longitude}`,
+          `/api/weather?latitude=${location.latitude}&longitude=${location.longitude}`,
         );
         const json = await res.json();
         setWeather(json.data);

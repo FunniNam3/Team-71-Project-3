@@ -1,86 +1,12 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import MenuCard from "@components/menucard";
-import DigitalMenuBoard from "./Menu/page";
 
 export default function Home() {
-   const [foodItems, setFoodItems] = useState<any[]>([]); // This will hold all menu items
-   const [drinkItems, setDrinkItems] = useState<any[]>([]);
-   const menuItems = [
-  ...foodItems.map(item => ({ ...item, type: 'Food' })),
-  ...drinkItems.map(item => ({ ...item, type: 'Drink' }))
-];
-   const [loading, setLoading] = useState(true);
-   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-
-
-   useEffect(() => {
-    setLoading(true);
-
-    // 1. Fetch from your team's endpoint
-    fetch("/api/drinks?allDrinks=true")
-      .then((response) => response.json())
-      .then((res) => {
-        // 2. Check if the data exists and is an array
-        if (res.data && Array.isArray(res.data)) {
-          // 3. ADD THE IMAGE HERE:
-          // We transform the data to include your placeholder image path
-          const itemsWithPlaceholder = res.data.map((item: any) => ({
-            ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
-          }));
-
-          setDrinkItems(itemsWithPlaceholder);
-        } else {
-          console.error("Received something that isn't an array:", res);
-          setDrinkItems([]);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Fetch error:", error);
-        setLoading(false);
-      });
-    fetch("/api/foods?allFoods=true")
-      .then((response) => response.json())
-      .then((res) => {
-        // 2. Check if the data exists and is an array
-        if (res.data && Array.isArray(res.data)) {
-          // 3. ADD THE IMAGE HERE:
-          // We transform the data to include your placeholder image path
-          const itemsWithPlaceholder = res.data.map((item: any) => ({
-            ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
-          }));
-
-          setFoodItems(itemsWithPlaceholder);
-        } else {
-          console.error("Received something that isn't an array:", res);
-          setFoodItems([]);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Fetch error:", error);
-        setLoading(false);
-      });  
-  }, []);
-
-
-  if (loading) {
-    return (
-      <div className="text-center mt-20 text-gray-500">Loading menu...</div>
-    );
-  }
-
-
   return (
     <main className="min-h-screen text-black">
       {/* 2. Hero Title */}
       <header className="pt-32 pb-10 text-center">
         <h1 className="text-6xl font-serif">Boba shop</h1>
-
       </header>
 
       {/* 3. Content Sections */}
@@ -90,9 +16,14 @@ export default function Home() {
           <div className="flex-1">
             <h2 className="text-4xl font-semibold mb-4">Who are we</h2>
             <p className="text-lg leading-relaxed text-gray-800">
-              Lorem ipsum dolor sit amet consectetur. Hendrerit habitasse enim a
-              condimentum malesuada nunc donec commodo felis. Scelerisque felis
-              fringilla potenti tristique tellus at eu elementum ultricies.
+              At The Cool Boba Shop, we’re passionate about crafting
+              high-quality bubble tea that brings people together. Founded by a
+              group of tea lovers, our goal is to create a welcoming space where
+              friends can hang out, study, or just enjoy a refreshing drink. We
+              use premium tea leaves, fresh ingredients, and house-made syrups
+              to ensure every cup is flavorful and unique. Whether you're a
+              longtime boba fan or trying it for the first time, we’re here to
+              make your experience memorable.
             </p>
           </div>
           <div className="flex-1 flex justify-center">
@@ -111,9 +42,17 @@ export default function Home() {
           <div className="flex-1">
             <h2 className="text-4xl font-semibold mb-4">Location & Hours</h2>
             <p className="text-lg leading-relaxed text-gray-800">
-              Lorem ipsum dolor sit amet consectetur. Hendrerit habitasse enim a
-              condimentum malesuada nunc donec commodo felis. Scelerisque felis
-              fringilla potenti tristique tellus at eu elementum ultricies.
+              You can find us conveniently located in the heart of College
+              Station, making us a perfect stop between classes, after work, or
+              during a night out. Address: 123 University Drive, College
+              Station, TX Hours:
+              <ul>
+                <li>Monday – Thursday: 11:00 AM – 10:00 PM</li>
+                <li>Friday – Saturday: 11:00 AM – 12:00 AM</li>
+                <li>Sunday: 12:00 PM – 9:00 PM</li>
+              </ul>
+              We offer dine-in, takeout, and online ordering for your
+              convenience.
             </p>
           </div>
           <div className="flex-1 flex justify-center">
@@ -132,9 +71,32 @@ export default function Home() {
           <div className="flex-1">
             <h2 className="text-4xl font-semibold mb-4">Types of Products</h2>
             <p className="text-lg leading-relaxed text-gray-800">
-              Lorem ipsum dolor sit amet consectetur. Hendrerit habitasse enim a
-              condimentum malesuada nunc donec commodo felis. Scelerisque felis
-              fringilla potenti tristique tellus at eu elementum ultricies.
+              We offer a wide variety of drinks and snacks to satisfy every
+              craving:
+              <ul>
+                <li>
+                  Classic Milk Teas: Black, green, and jasmine teas with creamy
+                  milk and chewy tapioca pearls
+                </li>
+                <li>
+                  Fruit Teas: Refreshing blends like mango, strawberry,
+                  passionfruit, and lychee
+                </li>
+                <li>
+                  Specialty Drinks: Brown sugar milk tea, matcha lattes, taro
+                  milk tea, and seasonal creations
+                </li>
+                <li>
+                  Toppings: Tapioca pearls, popping boba, grass jelly, aloe
+                  vera, and pudding
+                </li>
+                <li>
+                  Snacks: Light bites such as mochi, egg waffles, and crispy
+                  popcorn chicken
+                </li>
+              </ul>
+              All drinks are customizable with your choice of sweetness level,
+              ice level, and toppings.
             </p>
           </div>
           <div className="flex-1 flex justify-center">

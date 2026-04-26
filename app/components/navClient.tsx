@@ -19,6 +19,17 @@ export default function NavClient({ user }: { user: User | undefined }) {
 
   return (
     <div className="w-fit flex gap-4">
+      <Link className={LinkStyle} href="/Order">
+        <Image
+          className="h-5 w-auto"
+          src="/Cart.svg"
+          alt=""
+          width={22}
+          height={21}
+        />
+        Order
+      </Link>
+
       {role && role === "manager" ? (
         <Link className={LinkStyle} href="/Manager">
           <Image
@@ -30,28 +41,19 @@ export default function NavClient({ user }: { user: User | undefined }) {
           />
           Manager
         </Link>
-      ) : role === "cashier" ? (
-        <Link className={LinkStyle} href="/CashierPOS">
-          <Image
-            className="h-5 w-auto"
-            src="/Money.svg"
-            alt=""
-            width={12}
-            height={22}
-          />
-          Cashier
-        </Link>
       ) : (
-        <Link className={LinkStyle} href="/Order">
-          <Image
-            className="h-5 w-auto"
-            src="/Cart.svg"
-            alt=""
-            width={22}
-            height={21}
-          />
-          Order
-        </Link>
+        role === "cashier" && (
+          <Link className={LinkStyle} href="/CashierPOS">
+            <Image
+              className="h-5 w-auto"
+              src="/Money.svg"
+              alt=""
+              width={12}
+              height={22}
+            />
+            Cashier
+          </Link>
+        )
       )}
       {!user && (
         <Link className={LinkStyle} href="/auth/login">

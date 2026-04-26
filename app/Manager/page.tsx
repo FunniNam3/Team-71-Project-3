@@ -5,21 +5,21 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function ManagerDashboard() {
-  const router = useRouter();
-  useEffect(() => {
-    fetch("/api/login")
-      .then((result) => result.json())
-      .then((res) => {
-        if (res.role !== "manager") {
-          router.push("/Portal");
-        }
-      });
-  }, []);
+  // const router = useRouter();
+  // useEffect(() => {
+  //   fetch("/api/login")
+  //     .then((result) => result.json())
+  //     .then((res) => {
+  //       if (res.role !== "manager") {
+  //         router.push("/Portal");
+  //       }
+  //     });
+  // }, []);
 
   return (
-    <main className="min-h-screen bg-[#C4AF9A] font-sans pb-20">
+    <main className="min-h-screen font-sans pb-20">
       <div className="max-w-4xl mx-auto px-4 mt-12 text-center">
-        <h1 className="text-6xl font-medium text-white mb-16 drop-shadow-sm">
+        <h1 className="text-6xl font-medium text-white bg-(--header_bg) mb-16 drop-shadow-sm">
           Manager Dashboard
         </h1>
 
@@ -39,6 +39,26 @@ export default function ManagerDashboard() {
                 Open Trends Page
               </span>
               <span className="text-xs text-white mt-1">Trends over time</span>
+            </Link>
+          </div>
+
+          <div className="w-full max-w-xl bg-white p-10 rounded-[45px] shadow-xl">
+            <h2 className="text-3xl text-(--primary) font-semibold mb-2">
+              Inventory
+            </h2>
+            <p className="text-sm text-(--primary) opacity-80 mb-6 italic">
+              Inventory Page: View Inventory
+            </p>
+            <Link
+              className="flex flex-col bg-(--primary) w-full p-6 rounded-lg justify-center shadow-lg"
+              href="/Manager/Inventory"
+            >
+              <span className="text-xl font-bold tracking-widest text-white">
+                Open Inventory Page
+              </span>
+              <span className="text-xs text-white mt-1">
+                View/Display Inventory
+              </span>
             </Link>
           </div>
 

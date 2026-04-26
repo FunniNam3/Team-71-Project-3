@@ -459,7 +459,7 @@ export default function TrendsPage() {
     <div className="my-10">
       <Link
         href="/Manager"
-        className="px-6 py-4 bg-(--primary) rounded-full mx-4"
+        className="px-6 py-4 bg-(--primary) text-white rounded-full mx-4"
       >
         {" "}
         Back to Manager Page
@@ -469,13 +469,13 @@ export default function TrendsPage() {
           <div className="flex flex-wrap justify-center border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">
             <button
               onClick={toggleCalendar}
-              className="px-3 py-1.5 gap-3 bg-(--primary) w-fit h-fit rounded-full"
+              className="px-3 py-1.5 gap-3 bg-(--primary) w-fit text-white h-fit rounded-full"
             >
               Select Time Frame
             </button>
             <button
               onClick={toggleAllTime}
-              className="px-3 py-1.5 gap-3 bg-(--primary) w-fit h-fit rounded-full"
+              className="px-3 py-1.5 gap-3 bg-(--primary) w-fit text-white h-fit rounded-full"
             >
               All Time Data
             </button>

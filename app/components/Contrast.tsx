@@ -41,12 +41,14 @@ export default function ThemeProvider({
       root.style.setProperty("--secondary", "#C4AF9A");
       root.style.setProperty("--accent", "#FB9F89");
       root.style.setProperty("--gray", "#6a7282");
+      root.style.setProperty("--header_bg", "transparent");
     } else {
       root.style.setProperty("--primary", "#0D6B4F");
       root.style.setProperty("--dark", "#0F0F0F");
       root.style.setProperty("--secondary", "#F5F5DC");
       root.style.setProperty("--accent", "#E63946");
       root.style.setProperty("--gray", "#000");
+      root.style.setProperty("--header_bg", "#000");
     }
   };
 
@@ -57,7 +59,7 @@ export default function ThemeProvider({
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className="fixed top-4 right-4 z-[9999] w-10 bg-(--primary) text-white p-2 rounded-full hover:scale-105 active:scale-95 flex items-center gap-2 font-medium"
+        className="fixed top-4 right-4 z-9999 w-10 bg-(--primary) text-white p-2 rounded-full hover:scale-105 active:scale-95 flex items-center gap-2 font-medium"
         aria-label={`Switch to ${theme === "original" ? "high contrast" : "original"} theme`}
         title={`Current: ${theme === "original" ? "Original" : "High Contrast"} Theme`}
       >

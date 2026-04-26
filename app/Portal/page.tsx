@@ -5,8 +5,10 @@ export default function Portal() {
     "flex flex-col text-center gap-2 m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
   return (
     <main className="flex flex-col gap-10 text-white">
-      <h1 className="text-center text-5xl text-black mt-5">Portal Page</h1>
-      <p className="text-wrap text-black max-w-3/4 text-center mx-auto">
+      <h1 className="text-center text-6xl font-bold text-white w-fit mx-auto bg-(--header_bg) drop-shadow-sm mt-15">
+        Portal Page
+      </h1>
+      <p className="text-wrap text-white  bg-(--header_bg) font-semibold max-w-3/4 text-center mx-auto mb-10">
         This page is not supposed to exist in production, it only exists for
         easy access to the necessary pages for the person grading our website.
         The NavBar updates based on who is logged in and that is typically how

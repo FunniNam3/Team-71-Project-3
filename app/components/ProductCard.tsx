@@ -43,7 +43,7 @@ export default function ProductCard({
             ${price.toFixed(2)}
           </span>
           <div className="bg-[#00A67E] text-white rounded-full p-2 hover:scale-105 active:scale-95 transition-all shadow-md">
-            <Image src="/plus-icon.svg" alt="Add" width={24} height={24} />
+            <Image src="/Add.svg" alt="Add" width={24} height={24} />
           </div>
         </div>
       </button>

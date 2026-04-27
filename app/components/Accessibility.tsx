@@ -15,6 +15,7 @@ export default function AccessibilityProvider({
   const [lens, setLens] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<Theme>("original");
+  const [open, setOpen] = useState(false);
 
   // Load saved theme from localStorage
   useEffect(() => {
@@ -58,36 +59,30 @@ export default function AccessibilityProvider({
   if (!mounted) return <>{children}</>;
   return (
     <>
-      <div className="flex gap-2 bg-white flex-wrap w-40 rounded-[40] justify-between p-3 fixed top-5 right-4 z-9999 ">
+      <div
+        hidden={!open}
+        className="flex gap-2 bg-white flex-wrap w-40 rounded-3xl justify-between p-3 fixed top-5 right-4 z-9999 "
+      >
         <button
-          onClick={() => setLens((v) => !v)}
-          className={`h-14 w-14 ${lens ? "bg-(--accent)" : "bg-(--primary)"} text-white p-3 rounded-full hover:scale-110 transition flex items-center justify-center`}
-          aria-label={
-            lens ? "Disable magnifying glass" : "Enable magnifying glass"
-          }
-          title="Press to toggle magnifying glass for accessibility"
+          onClick={() => setOpen(false)}
+          className="absolute right-3 hover:scale-105 active:scale-95"
         >
           <Image
-            src="/Magnify.svg"
-            alt="Magnifying Glass"
+            src="/plus-icon.svg"
+            alt="Smaller"
             width={20}
             height={20}
-            className="w-full h-auto"
+            className="w-full h-auto rotate-45"
+            priority
           />
         </button>
         <button
-          onClick={toggleTheme}
-          className="h-14 w-14 bg-(--primary) text-white p-3 rounded-full hover:scale-105 active:scale-95 flex items-center justify-center font-medium"
-          aria-label={`Switch to ${theme === "original" ? "high contrast" : "original"} theme`}
-          title={`Current: ${theme === "original" ? "Original" : "High Contrast"} Theme`}
+          className="mx-auto bg-(--primary) rounded-full px-2 -mb-3 py-1 text-sm text-white"
+          onClick={() => {
+            setScale(100);
+          }}
         >
-          <Image
-            src="/Contrast.svg"
-            alt="Contrast"
-            width={20}
-            height={20}
-            className="w-full h-auto"
-          />
+          Reset
         </button>
         <div className="flex py-3">
           <button
@@ -136,14 +131,50 @@ export default function AccessibilityProvider({
           </button>
         </div>
         <button
-          className="mx-auto bg-(--primary) rounded-full px-2 -mt-3 py-1 text-sm text-white"
-          onClick={() => {
-            setScale(100);
-          }}
+          onClick={() => setLens((v) => !v)}
+          className={`h-14 w-14 ${lens ? "bg-(--accent)" : "bg-(--primary)"} text-white p-3 rounded-full hover:scale-110 transition flex items-center justify-center`}
+          aria-label={
+            lens ? "Disable magnifying glass" : "Enable magnifying glass"
+          }
+          title="Press to toggle magnifying glass for accessibility"
         >
-          Reset
+          <Image
+            src="/Magnify.svg"
+            alt="Magnifying Glass"
+            width={20}
+            height={20}
+            className="w-full h-auto"
+          />
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="h-14 w-14 bg-(--primary) text-white p-3 rounded-full hover:scale-105 active:scale-95 flex items-center justify-center font-medium"
+          aria-label={`Switch to ${theme === "original" ? "high contrast" : "original"} theme`}
+          title={`Current: ${theme === "original" ? "Original" : "High Contrast"} Theme`}
+        >
+          <Image
+            src="/Contrast.svg"
+            alt="Contrast"
+            width={20}
+            height={20}
+            className="w-full h-auto"
+          />
         </button>
       </div>
+      <button
+        hidden={open}
+        onClick={() => setOpen(true)}
+        className="fixed bg-(--primary) flex-wrap w-14 rounded-[40] p-1 top-5 right-4 z-9999 hover:scale-105 active:scale-95"
+      >
+        <Image
+          src="/Access.svg"
+          alt="Accessibility"
+          width={20}
+          height={20}
+          className="w-full h-auto"
+          priority
+        />
+      </button>
       <LensProvider enabled={lens}>
         <div
           className="origin-top-left top-0"

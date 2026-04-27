@@ -12,15 +12,6 @@ type Reward = {
   image: string;
 };
 
-type LoginUser = {
-  id: number;
-  auth0_user_id: string;
-  name: string;
-  role: string;
-  points: number;
-  cart: string | null;
-};
-
 export default function RewardsPage() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [userPoints, setUserPoints] = useState(0);
@@ -76,19 +67,19 @@ export default function RewardsPage() {
 
   const giftRewards = useMemo(() => {
     return rewards.filter(
-      (reward) => reward.type?.trim().toLowerCase() === "gifts"
+      (reward) => reward.type?.trim().toLowerCase() === "gifts",
     );
   }, [rewards]);
 
   const drinkRewards = useMemo(() => {
     return rewards.filter(
-      (reward) => reward.type?.trim().toLowerCase() === "drinks"
+      (reward) => reward.type?.trim().toLowerCase() === "drinks",
     );
   }, [rewards]);
 
   const toyRewards = useMemo(() => {
     return rewards.filter(
-      (reward) => reward.type?.trim().toLowerCase() === "toys"
+      (reward) => reward.type?.trim().toLowerCase() === "toys",
     );
   }, [rewards]);
 
@@ -203,15 +194,13 @@ function RewardSection({ title, rewards, onSelect }: RewardSectionProps) {
       <h2 className="mb-4 text-2xl font-bold text-gray-600">{title}</h2>
 
       {rewards.length === 0 ? (
-        <p className="text-sm text-gray-500">No rewards found in this section.</p>
+        <p className="text-sm text-gray-500">
+          No rewards found in this section.
+        </p>
       ) : (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {rewards.map((reward) => (
-            <RewardCard
-              key={reward.id}
-              reward={reward}
-              onSelect={onSelect}
-            />
+            <RewardCard key={reward.id} reward={reward} onSelect={onSelect} />
           ))}
         </div>
       )}

@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import NavBar from "./components/nav";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import ThemeProvider from "@components/Contrast";
+import LensProvider from "./components/magnifier";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Team 71 App",
@@ -20,22 +12,33 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NavBar />
-        {children}
-        {/* Elfsight Website Translator | Untitled Website Translator */}
-        <script src="https://elfsightcdn.com/platform.js" async></script>
+      <body className="antialiased">
+        <ThemeProvider>
+          <LensProvider>
+            <NavBar />
+            {children}
+          </LensProvider>
+        </ThemeProvider>
+        <Script
+          src="https://elfsightcdn.com/platform.js"
+          strategy="afterInteractive"
+        />
+
+        <Script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js" />
+        <Script
+          src="https://files.bpcontent.cloud/2026/04/26/11/20260426111339-NJH2HJYL.js"
+          defer
+        />
+
         <div
           className="elfsight-app-72f9bd91-2a62-4d73-b116-1de5d755fd57"
           data-elfsight-app-lazy
-        ></div>
+        />
       </body>
     </html>
   );

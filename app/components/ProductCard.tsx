@@ -35,11 +35,13 @@ export default function ProductCard({
           <Image src={imageUrl} alt={name} fill className="object-cover" />
         </div>
 
-        <h3 className="text-gray-900 text-2xl font-semibold mb-1">{name}</h3>
-        <p className="text-gray-600 text-sm grow mb-4">{description}</p>
+        <h3 className="text-(--gray) text-2xl font-semibold mb-1">{name}</h3>
+        <p className="text-(--gray) text-sm grow mb-4">{description}</p>
 
         <div className="flex justify-between items-center mt-auto">
-          <span className="text-gray-900 text-xl font-bold">${price.toFixed(2)}</span>
+          <span className="text-(--gray) text-xl font-bold">
+            ${price.toFixed(2)}
+          </span>
           <div className="bg-[#00A67E] text-white rounded-full p-2 hover:scale-105 active:scale-95 transition-all shadow-md">
             <Image src="/plus-icon.svg" alt="Add" width={24} height={24} />
           </div>

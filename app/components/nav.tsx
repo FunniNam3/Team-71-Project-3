@@ -9,7 +9,7 @@ export default async function NavBar() {
   const user = session?.user;
 
   return (
-    <nav className="w-full p-3 bg-transparent">
+    <nav className="top-0 left-0 z-50 w-[calc(100%-9rem)] p-3 bg-transparent">
       <div className="w-full max-w-250 mx-auto bg-white flex justify-between gap-3 p-3 rounded-full">
         <div className="flex gap-4">
           <Link
@@ -26,7 +26,7 @@ export default async function NavBar() {
           </Link>
           <Link
             href="/Portal"
-            className="flex gap-2 text-center p-3 h-full w-fit z-10 bg-(--primary) rounded-full hover:scale-105 active:scale-95 transition-transform duration-300"
+            className="flex text-white gap-2 text-center p-3 h-full w-fit z-10 bg-(--primary) rounded-full hover:scale-105 active:scale-95 transition-transform duration-300"
           >
             <Image
               src="/Portal.svg"

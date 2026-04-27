@@ -225,7 +225,16 @@ export default function CashierPOSPage() {
     setShowDiscountPopup(false);
   }
 
-  async function handleCheckout(selectedMethod: string) {
+  function getReceiptId(json: any) {
+    return json.receipt?.id ?? json.data?.id ?? json.id ?? json.receipt_id;
+  }
+
+    async function handleCheckout(selectedMethod: string) {
+    console.log("Checkout started with payment method:", selectedMethod);
+    console.log("Selected customer:", selectedCustomer);
+    console.log("Cart items:", cartItems);
+    console.log("Cashier ID:", cashierId);
+
     setPaymentMethod(selectedMethod);
     setShowPaymentPopup(false);
 
@@ -244,46 +253,109 @@ export default function CashierPOSPage() {
       return;
     }
 
-    const receiptPayload = {
-      customer_id: selectedCustomer.id,
-      cashier_id: cashierId,
-      purchase_date: new Date().toISOString(),
-      tax,
-      discount: discountAmount,
-      payment_method: selectedMethod,
-      z_closed: false,
-      total,
-      items: cartItems,
-      discount_id: selectedDiscount?.id ?? null,
-    };
+    try {
+      const receiptPayload = {
+        customer_id: selectedCustomer.id,
+        cashier_id: cashierId,
+        purchase_date: new Date().toISOString(),
+        tax,
+        discount: discountAmount,
+        payment_method: selectedMethod,
+        z_closed: false,
+        total,
+        items: cartItems,
+        discount_id: selectedDiscount?.id ?? null,
+      };
 
-    const res = await fetch("/api/receipt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(receiptPayload),
-    });
+      console.log("Sending receipt payload:", receiptPayload);
 
-    const json = await res.json();
+      const res = await fetch("/api/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(receiptPayload),
+      });
 
-    if (!res.ok) {
-      console.error(json);
-      alert("Checkout failed.");
-      return;
+      const json = await res.json();
+
+      console.log("Receipt API status:", res.status);
+      console.log("Receipt API response:", json);
+
+      if (!res.ok) {
+        alert("Checkout failed at receipt creation.");
+        return;
+      }
+
+      const receiptId = getReceiptId(json);
+
+      console.log("Receipt ID found:", receiptId);
+
+      if (!receiptId) {
+        alert("Checkout failed: receipt ID was not returned.");
+        return;
+      }
+
+      console.log("Sending receipt items:", {
+        receipt_id: receiptId,
+        items: cartItems,
+      });
+
+      const receiptItemsRes = await fetch("/api/to_receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receipt_id: receiptId,
+          items: cartItems,
+        }),
+      });
+
+      const receiptItemsJson = await receiptItemsRes.json();
+
+      console.log("Receipt items API status:", receiptItemsRes.status);
+      console.log("Receipt items API response:", receiptItemsJson);
+
+      if (!receiptItemsRes.ok) {
+        alert("Receipt was created, but food/drink items failed to save.");
+        return;
+      }
+
+      const pointsToAdd = Math.floor(total * 10);
+
+      const pointsRes = await fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedCustomer.id,
+          pointsToAdd,
+        }),
+      });
+
+      const pointsJson = await pointsRes.json();
+
+      console.log("Points API status:", pointsRes.status);
+      console.log("Points API response:", pointsJson);
+
+      if (!pointsRes.ok) {
+        alert("Receipt was created, but customer points failed to update.");
+        return;
+      }
+
+      alert(`${selectedMethod} transaction completed.`);
+
+      setCartItems([]);
+      setSelectedDiscount(null);
+      setSelectedCustomer(null);
+      setCustomerSearch("");
+      setItemSearch("");
+      setPaymentMethod("");
+    } catch (error) {
+      console.error("Checkout crashed:", error);
+      alert("Checkout crashed. Check the console.");
     }
-
-    alert(`${selectedMethod} transaction completed.`);
-
-    setCartItems([]);
-    setSelectedDiscount(null);
-    setSelectedCustomer(null);
-    setCustomerSearch("");
-    setItemSearch("");
-    setPaymentMethod("");
   }
 
   if (loading) {
     return (
-      <div className="mt-20 text-center text-gray-500">
+      <div className="mt-20 text-center text-(--gray)">
         Loading cashier POS...
       </div>
     );
@@ -292,27 +364,27 @@ export default function CashierPOSPage() {
   return (
     <main className="flex min-h-screen #C4AF9A">
       <section className="w-[32%] min-w-85 bg-white p-5 rounded-tr-2xl">
-        <h1 className="mb-6 text-2xl font-bold text-gray-500">Checkout</h1>
+        <h1 className="mb-6 text-2xl font-bold text-(--gray)">Checkout</h1>
 
         <div className="mb-5 rounded-lg border p-4">
-          <p className="text-sm font-semibold text-gray-500">Customer</p>
-          <p className="mt-1 text-lg text-gray-500">
+          <p className="text-sm font-semibold text-(--gray)">Customer</p>
+          <p className="mt-1 text-lg text-(--gray)">
             {selectedCustomer ? selectedCustomer.name : "No customer selected"}
           </p>
           {selectedCustomer && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-(--gray)">
               Customer ID: {selectedCustomer.id}
             </p>
           )}
         </div>
 
         <div className="mb-5 rounded-lg border p-4">
-          <p className="mb-3 text-sm font-semibold text-gray-500">
+          <p className="mb-3 text-sm font-semibold text-(--gray)">
             Current Items
           </p>
 
           {cartItems.length === 0 ? (
-            <p className="text-sm text-gray-500">No items added yet.</p>
+            <p className="text-sm text-(--gray)">No items added yet.</p>
           ) : (
             <div className="space-y-3">
               {cartItems.map((item, index) => (
@@ -324,11 +396,12 @@ export default function CashierPOSPage() {
                     <div>
                       <p className="font-semibold text-gray-500">{item.name}</p>
                       <p className="text-sm text-gray-500">
-                        ${item.price.toFixed(2)}
+                        ${item.price.toFixed(2)} x {item.quantity} = $
+                        {(item.price * item.quantity).toFixed(2)}
                       </p>
 
                       {item.itemType === "drink" && (
-                        <div className="mt-2 text-xs text-gray-500">
+                        <div className="mt-2 text-xs text-(--gray)">
                           <p>Ice: {item.selectedIce}</p>
                           <p>Sweetness: {item.selectedSweetness}</p>
                           <p>Milk: {item.selectedMilk}</p>
@@ -340,7 +413,7 @@ export default function CashierPOSPage() {
 
                     <button
                       onClick={() => handleRemoveCartItem(index)}
-                      className="rounded border px-2 py-1 text-sm text-gray-500 hover:bg-gray-100"
+                      className="rounded border px-2 py-1 text-sm text-(--gray) hover:bg-gray-100"
                     >
                       Remove
                     </button>
@@ -352,28 +425,28 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="mb-5 rounded-lg border p-4">
-          <div className="mb-2 flex justify-between text-gray-500">
+          <div className="mb-2 flex justify-between text-(--gray)">
             <span>Subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
 
-          <div className="mb-2 flex justify-between text-gray-500">
+          <div className="mb-2 flex justify-between text-(--gray)">
             <span>Tax</span>
             <span>${tax.toFixed(2)}</span>
           </div>
 
-          <div className="mb-2 flex justify-between text-gray-500">
+          <div className="mb-2 flex justify-between text-(--gray)">
             <span>Discount</span>
             <span>- ${discountAmount.toFixed(2)}</span>
           </div>
 
           {selectedDiscount && (
-            <div className="mb-3 text-sm text-gray-500">
+            <div className="mb-3 text-sm text-(--gray)">
               Applied: {selectedDiscount.type}
             </div>
           )}
 
-          <div className="mt-4 flex justify-between border-t pt-3 text-lg font-bold text-gray-500">
+          <div className="mt-4 flex justify-between border-t pt-3 text-lg font-bold text-(--gray)">
             <span>Total</span>
             <span>${total.toFixed(2)}</span>
           </div>
@@ -382,14 +455,14 @@ export default function CashierPOSPage() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowDiscountPopup(true)}
-            className="w-full rounded-lg border px-4 py-3 font-semibold text-gray-500 hover:bg-gray-100"
+            className="w-full rounded-lg border px-4 py-3 font-semibold text-(--gray) hover:bg-gray-100"
           >
             Discount
           </button>
 
           <button
             onClick={() => setShowPaymentPopup(true)}
-            className="w-full rounded-lg bg-[#21A179] px-4 py-3 font-semibold text-white hover:bg-green-700"
+            className="w-full rounded-lg bg-(--primary) px-4 py-3 font-semibold text-white hover:bg-green-700"
           >
             Checkout
           </button>
@@ -398,7 +471,7 @@ export default function CashierPOSPage() {
 
       <section className="flex-1 p-6">
         <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold text-gray-500">
+          <h2 className="mb-3 text-lg font-bold text-(--gray)">
             Customer Search
           </h2>
           <input
@@ -418,12 +491,12 @@ export default function CashierPOSPage() {
                     onClick={() => handleSelectCustomer(customer)}
                     className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100 last:border-b-0"
                   >
-                    <p className="font-medium text-gray-500">{customer.name}</p>
-                    <p className="text-sm text-gray-500">ID: {customer.id}</p>
+                    <p className="font-medium text-(--gray)">{customer.name}</p>
+                    <p className="text-sm text-(--gray)">ID: {customer.id}</p>
                   </button>
                 ))
               ) : (
-                <p className="px-4 py-3 text-sm text-gray-500">
+                <p className="px-4 py-3 text-sm text-(--gray)">
                   No customers found.
                 </p>
               )}
@@ -432,7 +505,7 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold text-gray-500">
+          <h2 className="mb-3 text-lg font-bold text-(--gray)">
             Product Search
           </h2>
           <input
@@ -446,7 +519,7 @@ export default function CashierPOSPage() {
           {itemSearch.trim() && (
             <div className="mt-3 max-h-72 overflow-y-auto rounded-lg border">
               {filteredDrinks.length === 0 && filteredFoods.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-gray-500">
+                <p className="px-4 py-3 text-sm text-(--gray)">
                   No products found.
                 </p>
               ) : (
@@ -457,8 +530,8 @@ export default function CashierPOSPage() {
                       onClick={() => handleSelectDrink(drink)}
                       className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100"
                     >
-                      <p className="font-medium text-gray-500">{drink.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-(--gray)">{drink.name}</p>
+                      <p className="text-sm text-(--gray)">
                         Drink • ${Number(drink.price).toFixed(2)}
                       </p>
                     </button>
@@ -470,8 +543,8 @@ export default function CashierPOSPage() {
                       onClick={() => handleAddFood(food)}
                       className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100 last:border-b-0"
                     >
-                      <p className="font-medium text-gray-500">{food.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-(--gray)">{food.name}</p>
+                      <p className="text-sm text-(--gray)">
                         Food • ${Number(food.price).toFixed(2)}
                       </p>
                     </button>
@@ -483,12 +556,12 @@ export default function CashierPOSPage() {
         </div>
 
         <div className="rounded-xl bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-gray-500">
+          <h2 className="mb-4 text-lg font-bold text-(--gray)">
             Most Ordered Drinks
           </h2>
 
           {mostOrderedDrinks.length === 0 ? (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-(--gray)">
               No most ordered drinks found.
             </p>
           ) : (

@@ -13,7 +13,6 @@ export default function DigitalMenuBoard() {
     ...drinkItems.map((item) => ({ ...item, type: "Drink" })),
   ];
   const [loading, setLoading] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // 1. Calculate how many pages you have total
   const totalPages = Math.ceil(menuItems.length / ITEMS_PER_PAGE);
@@ -32,6 +31,7 @@ export default function DigitalMenuBoard() {
     currentPage * ITEMS_PER_PAGE,
     (currentPage + 1) * ITEMS_PER_PAGE,
   );
+
   useEffect(() => {
     setLoading(true);
 
@@ -83,36 +83,32 @@ export default function DigitalMenuBoard() {
         setLoading(false);
       });
   }, []);
+
   if (loading) {
     return (
-      <div className="text-center mt-20 text-gray-500">Loading menu...</div>
+      <div className="text-center mt-20 text-(--dark)">Loading menu...</div>
     );
   }
 
   return (
-    <div className="h-screen w-full bg-black text-white p-10 overflow-hidden">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-5xl font-bold uppercase tracking-widest">
-          Current Specials
-        </h1>
-        <div className="text-xl text-gray-400">
+    <div className="w-full bg-(--secondary) text-(--primary) p-10">
+      <div className="flex justify-between items-center mb-5 border w-full py-4 px-6 bg-white border-white rounded-full">
+        <h1 className="text-5xl font-bold uppercase">Current Specials</h1>
+        <h2 className="text-xl text-(--dark) font-bold">
           Page {currentPage + 1} of {totalPages}
-        </div>
+        </h2>
       </div>
 
       {/* The Grid */}
-      <div className="grid grid-cols-3 gap-10">
-        {displayItems.map((item) => (
-          <MenuCard key={item.id} {...item} />
+      <div className="grid grid-cols-3 gap-10 p-10 bg-white rounded bottom-1 border-4 border-(--accent) h-fit">
+        {displayItems.map((item, index) => (
+          <MenuCard key={index} {...item} />
         ))}
-      </div>
-
-      {/* Progress Bar (Visual flair) */}
-      <div
-        className="absolute bottom-0 left-0 h-2 bg-orange-500 transition-all duration-8000 ease-linear"
+        {/* Progress Bar (Visual flair) */}
+        {/* <div className="absolute left-25% h-3 bg-orange-500 transition-all duration-8000 ease-linear"
         style={{ width: "100%" }}
-        key={currentPage}
-      />
+        key={currentPage}/> */}
+      </div>
     </div>
   );
 }

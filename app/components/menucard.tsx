@@ -30,7 +30,7 @@ export default function MenuCard({
 
       {/* Text Info */}
       <h3 className="text-(--dark) text-2xl font-semibold mb-1">{name}</h3>
-      <p className="text-gray-600 text-sm grow mb-4 truncate">{description}</p>
+      <p className="text-(--gray) text-sm grow mb-4 truncate">{description}</p>
 
       {/* Price and Add Button */}
       <div className="flex justify-between items-center mt-auto">

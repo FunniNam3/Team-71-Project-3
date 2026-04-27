@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useUser } from "@auth0/nextjs-auth0/client"; 
+import { useUser } from "@auth0/nextjs-auth0/client";
 import ProductCard from "@components/ProductCard";
 import Modal from "@components/Modal";
 import CartModal from "@components/CartModal";
@@ -21,32 +21,35 @@ interface MenuItem {
   price: number;
   imageUrl: string;
   category: string;
-  type: 'Food' | 'Drink';
+  type: "Food" | "Drink";
   customizations?: Customizations;
-  instanceId?: string; 
+  instanceId?: string;
 }
 
 export default function OrderPage() {
-  const { user } = useUser(); 
-  const [dbUserId, setDbUserId] = useState<number | null>(null); 
+  const { user } = useUser();
+  const [dbUserId, setDbUserId] = useState<number | null>(null);
   const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
   const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
-  
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("most ordered");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
 
-  const menuItems = useMemo(() => [
-    ...foodItems.map(item => ({ ...item, type: 'Food' as const })),
-    ...drinkItems.map(item => ({ ...item, type: 'Drink' as const }))
-  ], [foodItems, drinkItems]);
+  const menuItems = useMemo(
+    () => [
+      ...foodItems.map((item) => ({ ...item, type: "Food" as const })),
+      ...drinkItems.map((item) => ({ ...item, type: "Drink" as const })),
+    ],
+    [foodItems, drinkItems],
+  );
 
   // Handle finding the numeric ID (Alli Qayyum -> 10)
   // FIX: Using a local variable 'userSub' to satisfy TypeScript and handle guest logic
   useEffect(() => {
-    const userSub = user?.sub; 
+    const userSub = user?.sub;
 
     if (userSub) {
       async function fetchMyId() {
@@ -54,10 +57,12 @@ export default function OrderPage() {
           const res = await fetch("/api/users");
           const json = await res.json();
           const allUsers = json.data || [];
-          
+
           // Match Auth0 sub to auth0_user_id in DB using the captured userSub
-          const matchedUser = allUsers.find((u: any) => u.auth0_user_id === userSub);
-          
+          const matchedUser = allUsers.find(
+            (u: any) => u.auth0_user_id === userSub,
+          );
+
           if (matchedUser) {
             setDbUserId(matchedUser.id);
           }
@@ -73,9 +78,14 @@ export default function OrderPage() {
   }, [user]);
 
   const handleAddToCart = (customizedItem: MenuItem) => {
-    const customizations = customizedItem.customizations || { ice: '', sugar: '', toppings: [] };
+    const customizations = customizedItem.customizations || {
+      ice: "",
+      sugar: "",
+      toppings: [],
+    };
     const cartItem: CartItem = {
-      instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+      instanceId:
+        customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
       name: customizedItem.name,
       price: customizedItem.price,
       imageUrl: customizedItem.imageUrl,
@@ -86,54 +96,77 @@ export default function OrderPage() {
       },
     };
     setCart((prev) => [...prev, cartItem]);
-    setSelectedProduct(null); 
+    setSelectedProduct(null);
   };
 
   useEffect(() => {
     setLoading(true);
-    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then(res => res.json());
-    const fetchFoods = fetch("/api/foods?allFoods=true").then(res => res.json());
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) =>
+      res.json(),
+    );
+    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) =>
+      res.json(),
+    );
 
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
         if (drinksRes.data) {
-            setDrinkItems(drinksRes.data.map((item: any, index: number) => ({
-           ...item,
-            id: item.id || item._id || `drink-${index}`,
-            imageUrl: "/Template Image.png",
-            category: item.category || "milk tea",
-          })));
+          setDrinkItems(
+            drinksRes.data.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || item._id || `drink-${index}`,
+              imageUrl: "/Template Image.png",
+              category: item.category || "milk tea",
+            })),
+          );
         }
         if (foodsRes.data) {
-          setFoodItems(foodsRes.data.map((item: any, index: number) => ({
-            ...item,
-            id: item.id || item._id || `food-${index}`,
-            imageUrl: "/Template Image.png",
-            category: "food",
-          })));
+          setFoodItems(
+            foodsRes.data.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || item._id || `food-${index}`,
+              imageUrl: "/Template Image.png",
+              category: "food",
+            })),
+          );
         }
       })
       .catch((error) => console.error("Fetch error:", error))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center mt-20 text-gray-500 font-bold">Loading menu...</div>;
+  if (loading)
+    return (
+      <div className="text-center mt-20 text-gray-500 font-bold">
+        Loading menu...
+      </div>
+    );
 
-  const categories = ["most ordered", "milk tea", "fruit tea", "specialty tea", "food"];
+  const categories = [
+    "most ordered",
+    "milk tea",
+    "fruit tea",
+    "specialty tea",
+    "food",
+  ];
 
-  const filteredItems = activeTab === "most ordered"
+  const filteredItems =
+    activeTab === "most ordered"
       ? menuItems
       : menuItems.filter((item) => item.category?.includes(activeTab));
 
   return (
-    <main className="p-8">
+    <main className="p-8 pb-36">
+      {/* Navigation Tabs */}
       <nav className="flex justify-center gap-8 mb-12 border-b border-gray-300">
         {categories.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`pb-2 text-lg transition-all ${
-              activeTab === tab ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]" : "text-gray-600 hover:text-black"
+              activeTab === tab
+                ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]"
+                : "text-gray-600 hover:text-black"
             }`}
           >
             {tab}
@@ -146,9 +179,9 @@ export default function OrderPage() {
           <ProductCard
             key={`${item.type}-${item.id}`}
             {...item}
-            onAddToCart={() => setSelectedProduct(item)} 
+            onAddToCart={() => setSelectedProduct(item)}
             onCustomize={() => setSelectedProduct(item)}
-            />
+          />
         ))}
       </div>
 
@@ -161,23 +194,25 @@ export default function OrderPage() {
       )}
 
       {cart.length > 0 && (
-        <button 
-          onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-8 right-8 bg-[#00A67E] text-white p-4 rounded-full shadow-2xl flex items-center gap-3 hover:scale-105 transition-transform z-40"
-        >
-          <div className="bg-white text-[#00A67E] w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">
-            {cart.length}
-          </div>
-          <span className="font-bold">Check Out</span>
-        </button>
+        <div className="fixed bottom-8 left-1/2 z-40 -translate-x-1/2">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="bg-[#00A67E] text-white px-12 py-5 rounded-full shadow-2xl flex items-center gap-4 hover:scale-105 transition-transform text-xl font-bold"
+          >
+            <div className="bg-white text-[#00A67E] w-9 h-9 rounded-full flex items-center justify-center font-bold text-base">
+              {cart.length}
+            </div>
+            <span>Check Out</span>
+          </button>
+        </div>
       )}
 
       {isCartOpen && (
-        <CartModal 
-          cart={cart} 
-          onClose={() => setIsCartOpen(false)} 
-          setCart={setCart} 
-          userId={dbUserId} 
+        <CartModal
+          cart={cart}
+          onClose={() => setIsCartOpen(false)}
+          setCart={setCart}
+          userId={dbUserId}
         />
       )}
     </main>

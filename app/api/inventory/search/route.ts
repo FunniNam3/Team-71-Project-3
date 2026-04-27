@@ -24,7 +24,7 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
-// will return all table lines the match the parameter enetered, 
+// will return all table lines the match the parameter enetered,
 // searches by any of the attributes in the inventory table
 export async function GET(request: Request) {
   try {
@@ -40,12 +40,12 @@ export async function GET(request: Request) {
       SELECT * FROM inventory
       WHERE
         CAST(id AS TEXT) ILIKE $1
-        OR CAST(amount AS TEXT) ILIKE $1
         OR name ILIKE $1
         OR supplier_name ILIKE $1
         OR supplier_contact ILIKE $1
+      ORDER BY id
       `,
-      [`%${q}%`]
+      [`%${q}%`],
     );
 
     return Response.json(result.rows);
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     console.error(err);
     return Response.json(
       { error: "Failed to search inventory" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

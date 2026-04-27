@@ -59,7 +59,7 @@ export default function ThemeProvider({
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className="fixed top-4 right-4 z-9999 w-10 bg-(--primary) text-white p-2 rounded-full hover:scale-105 active:scale-95 flex items-center gap-2 font-medium"
+        className="fixed top-5 right-4 z-9999 h-14 w-14 bg-(--primary) text-white p-3 rounded-full hover:scale-105 active:scale-95 flex items-center justify-center font-medium"
         aria-label={`Switch to ${theme === "original" ? "high contrast" : "original"} theme`}
         title={`Current: ${theme === "original" ? "Original" : "High Contrast"} Theme`}
       >

@@ -9,7 +9,7 @@ export default async function NavBar() {
   const user = session?.user;
 
   return (
-    <nav className="w-full p-3 bg-transparent">
+    <nav className="top-0 left-0 z-50 w-[calc(100%-9rem)] p-3 bg-transparent">
       <div className="w-full max-w-250 mx-auto bg-white flex justify-between gap-3 p-3 rounded-full">
         <div className="flex gap-4">
           <Link

@@ -46,11 +46,13 @@ export default function Home() {
               Station, making us a perfect stop between classes, after work, or
               during a night out. Address: 123 University Drive, College
               Station, TX Hours:
-              <ul>
-                <li>Monday – Thursday: 11:00 AM – 10:00 PM</li>
-                <li>Friday – Saturday: 11:00 AM – 12:00 AM</li>
-                <li>Sunday: 12:00 PM – 9:00 PM</li>
-              </ul>
+            </p>
+            <ul className="list-disc pl-5 indent-4">
+              <li>Monday – Thursday: 11:00 AM – 10:00 PM</li>
+              <li>Friday – Saturday: 11:00 AM – 12:00 AM</li>
+              <li>Sunday: 12:00 PM – 9:00 PM</li>
+            </ul>
+            <p>
               We offer dine-in, takeout, and online ordering for your
               convenience.
             </p>
@@ -73,28 +75,30 @@ export default function Home() {
             <p className="text-lg leading-relaxed text-gray-800">
               We offer a wide variety of drinks and snacks to satisfy every
               craving:
-              <ul>
-                <li>
-                  Classic Milk Teas: Black, green, and jasmine teas with creamy
-                  milk and chewy tapioca pearls
-                </li>
-                <li>
-                  Fruit Teas: Refreshing blends like mango, strawberry,
-                  passionfruit, and lychee
-                </li>
-                <li>
-                  Specialty Drinks: Brown sugar milk tea, matcha lattes, taro
-                  milk tea, and seasonal creations
-                </li>
-                <li>
-                  Toppings: Tapioca pearls, popping boba, grass jelly, aloe
-                  vera, and pudding
-                </li>
-                <li>
-                  Snacks: Light bites such as mochi, egg waffles, and crispy
-                  popcorn chicken
-                </li>
-              </ul>
+            </p>
+            <ul className="list-disc pl-5 indent-4">
+              <li>
+                Classic Milk Teas: Black, green, and jasmine teas with creamy
+                milk and chewy tapioca pearls
+              </li>
+              <li>
+                Fruit Teas: Refreshing blends like mango, strawberry,
+                passionfruit, and lychee
+              </li>
+              <li>
+                Specialty Drinks: Brown sugar milk tea, matcha lattes, taro milk
+                tea, and seasonal creations
+              </li>
+              <li>
+                Toppings: Tapioca pearls, popping boba, grass jelly, aloe vera,
+                and pudding
+              </li>
+              <li>
+                Snacks: Light bites such as mochi, egg waffles, and crispy
+                popcorn chicken
+              </li>
+            </ul>
+            <p>
               All drinks are customizable with your choice of sweetness level,
               ice level, and toppings.
             </p>

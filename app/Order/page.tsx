@@ -166,7 +166,49 @@ return menuItems.filter(item => {
     setSelectedProduct(null); 
   };
 
-  // Add "recommended" to the start of categories if weather is available
+  useEffect(() => {
+    setLoading(true);
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) =>
+      res.json(),
+    );
+    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) =>
+      res.json(),
+    );
+
+    Promise.all([fetchDrinks, fetchFoods])
+      .then(([drinksRes, foodsRes]) => {
+        if (drinksRes.data) {
+          setDrinkItems(
+            drinksRes.data.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || item._id || `drink-${index}`,
+              imageUrl: "/menu/" + String(item.name).trim() + ".png",
+              category: item.category || "milk tea",
+            })),
+          );
+        }
+        if (foodsRes.data) {
+          setFoodItems(
+            foodsRes.data.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || item._id || `food-${index}`,
+              imageUrl: "/menu/" + String(item.name).trim() + ".png",
+              category: "food",
+            })),
+          );
+        }
+      })
+      .catch((error) => console.error("Fetch error:", error))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading)
+    return (
+      <div className="text-center mt-20 text-gray-500 font-bold">
+        Loading menu...
+      </div>
+    );
+
   const categories = [
     ...(currentTemp !== null ? ["recommended"] : []),
     "most ordered", 

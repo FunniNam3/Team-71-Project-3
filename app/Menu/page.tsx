@@ -45,7 +45,7 @@ export default function DigitalMenuBoard() {
           // We transform the data to include your placeholder image path
           const itemsWithPlaceholder = res.data.map((item: any) => ({
             ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+            imageUrl: "/menu/" + String(item.name).trim() + ".png", // This must match your public folder filename exactly
           }));
 
           setDrinkItems(itemsWithPlaceholder);
@@ -68,7 +68,7 @@ export default function DigitalMenuBoard() {
           // We transform the data to include your placeholder image path
           const itemsWithPlaceholder = res.data.map((item: any) => ({
             ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+            imageUrl: "/menu/" + String(item.name).trim() + ".png", // This must match your public folder filename exactly
           }));
 
           setFoodItems(itemsWithPlaceholder);
@@ -92,7 +92,7 @@ export default function DigitalMenuBoard() {
 
   return (
     <div className="w-full bg-(--secondary) text-(--primary) p-10">
-      <div className="flex justify-between items-center mb-5 border w-full py-4 px-6 bg-white border-white rounded-full">
+      <div className="flex justify-between items-center mb-5 w-full py-4 px-6 bg-white rounded-full">
         <h1 className="text-5xl font-bold uppercase">Current Specials</h1>
         <h2 className="text-xl text-(--dark) font-bold">
           Page {currentPage + 1} of {totalPages}
@@ -100,7 +100,7 @@ export default function DigitalMenuBoard() {
       </div>
 
       {/* The Grid */}
-      <div className="grid grid-cols-3 gap-10 p-10 bg-white rounded bottom-1 border-4 border-(--accent) h-fit">
+      <div className="grid grid-cols-3 gap-10 p-10 bg-white rounded-4xl bottom-1 h-fit">
         {displayItems.map((item, index) => (
           <MenuCard key={index} {...item} />
         ))}

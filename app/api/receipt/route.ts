@@ -1,110 +1,97 @@
 import { NextResponse } from "next/server";
-import { pool } from "@/lib/db"; //to connect  to out db
-import { auth0 } from "@/lib/auth0";
+import { pool } from "@/lib/db"; 
 
-/*
-HTTP Status Codes
-
-200 - OK (success)
-201 - Created (new resource created)
-400 - Bad Request (invalid input)
-401 - Unauthorized (not logged in)
-403 - Forbidden (no permission)
-404 - Not Found (resource doesn’t exist)
-500 - Server Error (something broke)
-*/
-
-/*
-HTTP Methods
-
-GET    - Read data
-POST   - Create new data
-PUT    - Replace entire resource
-PATCH  - Update part of resource
-DELETE - Remove data
-*/
-
-// display all of the receipt table
-export async function GET() {
-  try {
-    const result = await pool.query("SELECT * FROM receipt");
-
-    return Response.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    return Response.json(
-      { error: "Failed to fetch receipts" },
-      { status: 500 }
-    );
-  }
-}
-
-// add a new recipt entry
 export async function POST(request: Request) {
+  const client = await pool.connect();
   try {
     const body = await request.json();
+    const { cart, payment_method, total, tax, discount, customer_id, points } = body;
 
-    const {
-      customer_id,
-      cashier_id,
-      purchase_date,
-      tax,
-      discount,
-      payment_method,
-      z_closed,
-      total,
-    } = body;
+    await client.query("BEGIN");
 
-    // basic validation
-    if (!cashier_id || !payment_method || total == null) {
-      return Response.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+    // 1. Insert into receipt table
+    // Using customer_id || null allows guests to checkout without breaking FK constraints
+    const receiptRes = await client.query(
+      `INSERT INTO receipt (customer_id, cashier_id, tax, discount, payment_method, total, purchase_date)
+       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE) RETURNING id`,
+      [customer_id || null, 1, tax, discount || 0, payment_method, total]
+    );
+    
+    const receiptId = receiptRes.rows[0].id;
+
+    // 2. Insert items into bridging tables
+    for (const item of cart) {
+      /**
+       * CHANGE: Normalize category to lowercase.
+       * This prevents "French fries" from failing if the category is "Food" instead of "food".
+       */
+      const itemCategory = item.category?.toLowerCase();
+
+      if (itemCategory === "food") {
+        // Find the ID in the food table based on the name
+        const foodLookup = await client.query("SELECT id FROM food WHERE name = $1", [item.name]);
+        const foodId = foodLookup.rows[0]?.id;
+
+        if (foodId) {
+          /**
+           * CHANGE: Column name alignment.
+           * Updated from 'notes' to 'modifiers' to match your 'food_to_receipt' table schema.
+           */
+          await client.query(
+            `INSERT INTO food_to_receipt (receipt_id, food_id, modifiers, quantity)
+             VALUES ($1, $2, $3, $4)`,
+            [
+              receiptId, 
+              foodId, 
+              item.customizations.notes || "", 
+              1
+            ]
+          );
+        }
+      } else {
+        // Drink logic
+        const drinkLookup = await client.query("SELECT id FROM drink WHERE name = $1", [item.name]);
+        const drinkId = drinkLookup.rows[0]?.id;
+
+        if (drinkId) {
+          // Convert sugar string (e.g., "100%") to integer (100)
+          const sweetnessInt = parseInt(item.customizations.sugar || "100", 10);
+          
+          await client.query(
+            `INSERT INTO drink_to_receipt (receipt_id, drink_id, ice_level, sweetness, boba, quantity)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [
+              receiptId, 
+              drinkId, 
+              item.customizations.ice || "Regular", 
+              isNaN(sweetnessInt) ? 100 : sweetnessInt, 
+              item.customizations.toppings?.includes("Boba") || false, 
+              1
+            ]
+          );
+        }
+      }
+    }
+
+    /**
+     * CHANGE: Added check for customer_id.
+     * Only attempts to update points if a valid user ID is present (skips for guests).
+     */
+    if (points && customer_id) {
+      await client.query(
+        "UPDATE users SET points = points + $1 WHERE id = $2",
+        [points, customer_id]
       );
     }
 
-    const result = await pool.query(
-      `
-      INSERT INTO receipt (
-        customer_id,
-        cashier_id,
-        purchase_date,
-        tax,
-        discount,
-        payment_method,
-        z_closed,
-        total
-      )
-      VALUES (
-        $1,
-        $2,
-        COALESCE($3, CURRENT_TIMESTAMP),
-        $4,
-        $5,
-        $6,
-        COALESCE($7, false),
-        $8
-      )
-      RETURNING *
-      `,
-      [
-        customer_id ?? null,
-        cashier_id,
-        purchase_date ?? null,
-        tax ?? 0,
-        discount ?? 0,
-        payment_method,
-        z_closed ?? null,
-        total,
-      ]
-    );
+    await client.query("COMMIT");
+    return Response.json({ id: receiptId });
 
-    return Response.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    return Response.json(
-      { error: "Failed to insert receipt" },
-      { status: 500 }
-    );
+    await client.query("ROLLBACK");
+    console.error("DATABASE ERROR:", err);
+    return Response.json({ error: "Database transaction failed" }, { status: 500 });
+  } finally {
+    client.release();
   }
 }

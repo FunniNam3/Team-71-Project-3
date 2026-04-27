@@ -1,29 +1,15 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db"; 
 
-// Display all receipts
-export async function GET() {
-  try {
-    const result = await pool.query("SELECT * FROM receipt");
-    return Response.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    return Response.json({ error: "Failed to fetch receipts" }, { status: 500 });
-  }
-}
-
-// Process new purchase
 export async function POST(request: Request) {
   const client = await pool.connect();
   try {
     const body = await request.json();
-    // Destructure data sent from CartModal
     const { cart, payment_method, total, tax, discount, customer_id, points } = body;
 
     await client.query("BEGIN");
 
-    // 1. Insert into receipt table
-    // Uses CURRENT_DATE to store YYYY-MM-DD without time
+    // 1. Insert into receipt table (Date only: YYYY-MM-DD)
     const receiptRes = await client.query(
       `INSERT INTO receipt (customer_id, cashier_id, tax, discount, payment_method, total, purchase_date)
        VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE) RETURNING id`,
@@ -32,7 +18,7 @@ export async function POST(request: Request) {
     
     const receiptId = receiptRes.rows[0].id;
 
-    // 2. Insert items into bridging tables using receipt_id
+    // 2. Insert items into bridging tables
     for (const item of cart) {
       if (item.category === "food") {
         const foodLookup = await client.query("SELECT id FROM food WHERE name = $1", [item.name]);
@@ -50,14 +36,17 @@ export async function POST(request: Request) {
         const drinkId = drinkLookup.rows[0]?.id;
 
         if (drinkId) {
+          // CLEANING DATA: Convert "100%" (string) to 100 (int) for your DB column
+          const sweetnessInt = parseInt(item.customizations.sugar || "100", 10);
+
           await client.query(
-            `INSERT INTO drink_to_receipt (receipt_id, drink_id, ice_level, sweetness_level, boba, quantity)
+            `INSERT INTO drink_to_receipt (receipt_id, drink_id, ice_level, sweetness, boba, quantity)
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [
               receiptId, 
               drinkId, 
               item.customizations.ice, 
-              item.customizations.sugar, 
+              sweetnessInt, // Now an Integer
               item.customizations.toppings.includes("Boba"), 
               1
             ]
@@ -66,7 +55,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 3. Update the specific user's points in the users table
+    // 3. Update the specific user's points
     if (points && customer_id) {
       await client.query(
         "UPDATE users SET points = points + $1 WHERE id = $2",

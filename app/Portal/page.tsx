@@ -44,6 +44,15 @@ export default function Portal() {
           Cashier Page{" "}
           <small className="text-xs">You have to be logged in to access</small>
         </Link>
+        <Link
+          className={
+            LinkStyle +
+            " hover:scale-105 active:scale-95 transition-transform duration-300"
+          }
+          href="/Menu"
+        >
+          Menu Page{" "}
+        </Link>
       </div>
       {/* <div className="flex flex-col gap-3 p-3 bg-(--primary) rounded-3xl w-fit mx-auto">
         <div className="flex flex-col gap-1">

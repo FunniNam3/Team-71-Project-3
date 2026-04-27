@@ -115,7 +115,7 @@ export default function OrderPage() {
             drinksRes.data.map((item: any, index: number) => ({
               ...item,
               id: item.id || item._id || `drink-${index}`,
-              imageUrl: "/Template Image.png",
+              imageUrl: "/menu/" + String(item.name).trim() + ".png",
               category: item.category || "milk tea",
             })),
           );
@@ -125,7 +125,7 @@ export default function OrderPage() {
             foodsRes.data.map((item: any, index: number) => ({
               ...item,
               id: item.id || item._id || `food-${index}`,
-              imageUrl: "/Template Image.png",
+              imageUrl: "/menu/" + String(item.name).trim() + ".png",
               category: "food",
             })),
           );

@@ -45,7 +45,7 @@ export default function DigitalMenuBoard() {
           // We transform the data to include your placeholder image path
           const itemsWithPlaceholder = res.data.map((item: any) => ({
             ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+            imageUrl: "/menu/" + String(item.name).trim() + ".png", // This must match your public folder filename exactly
           }));
 
           setDrinkItems(itemsWithPlaceholder);
@@ -68,7 +68,7 @@ export default function DigitalMenuBoard() {
           // We transform the data to include your placeholder image path
           const itemsWithPlaceholder = res.data.map((item: any) => ({
             ...item,
-            imageUrl: "/Template Image.png", // This must match your public folder filename exactly
+            imageUrl: "/menu/" + String(item.name).trim() + ".png", // This must match your public folder filename exactly
           }));
 
           setFoodItems(itemsWithPlaceholder);

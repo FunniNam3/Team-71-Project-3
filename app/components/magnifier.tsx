@@ -133,7 +133,7 @@ function LensMirror({
       lensRef.current.style.webkitMaskImage = `radial-gradient(circle ${lensRadius}px at ${x}px ${y}px, black 100%, transparent 100%)`;
 
       mirrorRef.current.style.transform = `scale(${zoom})`;
-      mirrorRef.current.style.transformOrigin = `${x}px ${y}px`;
+      mirrorRef.current.style.transformOrigin = `${x}px ${y + window.scrollY * 2}px`;
 
       frameId = requestAnimationFrame(update);
     };

@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import ProductCard from "@components/ProductCard";
 import Modal from "@components/Modal";
 import CartModal from "@components/CartModal";
 import { CartItem } from "@components/CartModal";
 
 // 1. THE "STRUCTS" (Interfaces)
-
 interface Customizations {
   ice: string;
   sugar: string;
@@ -21,89 +21,139 @@ interface MenuItem {
   price: number;
   imageUrl: string;
   category: string;
-  type: 'Food' | 'Drink';
-  // These are added only when the item is in the cart
+  type: "Food" | "Drink";
   customizations?: Customizations;
-  instanceId?: string; 
+  instanceId?: string;
 }
 
 export default function OrderPage() {
+  const { user } = useUser();
+  const [dbUserId, setDbUserId] = useState<number | null>(null);
   const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
   const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
-  
-  // 2. THE CART STATE (The "Memory" for your checkout)
+
   const [cart, setCart] = useState<CartItem[]>([]);
-  
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("most ordered");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
 
-  const menuItems = useMemo(() => [
-    ...foodItems.map(item => ({ ...item, type: 'Food' as const })),
-    ...drinkItems.map(item => ({ ...item, type: 'Drink' as const }))
-  ], [foodItems, drinkItems]);
+  const menuItems = useMemo(
+    () => [
+      ...foodItems.map((item) => ({ ...item, type: "Food" as const })),
+      ...drinkItems.map((item) => ({ ...item, type: "Drink" as const })),
+    ],
+    [foodItems, drinkItems],
+  );
 
-  // 3. THE HANDLER (Saves the customized drink to the cart)
-  // ...existing code...
+  // Handle finding the numeric ID (Alli Qayyum -> 10)
+  // FIX: Using a local variable 'userSub' to satisfy TypeScript and handle guest logic
+  useEffect(() => {
+    const userSub = user?.sub;
 
-// 3. THE HANDLER (Saves the customized drink to the cart)
-const handleAddToCart = (customizedItem: MenuItem) => {
-  const customizations = customizedItem.customizations || { ice: '', sugar: '', toppings: [] };
-  const cartItem: CartItem = {
-    instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
-    name: customizedItem.name,
-    price: customizedItem.price,
-    imageUrl: customizedItem.imageUrl,
-    customizations: {
-      ice: customizations.ice,
-      sugar: customizations.sugar,
-      toppings: customizations.toppings,
-    },
+    if (userSub) {
+      async function fetchMyId() {
+        try {
+          const res = await fetch("/api/users");
+          const json = await res.json();
+          const allUsers = json.data || [];
+
+          // Match Auth0 sub to auth0_user_id in DB using the captured userSub
+          const matchedUser = allUsers.find(
+            (u: any) => u.auth0_user_id === userSub,
+          );
+
+          if (matchedUser) {
+            setDbUserId(matchedUser.id);
+          }
+        } catch (err) {
+          console.error("Failed to find user ID", err);
+        }
+      }
+      fetchMyId();
+    } else {
+      // If user logs out or isn't logged in, reset to null for Guest Mode
+      setDbUserId(null);
+    }
+  }, [user]);
+
+  const handleAddToCart = (customizedItem: MenuItem) => {
+    const customizations = customizedItem.customizations || {
+      ice: "",
+      sugar: "",
+      toppings: [],
+    };
+    const cartItem: CartItem = {
+      instanceId:
+        customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+      name: customizedItem.name,
+      price: customizedItem.price,
+      imageUrl: customizedItem.imageUrl,
+      customizations: {
+        ice: customizations.ice,
+        sugar: customizations.sugar,
+        toppings: customizations.toppings,
+      },
+    };
+    setCart((prev) => [...prev, cartItem]);
+    setSelectedProduct(null);
   };
-  setCart((prev) => [...prev, cartItem]);
-  setSelectedProduct(null); // Close the customization modal
-};
 
-// ...existing code...
   useEffect(() => {
     setLoading(true);
-    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then(res => res.json());
-    const fetchFoods = fetch("/api/foods?allFoods=true").then(res => res.json());
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) =>
+      res.json(),
+    );
+    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) =>
+      res.json(),
+    );
 
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
         if (drinksRes.data) {
-            setDrinkItems(drinksRes.data.map((item: any, index: number) => ({
-           ...item,
-            id: item.id || item._id || `drink-${index}`,
-            imageUrl: "/Template Image.png",
-            category: item.category || "milk tea",
-          })));
+          setDrinkItems(
+            drinksRes.data.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || item._id || `drink-${index}`,
+              imageUrl: "/Template Image.png",
+              category: item.category || "milk tea",
+            })),
+          );
         }
         if (foodsRes.data) {
-          setFoodItems(foodsRes.data.map((item: any, index: number) => ({
-            ...item,
-            id: item.id || item._id || `food-${index}`, // Ensure there's a unique ID
-            imageUrl: "/Template Image.png",
-            category: "food",
-          })));
+          setFoodItems(
+            foodsRes.data.map((item: any, index: number) => ({
+              ...item,
+              id: item.id || item._id || `food-${index}`,
+              imageUrl: "/Template Image.png",
+              category: "food",
+            })),
+          );
         }
       })
       .catch((error) => console.error("Fetch error:", error))
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="text-center mt-20 text-gray-500">Loading menu...</div>;
+  if (loading)
+    return (
+      <div className="text-center mt-20 text-gray-500 font-bold">
+        Loading menu...
+      </div>
+    );
 
-  const categories = ["most ordered", "milk tea", "fruit tea", "specialty tea", "food"];
+  const categories = [
+    "most ordered",
+    "milk tea",
+    "fruit tea",
+    "specialty tea",
+    "food",
+  ];
 
-  const filteredItems = activeTab === "most ordered"
+  const filteredItems =
+    activeTab === "most ordered"
       ? menuItems
       : menuItems.filter((item) => item.category?.includes(activeTab));
-    console.log("Current Tab:", activeTab);
-    console.log("All Items:", menuItems);
-    console.log("Filtered Results:", filteredItems);
 
   return (
     <main className="p-8 pb-36">
@@ -114,7 +164,9 @@ const handleAddToCart = (customizedItem: MenuItem) => {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`pb-2 text-lg transition-all ${
-              activeTab === tab ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]" : "text-gray-600 hover:text-black"
+              activeTab === tab
+                ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]"
+                : "text-gray-600 hover:text-black"
             }`}
           >
             {tab}
@@ -122,29 +174,25 @@ const handleAddToCart = (customizedItem: MenuItem) => {
         ))}
       </nav>
 
-      {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filteredItems.map((item) => (
           <ProductCard
-            key={item.id}
+            key={`${item.type}-${item.id}`}
             {...item}
-            // Only open the modal. Do NOT call setCart here.
-            onAddToCart={() => setSelectedProduct(item)} 
+            onAddToCart={() => setSelectedProduct(item)}
             onCustomize={() => setSelectedProduct(item)}
-            />
+          />
         ))}
       </div>
 
-      {/* ITEM CUSTOMIZATION MODAL */}
       {selectedProduct && (
         <Modal
           item={selectedProduct}
           onClose={() => setSelectedProduct(null)}
-          onConfirm={handleAddToCart} // This is the connection!
+          onConfirm={handleAddToCart}
         />
       )}
 
-      {/* FLOATING CHECKOUT BUTTON */}
       {cart.length > 0 && (
         <div className="fixed bottom-8 left-1/2 z-40 -translate-x-1/2">
           <button
@@ -159,12 +207,12 @@ const handleAddToCart = (customizedItem: MenuItem) => {
         </div>
       )}
 
-      {/* CHECKOUT LIST MODAL */}
       {isCartOpen && (
-        <CartModal 
-          cart={cart} 
-          onClose={() => setIsCartOpen(false)} 
-          setCart={setCart} 
+        <CartModal
+          cart={cart}
+          onClose={() => setIsCartOpen(false)}
+          setCart={setCart}
+          userId={dbUserId}
         />
       )}
     </main>

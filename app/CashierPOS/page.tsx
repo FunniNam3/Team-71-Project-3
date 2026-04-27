@@ -59,7 +59,7 @@ export default function CashierPOSPage() {
     fetch("/api/login")
       .then((result) => result.json())
       .then((res) => {
-        if (res.role !== "cashier") {
+        if (res.role !== "cashier" && res.role !== "rev") {
           router.push("/Portal");
         }
       });
@@ -229,7 +229,7 @@ export default function CashierPOSPage() {
     return json.receipt?.id ?? json.data?.id ?? json.id ?? json.receipt_id;
   }
 
-    async function handleCheckout(selectedMethod: string) {
+  async function handleCheckout(selectedMethod: string) {
     console.log("Checkout started with payment method:", selectedMethod);
     console.log("Selected customer:", selectedCustomer);
     console.log("Cart items:", cartItems);

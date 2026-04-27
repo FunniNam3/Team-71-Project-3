@@ -45,7 +45,7 @@ export default function Portal() {
           <small className="text-xs">You have to be logged in to access</small>
         </Link>
       </div>
-      <div className="flex flex-col gap-3 p-3 bg-(--primary) rounded-3xl w-fit mx-auto">
+      {/* <div className="flex flex-col gap-3 p-3 bg-(--primary) rounded-3xl w-fit mx-auto">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold">Manager account</h1>
           <p>
@@ -70,7 +70,7 @@ export default function Portal() {
             <span className="font-bold">Password:</span> Cu$t0mer
           </p>
         </div>
-      </div>
+      </div> */}
     </main>
   );
 }

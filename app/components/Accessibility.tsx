@@ -69,7 +69,7 @@ export default function AccessibilityProvider({
         >
           <Image
             src="/plus-icon.svg"
-            alt="Smaller"
+            alt="Close Accessibility"
             width={20}
             height={20}
             className="w-full h-auto rotate-45"

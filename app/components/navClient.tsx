@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export default function NavClient({ user }: { user: User | undefined }) {
   const LinkStyle =
-    "flex gap-2 text-white m-auto bg-(--primary) h-fit w-fit px-6 py-3 rounded-full";
+    "flex gap-2 text-white m-auto h-fit w-fit px-6 py-3 rounded-full";
 
   const [role, setRole] = useState();
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
 
   return (
     <div className="w-fit flex gap-4">
-      <Link className={LinkStyle} href="/Order">
+      <Link className={LinkStyle + "bg-(--primary)"} href="/Order">
         <Image
           className="h-5 w-auto"
           src="/Cart.svg"
@@ -31,7 +31,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
       </Link>
 
       {role && role === "manager" ? (
-        <Link className={LinkStyle} href="/Manager">
+        <Link className={LinkStyle + "bg-(--primary)"} href="/Manager">
           <Image
             className="h-5 w-auto"
             src="/Suitcase.svg"
@@ -43,7 +43,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
         </Link>
       ) : (
         role === "cashier" && (
-          <Link className={LinkStyle} href="/CashierPOS">
+          <Link className={LinkStyle + "bg-(--primary)"} href="/CashierPOS">
             <Image
               className="h-5 w-auto"
               src="/Money.svg"
@@ -56,7 +56,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
         )
       )}
       {!user && (
-        <Link className={LinkStyle} href="/auth/login">
+        <Link className={LinkStyle + "bg-(--primary)"} href="/auth/login">
           <Image
             className="h-5 w-auto"
             src="/Login.svg"
@@ -69,7 +69,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
       )}
       {user && (
         <>
-          <Link className={LinkStyle} href="/Profile">
+          <Link className={LinkStyle + "bg-(--primary)"} href="/Profile">
             <Image
               className="h-5 w-auto"
               src="/User.svg"
@@ -79,7 +79,7 @@ export default function NavClient({ user }: { user: User | undefined }) {
             />
             {user.given_name ? user.given_name : "User"}
           </Link>
-          <Link className={LinkStyle} href="/auth/logout">
+          <Link className={LinkStyle + "bg-(--primary)"} href="/auth/logout">
             <Image
               className="h-5 w-auto"
               src="/Logout.svg"

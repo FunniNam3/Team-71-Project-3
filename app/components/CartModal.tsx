@@ -142,7 +142,7 @@ export default function CartModal({
               ))}
             </div>
 
-            <div className="p-6 bg-gray-50">
+            <div className="p-6 bg-(--gray)">
               <div className="flex justify-between items-center mb-6">
                 <span className="text-black font-medium">Total Amount</span>
                 <span className="text-3xl font-bold text-black">
@@ -156,7 +156,7 @@ export default function CartModal({
               <button
                 disabled={cart.length === 0}
                 onClick={() => setView("payment")}
-                className="w-full bg-[#00A67E] text-white py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 disabled:bg-gray-300"
+                className="w-full bg-(--primary) text-white py-4 rounded-2xl font-bold text-lg shadow-lg active:scale-95 disabled:bg-(--gray)"
               >
                 Confirm Order
               </button>
@@ -181,7 +181,7 @@ export default function CartModal({
               <option value="Check">Check</option>
             </select>
 
-            <div className="min-h-[140px]">
+            <div className="min-h-35">
               {paymentMethod === "Card" && (
                 <div className="space-y-3 animate-in fade-in duration-300">
                   <input
@@ -201,7 +201,7 @@ export default function CartModal({
                 </div>
               )}
               {paymentMethod === "Cash" && (
-                <p className="p-4 bg-gray-50 rounded-xl text-sm border text-black">
+                <p className="p-4 bg-(--gray) rounded-xl text-sm border text-black">
                   Please pay at the counter. Points will be added upon
                   completion.
                 </p>
@@ -218,7 +218,7 @@ export default function CartModal({
               <button
                 onClick={handleConfirmPayment}
                 disabled={paymentMethod === "Payment Method" || isSubmitting}
-                className="flex-1 py-3 rounded-xl font-bold text-white bg-[#00A67E] disabled:bg-gray-300"
+                className="flex-1 py-3 rounded-xl font-bold text-white bg-(--primary) disabled:bg-(--gray)"
               >
                 {isSubmitting ? "Processing..." : "Finish Purchase"}
               </button>
@@ -228,15 +228,15 @@ export default function CartModal({
 
         {/* VIEW 3: RECEIPT */}
         {view === "receipt" && (
-          <div className="p-8 text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-[#00A67E] text-white flex items-center justify-center mx-auto text-3xl font-bold">
+          <div className="p-8 text-center space-y-6 overflow-y-auto">
+            <div className="w-16 h-16 rounded-full bg-(--primary) text-white flex items-center justify-center mx-auto text-3xl font-bold">
               ✓
             </div>
             <h2 className="text-2xl font-bold uppercase text-black">
               Order Confirmed
             </h2>
 
-            <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-300 text-left font-mono text-sm text-black">
+            <div className="bg-(--gray)/20 p-6 rounded-2xl border-2 border-dashed border-gray-300 text-left font-mono text-sm text-black">
               <p className="text-center font-bold mb-4 border-b pb-2 text-black">
                 OFFICIAL RECEIPT
               </p>

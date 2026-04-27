@@ -106,7 +106,7 @@ const handleAddToCart = (customizedItem: MenuItem) => {
     console.log("Filtered Results:", filteredItems);
 
   return (
-    <main className="p-8">
+    <main className="p-8 pb-36">
       {/* Navigation Tabs */}
       <nav className="flex justify-center gap-8 mb-12 border-b border-gray-300">
         {categories.map((tab) => (
@@ -146,15 +146,17 @@ const handleAddToCart = (customizedItem: MenuItem) => {
 
       {/* FLOATING CHECKOUT BUTTON */}
       {cart.length > 0 && (
-        <button 
-          onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-8 right-8 bg-[#00A67E] text-white p-4 rounded-full shadow-2xl flex items-center gap-3 hover:scale-105 transition-transform z-40"
-        >
-          <div className="bg-white text-[#00A67E] w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">
-            {cart.length}
-          </div>
-          <span className="font-bold">Check Out</span>
-        </button>
+        <div className="fixed bottom-8 left-1/2 z-40 -translate-x-1/2">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="bg-[#00A67E] text-white px-12 py-5 rounded-full shadow-2xl flex items-center gap-4 hover:scale-105 transition-transform text-xl font-bold"
+          >
+            <div className="bg-white text-[#00A67E] w-9 h-9 rounded-full flex items-center justify-center font-bold text-base">
+              {cart.length}
+            </div>
+            <span>Check Out</span>
+          </button>
+        </div>
       )}
 
       {/* CHECKOUT LIST MODAL */}

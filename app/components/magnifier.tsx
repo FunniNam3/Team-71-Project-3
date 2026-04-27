@@ -37,7 +37,7 @@ export default function LensProvider({
       {/* Accessibility toggle */}
       <button
         onClick={() => setEnabled((v) => !v)}
-        className={`fixed top-4 left-4 w-10 z-9999 ${enabled ? "bg-(--accent)" : "bg-(--primary)"} text-white p-2 rounded-full hover:scale-110 transition`}
+        className={`fixed top-5 right-20 z-9999 h-14 w-14 ${enabled ? "bg-(--accent)" : "bg-(--primary)"} text-white p-3 rounded-full hover:scale-110 transition flex items-center justify-center`}
         aria-label={
           enabled ? "Disable magnifying glass" : "Enable magnifying glass"
         }

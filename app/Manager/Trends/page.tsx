@@ -457,13 +457,6 @@ export default function TrendsPage() {
 
   return (
     <div className="my-10">
-      <Link
-        href="/Manager"
-        className="px-6 py-4 bg-(--primary) text-white rounded-full mx-4"
-      >
-        {" "}
-        Back to Manager Page
-      </Link>
       <div>
         {!viewCalendar && (
           <div className="flex flex-wrap justify-center border-3 m-auto px-1.5 py-0.75 gap-2 bg-white rounded-full w-fit h-fit border-white">

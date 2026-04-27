@@ -64,3 +64,55 @@ export async function GET(request: Request) {
     );
   }
 }
+
+//update point values in teh users table 
+export async function PATCH(request: Request) {
+  try {
+    const body = await request.json();
+
+    const { id, pointsToAdd } = body;
+
+    if (!id) {
+      return Response.json(
+        { error: "User id is required" },
+        { status: 400 },
+      );
+    }
+
+    if (pointsToAdd === undefined || pointsToAdd === null) {
+      return Response.json(
+        { error: "pointsToAdd is required" },
+        { status: 400 },
+      );
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET points = COALESCE(points, 0) + $1
+      WHERE id = $2
+      RETURNING id, name, email, role, points
+      `,
+      [pointsToAdd, id],
+    );
+
+    if (result.rows.length === 0) {
+      return Response.json(
+        { error: "User not found" },
+        { status: 404 },
+      );
+    }
+
+    return Response.json({
+      message: "User points updated successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Failed to update user points:", error);
+
+    return Response.json(
+      { error: "Failed to update user points" },
+      { status: 500 },
+    );
+  }
+}

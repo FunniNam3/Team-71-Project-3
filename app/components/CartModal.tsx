@@ -62,7 +62,7 @@ export default function CartModal({
           tax: tax.toFixed(2),
           total: total.toFixed(2),
           points: points,
-          customer_id: 1, //userId, // Use the actual user ID here
+          customer_id: userId, //userId, // Use the actual user ID here
           discount: 0,
         }),
       });

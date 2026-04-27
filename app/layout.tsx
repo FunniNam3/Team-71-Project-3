@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import NavBar from "./components/nav";
-import ThemeProvider from "@components/Contrast";
-import LensProvider from "./components/magnifier";
+import AccessibilityProvider from "./components/Accessibility";
 import Script from "next/script";
 
 export const metadata: Metadata = {
@@ -18,12 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <ThemeProvider>
-          <LensProvider>
-            <NavBar />
-            {children}
-          </LensProvider>
-        </ThemeProvider>
+        <AccessibilityProvider>
+          <NavBar />
+          {children}
+        </AccessibilityProvider>
         <Script
           src="https://elfsightcdn.com/platform.js"
           strategy="afterInteractive"

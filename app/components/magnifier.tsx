@@ -5,10 +5,11 @@ import Image from "next/image";
 
 export default function LensProvider({
   children,
+  enabled,
 }: {
   children: React.ReactNode;
+  enabled: boolean;
 }) {
-  const [enabled, setEnabled] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const sourceRef = useRef<HTMLDivElement>(null);
@@ -34,24 +35,6 @@ export default function LensProvider({
 
   return (
     <>
-      {/* Accessibility toggle */}
-      <button
-        onClick={() => setEnabled((v) => !v)}
-        className={`fixed top-5 right-20 z-9999 h-14 w-14 ${enabled ? "bg-(--accent)" : "bg-(--primary)"} text-white p-3 rounded-full hover:scale-110 transition flex items-center justify-center`}
-        aria-label={
-          enabled ? "Disable magnifying glass" : "Enable magnifying glass"
-        }
-        title="Press to toggle magnifying glass for accessibility"
-      >
-        <Image
-          src="/Magnify.svg"
-          alt="Magnifying Glass"
-          width={20}
-          height={20}
-          className="w-full h-auto"
-        />
-      </button>
-
       {/* SOURCE DOM */}
       <div ref={sourceRef}>{children}</div>
 

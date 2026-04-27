@@ -33,9 +33,8 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
 
   // 5. Dynamic Options based on type
   const drinkToppings = [
-    { id: "boba", name: "Boba", price: 0.5 },
-    { id: "jelly", name: "Lychee Jelly", price: 0.5 },
-    { id: "pudding", name: "Custard Pudding", price: 0.75 },
+    { id: "t", name: "yes", price: 0.5 },
+    { id: "f", name: "No", price: 0.0 },
   ];
 
   const foodExtras = [
@@ -92,7 +91,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Ice Level</h4>
               <div className="flex gap-2">
-                {["None", "Less", "Regular", "Extra"].map((level) => (
+                {["Hot Drink", "None", "Less", "Regular", "Extra"].map((level) => (
                   <button
                     key={level}
                     onClick={() => setIce(level)}
@@ -125,6 +124,14 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                   </button>
                 ))}
               </div>
+
+            </div>
+            <div className="mb-6">
+              <div className="font-bold mb-2 text-gray-800">Quantity</div>
+              
+              <input className = "flex items-center gap-2 border border-gray-300 rounded px-2 py-1" type="number" placeholder="1"  min="1" />
+              
+
             </div>
           </>
         )}
@@ -132,7 +139,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
         {/* --- SHARED TOPPINGS SECTION --- */}
         <div className="mb-6">
           <h4 className="font-bold mb-2 text-gray-800">
-            {isFood ? "Add Extras" : "Add Toppings"}
+            {isFood ? "Add Extras" : "Add Boba/Jelly"}
           </h4>
           <div className="space-y-2">
             {currentOptions.map((t) => (

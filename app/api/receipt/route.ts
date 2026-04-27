@@ -9,7 +9,8 @@ export async function POST(request: Request) {
 
     await client.query("BEGIN");
 
-    // 1. Insert into receipt table (Date only: YYYY-MM-DD)
+    // 1. Insert into receipt table
+    // Using customer_id || null allows guests to checkout without breaking FK constraints
     const receiptRes = await client.query(
       `INSERT INTO receipt (customer_id, cashier_id, tax, discount, payment_method, total, purchase_date)
        VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE) RETURNING id`,
@@ -20,34 +21,51 @@ export async function POST(request: Request) {
 
     // 2. Insert items into bridging tables
     for (const item of cart) {
-      if (item.category === "food") {
+      /**
+       * CHANGE: Normalize category to lowercase.
+       * This prevents "French fries" from failing if the category is "Food" instead of "food".
+       */
+      const itemCategory = item.category?.toLowerCase();
+
+      if (itemCategory === "food") {
+        // Find the ID in the food table based on the name
         const foodLookup = await client.query("SELECT id FROM food WHERE name = $1", [item.name]);
         const foodId = foodLookup.rows[0]?.id;
 
         if (foodId) {
+          /**
+           * CHANGE: Column name alignment.
+           * Updated from 'notes' to 'modifiers' to match your 'food_to_receipt' table schema.
+           */
           await client.query(
-            `INSERT INTO food_to_receipt (receipt_id, food_id, notes, quantity)
+            `INSERT INTO food_to_receipt (receipt_id, food_id, modifiers, quantity)
              VALUES ($1, $2, $3, $4)`,
-            [receiptId, foodId, item.customizations.notes, 1]
+            [
+              receiptId, 
+              foodId, 
+              item.customizations.notes || "", 
+              1
+            ]
           );
         }
       } else {
+        // Drink logic
         const drinkLookup = await client.query("SELECT id FROM drink WHERE name = $1", [item.name]);
         const drinkId = drinkLookup.rows[0]?.id;
 
         if (drinkId) {
-          // CLEANING DATA: Convert "100%" (string) to 100 (int) for your DB column
+          // Convert sugar string (e.g., "100%") to integer (100)
           const sweetnessInt = parseInt(item.customizations.sugar || "100", 10);
-
+          
           await client.query(
             `INSERT INTO drink_to_receipt (receipt_id, drink_id, ice_level, sweetness, boba, quantity)
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [
               receiptId, 
               drinkId, 
-              item.customizations.ice, 
-              sweetnessInt, // Now an Integer
-              item.customizations.toppings.includes("Boba"), 
+              item.customizations.ice || "Regular", 
+              isNaN(sweetnessInt) ? 100 : sweetnessInt, 
+              item.customizations.toppings?.includes("Boba") || false, 
               1
             ]
           );
@@ -55,7 +73,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // 3. Update the specific user's points
+    /**
+     * CHANGE: Added check for customer_id.
+     * Only attempts to update points if a valid user ID is present (skips for guests).
+     */
     if (points && customer_id) {
       await client.query(
         "UPDATE users SET points = points + $1 WHERE id = $2",

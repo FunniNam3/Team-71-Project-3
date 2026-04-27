@@ -19,7 +19,7 @@ export default async function NavBar() {
             <Image
               className="h-12 w-auto"
               src="/Logo.svg"
-              alt=""
+              alt="Home page"
               width={70}
               height={105}
             />
@@ -30,7 +30,7 @@ export default async function NavBar() {
           >
             <Image
               src="/Portal.svg"
-              alt="Portal"
+              alt="Portal Page"
               width={20}
               height={20}
               className="w-full h-auto"

@@ -47,7 +47,7 @@ export default function AccessibilityProvider({
       root.style.setProperty("--gray", "#6a7282");
       root.style.setProperty("--header_bg", "transparent");
     } else {
-      root.style.setProperty("--primary", "#0D6B4F");
+      root.style.setProperty("--primary", "#064230");
       root.style.setProperty("--dark", "#0F0F0F");
       root.style.setProperty("--secondary", "#F5F5DC");
       root.style.setProperty("--accent", "#E63946");

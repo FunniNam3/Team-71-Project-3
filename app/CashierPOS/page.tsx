@@ -229,89 +229,6 @@ export default function CashierPOSPage() {
     return json.receipt?.id ?? json.data?.id ?? json.id ?? json.receipt_id;
   }
 
-  /*
-  async function handleCheckout(selectedMethod: string) {
-    setPaymentMethod(selectedMethod);
-    setShowPaymentPopup(false);
-
-    if (!selectedCustomer) {
-      alert("Please select a customer before checkout.");
-      return;
-    }
-
-    if (cartItems.length === 0) {
-      alert("Please add at least one item before checkout.");
-      return;
-    }
-
-    if (cashierId === null) {
-      alert("Cashier ID is not loaded yet.");
-      return;
-    }
-
-    const receiptPayload = {
-      customer_id: selectedCustomer.id,
-      cashier_id: cashierId,
-      purchase_date: new Date().toISOString(),
-      tax,
-      discount: discountAmount,
-      payment_method: selectedMethod,
-      z_closed: false,
-      total,
-      items: cartItems,
-      discount_id: selectedDiscount?.id ?? null,
-    };
-
-    const res = await fetch("/api/receipt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(receiptPayload),
-    });
-
-        const json = await res.json();
-
-    if (!res.ok) {
-      console.error(json);
-      alert("Checkout failed.");
-      return;
-    }
-
-    const receiptId = getReceiptId(json);
-
-    if (!receiptId) {
-      console.error("Receipt was created, but no receipt ID was returned:", json);
-      alert("Checkout failed: receipt ID was not returned.");
-      return;
-    }
-
-    const receiptItemsRes = await fetch("/api/to_receipt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        receipt_id: receiptId,
-        items: cartItems,
-      }),
-    });
-
-    const receiptItemsJson = await receiptItemsRes.json();
-
-    if (!receiptItemsRes.ok) {
-      console.error(receiptItemsJson);
-      alert("Receipt was created, but items failed to save.");
-      return;
-    }
-
-    alert(`${selectedMethod} transaction completed.`);
-
-    setCartItems([]);
-    setSelectedDiscount(null);
-    setSelectedCustomer(null);
-    setCustomerSearch("");
-    setItemSearch("");
-    setPaymentMethod("");
-  }
-  */
-
     async function handleCheckout(selectedMethod: string) {
     console.log("Checkout started with payment method:", selectedMethod);
     console.log("Selected customer:", selectedCustomer);
@@ -398,6 +315,27 @@ export default function CashierPOSPage() {
 
       if (!receiptItemsRes.ok) {
         alert("Receipt was created, but food/drink items failed to save.");
+        return;
+      }
+
+      const pointsToAdd = Math.floor(total * 10);
+
+      const pointsRes = await fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedCustomer.id,
+          pointsToAdd,
+        }),
+      });
+
+      const pointsJson = await pointsRes.json();
+
+      console.log("Points API status:", pointsRes.status);
+      console.log("Points API response:", pointsJson);
+
+      if (!pointsRes.ok) {
+        alert("Receipt was created, but customer points failed to update.");
         return;
       }
 

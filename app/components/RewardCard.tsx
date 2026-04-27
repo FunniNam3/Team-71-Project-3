@@ -23,7 +23,7 @@ export default function RewardCard({ reward, onSelect }: RewardCardProps) {
       <div className="mb-2 flex h-24 w-full items-center justify-center overflow-hidden rounded-md bg-gray-100">
         {reward.image ? (
           <img
-            src={reward.image}
+            src="/Template Image.png"
             alt={reward.item}
             className="h-full w-full object-contain"
           />

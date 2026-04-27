@@ -66,7 +66,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-1 text-gray-900">{item.name}</h2>
         <p className="text-(--gray) mb-6">{item.description}</p>
@@ -92,7 +92,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Ice Level</h4>
               <div className="flex gap-2">
-                {["None", "Less", "Regular"].map((level) => (
+                {["None", "Less", "Regular", "Extra"].map((level) => (
                   <button
                     key={level}
                     onClick={() => setIce(level)}
@@ -111,7 +111,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Sugar Level</h4>
               <div className="flex flex-wrap gap-2">
-                {["0%", "50%", "100%"].map((level) => (
+                {["0%", "25%", "50%", "75%", "100%", "125%"].map((level) => (
                   <button
                     key={level}
                     onClick={() => setSugar(level)}

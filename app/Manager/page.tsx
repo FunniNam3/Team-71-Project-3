@@ -28,7 +28,7 @@ export default function ManagerDashboard() {
             <h2 className="text-3xl text-(--primary) font-semibold mb-2">
               Trends
             </h2>
-            <p className="text-sm text-(--primary) opacity-80 mb-6 italic">
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
               Trends Page: View trends
             </p>
             <Link
@@ -44,9 +44,27 @@ export default function ManagerDashboard() {
 
           <div className="w-full max-w-xl bg-white p-10 rounded-[45px] shadow-xl">
             <h2 className="text-3xl text-(--primary) font-semibold mb-2">
+              Menu
+            </h2>
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
+              Menu Page: Edit Menu Items
+            </p>
+            <Link
+              className="flex flex-col bg-(--primary) w-full p-6 rounded-lg justify-center shadow-lg"
+              href="/Manager/MenuEditing"
+            >
+              <span className="text-xl font-bold tracking-widest text-white">
+                Open Menu Page
+              </span>
+              <span className="text-xs text-white mt-1">Edit Menu Items</span>
+            </Link>
+          </div>
+
+          <div className="w-full max-w-xl bg-white p-10 rounded-[45px] shadow-xl">
+            <h2 className="text-3xl text-(--primary) font-semibold mb-2">
               Inventory
             </h2>
-            <p className="text-sm text-(--primary) opacity-80 mb-6 italic">
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
               Inventory Page: View Inventory
             </p>
             <Link
@@ -66,7 +84,7 @@ export default function ManagerDashboard() {
             <h2 className="text-3xl text-(--primary) font-semibold mb-2">
               Daily Snapshots
             </h2>
-            <p className="text-sm text-(--primary) opacity-80 mb-6 italic">
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
               X-Report: Real-time sales view
             </p>
             <ReportModule type="x" />
@@ -76,7 +94,7 @@ export default function ManagerDashboard() {
             <h2 className="text-3xl text-(--primary) font-semibold mb-2">
               End of Shift
             </h2>
-            <p className="text-sm text-(--primary) opacity-80 mb-6 italic">
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
               Z-Report: Close out registers
             </p>
             <ReportModule type="z" />
@@ -86,7 +104,7 @@ export default function ManagerDashboard() {
             <h2 className="text-3xl text-(--primary) font-semibold mb-2">
               Sales Report
             </h2>
-            <p className="text-sm text-(--primary) opacity-80 mb-6 italic">
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
               Inventory & Item tracking
             </p>
             <ReportModule type="sales" />

@@ -29,11 +29,11 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-        <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
-        <script
+        <Script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js" />
+        <Script
           src="https://files.bpcontent.cloud/2026/04/26/11/20260426111339-NJH2HJYL.js"
           defer
-        ></script>
+        />
 
         <div
           className="elfsight-app-72f9bd91-2a62-4d73-b116-1de5d755fd57"

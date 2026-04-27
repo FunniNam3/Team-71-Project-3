@@ -225,6 +225,11 @@ export default function CashierPOSPage() {
     setShowDiscountPopup(false);
   }
 
+  function getReceiptId(json: any) {
+    return json.receipt?.id ?? json.data?.id ?? json.id ?? json.receipt_id;
+  }
+
+  /*
   async function handleCheckout(selectedMethod: string) {
     setPaymentMethod(selectedMethod);
     setShowPaymentPopup(false);
@@ -263,11 +268,36 @@ export default function CashierPOSPage() {
       body: JSON.stringify(receiptPayload),
     });
 
-    const json = await res.json();
+        const json = await res.json();
 
     if (!res.ok) {
       console.error(json);
       alert("Checkout failed.");
+      return;
+    }
+
+    const receiptId = getReceiptId(json);
+
+    if (!receiptId) {
+      console.error("Receipt was created, but no receipt ID was returned:", json);
+      alert("Checkout failed: receipt ID was not returned.");
+      return;
+    }
+
+    const receiptItemsRes = await fetch("/api/to_receipt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        receipt_id: receiptId,
+        items: cartItems,
+      }),
+    });
+
+    const receiptItemsJson = await receiptItemsRes.json();
+
+    if (!receiptItemsRes.ok) {
+      console.error(receiptItemsJson);
+      alert("Receipt was created, but items failed to save.");
       return;
     }
 
@@ -279,6 +309,110 @@ export default function CashierPOSPage() {
     setCustomerSearch("");
     setItemSearch("");
     setPaymentMethod("");
+  }
+  */
+
+    async function handleCheckout(selectedMethod: string) {
+    console.log("Checkout started with payment method:", selectedMethod);
+    console.log("Selected customer:", selectedCustomer);
+    console.log("Cart items:", cartItems);
+    console.log("Cashier ID:", cashierId);
+
+    setPaymentMethod(selectedMethod);
+    setShowPaymentPopup(false);
+
+    if (!selectedCustomer) {
+      alert("Please select a customer before checkout.");
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert("Please add at least one item before checkout.");
+      return;
+    }
+
+    if (cashierId === null) {
+      alert("Cashier ID is not loaded yet.");
+      return;
+    }
+
+    try {
+      const receiptPayload = {
+        customer_id: selectedCustomer.id,
+        cashier_id: cashierId,
+        purchase_date: new Date().toISOString(),
+        tax,
+        discount: discountAmount,
+        payment_method: selectedMethod,
+        z_closed: false,
+        total,
+        items: cartItems,
+        discount_id: selectedDiscount?.id ?? null,
+      };
+
+      console.log("Sending receipt payload:", receiptPayload);
+
+      const res = await fetch("/api/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(receiptPayload),
+      });
+
+      const json = await res.json();
+
+      console.log("Receipt API status:", res.status);
+      console.log("Receipt API response:", json);
+
+      if (!res.ok) {
+        alert("Checkout failed at receipt creation.");
+        return;
+      }
+
+      const receiptId = getReceiptId(json);
+
+      console.log("Receipt ID found:", receiptId);
+
+      if (!receiptId) {
+        alert("Checkout failed: receipt ID was not returned.");
+        return;
+      }
+
+      console.log("Sending receipt items:", {
+        receipt_id: receiptId,
+        items: cartItems,
+      });
+
+      const receiptItemsRes = await fetch("/api/to_receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          receipt_id: receiptId,
+          items: cartItems,
+        }),
+      });
+
+      const receiptItemsJson = await receiptItemsRes.json();
+
+      console.log("Receipt items API status:", receiptItemsRes.status);
+      console.log("Receipt items API response:", receiptItemsJson);
+
+      if (!receiptItemsRes.ok) {
+        alert("Receipt was created, but food/drink items failed to save.");
+        return;
+      }
+
+      alert(`${selectedMethod} transaction completed.`);
+
+      setCartItems([]);
+      setSelectedDiscount(null);
+      setSelectedCustomer(null);
+      setCustomerSearch("");
+      setItemSearch("");
+      setPaymentMethod("");
+    } catch (error) {
+      console.error("Checkout crashed:", error);
+      alert("Checkout crashed. Check the console.");
+    }
   }
 
   if (loading) {
@@ -322,9 +456,10 @@ export default function CashierPOSPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-(--gray)">{item.name}</p>
-                      <p className="text-sm text-(--gray)">
-                        ${item.price.toFixed(2)}
+                      <p className="font-semibold text-gray-500">{item.name}</p>
+                      <p className="text-sm text-gray-500">
+                        ${item.price.toFixed(2)} x {item.quantity} = $
+                        {(item.price * item.quantity).toFixed(2)}
                       </p>
 
                       {item.itemType === "drink" && (

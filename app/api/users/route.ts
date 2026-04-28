@@ -91,7 +91,7 @@ export async function PATCH(request: Request) {
       UPDATE users
       SET points = COALESCE(points, 0) + $1
       WHERE id = $2
-      RETURNING id, name, email, role, points
+      RETURNING id, auth0_user_id, name, role, points
       `,
       [pointsToAdd, id],
     );

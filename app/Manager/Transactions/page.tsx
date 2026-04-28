@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 interface Receipt {
   id: number;
@@ -23,6 +24,16 @@ interface ReceiptItems {
 }
 
 export default function Inventory() {
+  const router = useRouter();
+  useEffect(() => {
+    fetch("/api/login")
+      .then((result) => result.json())
+      .then((res) => {
+        if (res.role !== "manager" && res.role !== "rev") {
+          router.push("/Portal");
+        }
+      });
+  }, []);
   const [loading, setLoading] = useState(true);
   const [receipts, setReceipts] = useState<Receipt[] | null>(null);
   const [search, setSearch] = useState("");

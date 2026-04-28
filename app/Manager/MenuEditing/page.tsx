@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import EditDrinkPopUp from "@components/EditDrinkPopUp";
@@ -6,6 +6,7 @@ import EditFoodPopUp from "@components/EditFoodPopUp";
 import AddDrinkPopUp from "@components/AddDrinkPopUp";
 import AddFoodPopUp from "@components/AddFoodPopUp";
 import RemoveItemPopUp from "@components/RemoveItemPopUp";
+import { useRouter } from "next/router";
 
 type DrinkItem = {
   id: number;
@@ -32,6 +33,16 @@ type NewFoodItem = {
 };
 
 export default function MenuEditPage() {
+  const router = useRouter();
+  useEffect(() => {
+    fetch("/api/login")
+      .then((result) => result.json())
+      .then((res) => {
+        if (res.role !== "manager" && res.role !== "rev") {
+          router.push("/Portal");
+        }
+      });
+  }, []);
   const [activeTab, setActiveTab] = useState<"drink" | "food">("drink");
 
   const [drinks, setDrinks] = useState<DrinkItem[]>([]);
@@ -47,7 +58,9 @@ export default function MenuEditPage() {
   const [showAddFood, setShowAddFood] = useState(false);
 
   const [showRemovePopup, setShowRemovePopup] = useState(false);
-  const [removeItemType, setRemoveItemType] = useState<"drink" | "food" | "">("");
+  const [removeItemType, setRemoveItemType] = useState<"drink" | "food" | "">(
+    "",
+  );
 
   useEffect(() => {
     loadMenuItems();
@@ -197,15 +210,15 @@ export default function MenuEditPage() {
   }
 
   if (loading) {
-    return <div className="mt-20 text-center text-gray-500">Loading menu...</div>;
+    return (
+      <div className="mt-20 text-center text-gray-500">Loading menu...</div>
+    );
   }
 
   return (
     <main className="min-h-screen bg-[--secondary] p-8">
       <div className="mx-auto max-w-6xl rounded-xl bg-white p-6 shadow-sm">
-        <h1 className="mb-6 text-2xl font-bold text-gray-700">
-          Menu Editing
-        </h1>
+        <h1 className="mb-6 text-2xl font-bold text-gray-700">Menu Editing</h1>
 
         <div className="mb-6 flex border-b">
           <button
@@ -370,8 +383,8 @@ export default function MenuEditPage() {
         isOpen={showRemovePopup}
         itemName={
           removeItemType === "drink"
-            ? selectedDrink?.name ?? ""
-            : selectedFood?.name ?? ""
+            ? (selectedDrink?.name ?? "")
+            : (selectedFood?.name ?? "")
         }
         itemType={removeItemType}
         onClose={() => {

@@ -7,10 +7,20 @@
 import { Chart } from "chart.js/auto";
 import { useEffect, useRef, useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
-import Link from "next/link";
+import { useRouter } from "next/router";
 import "react-day-picker/dist/style.css";
 
 export default function TrendsPage() {
+  const router = useRouter();
+  useEffect(() => {
+    fetch("/api/login")
+      .then((result) => result.json())
+      .then((res) => {
+        if (res.role !== "manager" && res.role !== "rev") {
+          router.push("/Portal");
+        }
+      });
+  }, []);
   // make variable to hold time frame selected from the day picker object
   const [timeFrame, setTimeFrame] = useState<DateRange>();
   const [allTime, setAllTime] = useState(true);

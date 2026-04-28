@@ -5,7 +5,18 @@ export async function POST(request: Request) {
   const client = await pool.connect();
   try {
     const body = await request.json();
-    const { cart, payment_method, total, tax, discount, customer_id, points } = body;
+    const {
+      cart,
+      payment_method,
+      total,
+      tax,
+      discount,
+      customer_id,
+      points,
+      cashier_id,
+      purchase_date,
+      z_closed,
+    } = body;
 
     await client.query("BEGIN");
 
@@ -13,14 +24,23 @@ export async function POST(request: Request) {
     // Using customer_id || null allows guests to checkout without breaking FK constraints
     const receiptRes = await client.query(
       `INSERT INTO receipt (customer_id, cashier_id, tax, discount, payment_method, total, purchase_date)
-       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_DATE) RETURNING id`,
-      [customer_id || null, 1, tax, discount || 0, payment_method, total]
+       VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, CURRENT_TIMESTAMP)) RETURNING id`,
+        [
+          customer_id || null,
+          cashier_id || 1,
+          tax,
+          discount || 0,
+          payment_method,
+          total,
+          purchase_date || null,
+        ]
     );
     
     const receiptId = receiptRes.rows[0].id;
 
     // 2. Insert items into bridging tables
-    for (const item of cart) {
+    if (Array.isArray(cart)) {
+      for (const item of cart) {
       /**
        * CHANGE: Normalize category to lowercase.
        * This prevents "French fries" from failing if the category is "Food" instead of "food".
@@ -58,7 +78,7 @@ export async function POST(request: Request) {
           const sweetnessInt = parseInt(item.customizations.sugar || "100", 10);
           
           await client.query(
-            `INSERT INTO drink_to_receipt (receipt_id, drink_id, ice_level, sweetness, boba, quantity)
+            `INSERT INTO drink_to_receipt (receipt_id, drink_id, ice, sweetness, boba, quantity)
              VALUES ($1, $2, $3, $4, $5, $6)`,
             [
               receiptId, 
@@ -70,6 +90,7 @@ export async function POST(request: Request) {
             ]
           );
         }
+      }
       }
     }
 

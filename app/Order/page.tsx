@@ -32,7 +32,7 @@ export default function OrderPage() {
   const [dbUserId, setDbUserId] = useState<number | null>(null);
   const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
   const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
-  
+
   // Weather states
   const [tempF, setTempF] = useState<number | null>(null);
   const [isDay, setIsDay] = useState<boolean>(true);
@@ -58,13 +58,19 @@ export default function OrderPage() {
         // Using College Station coordinates as default (matching your route's intent)
         const lat = "30.62";
         const long = "-96.33";
-        const res = await fetch(`/api/weather?latitude=${lat}&longitude=${long}`);
+        const res = await fetch(
+          `/api/weather?latitude=${lat}&longitude=${long}`,
+        );
         const json = await res.json();
-        
+
         if (json.data) {
           setTempF(json.data.current.temperature_2m);
           setIsDay(json.data.current.is_day === 1);
-          }
+        }
+      } catch (err) {
+        console.error("Internal Weather Route failed", err);
+      }
+    }
     fetchWeather();
   }, []);
 
@@ -73,19 +79,16 @@ export default function OrderPage() {
     const userSub = user?.sub;
     if (userSub) {
       fetch("/api/users")
-        .then(res => res.json())
-        .then(json => {
-          const matched = (json.data || []).find((u: any) => u.auth0_user_id === userSub);
+        .then((res) => res.json())
+        .then((json) => {
+          const matched = (json.data || []).find(
+            (u: any) => u.auth0_user_id === userSub,
+          );
           if (matched) setDbUserId(matched.id);
         });
     }
   }, [user]);
 
-  // --- Cart Management ---
-  const handleAddToCart = (customizedItem: any) => {
-    const cartItem: CartItem = {
-      instanceId: customizedItem.instanceId || `item-${Date.now()}`,
-          
   // Handle finding the numeric ID
   useEffect(() => {
     const userSub = user?.sub;
@@ -104,8 +107,6 @@ export default function OrderPage() {
         } catch (err) {
           console.error("Failed to find user ID", err);
         }
-      } catch (err) {
-        console.error("Internal Weather Route failed", err);
       }
       fetchMyId();
     } else {
@@ -115,14 +116,17 @@ export default function OrderPage() {
 
   // --- UPDATED handleAddToCart ---
   const handleAddToCart = (customizedItem: any) => {
-    // We explicitly ensure 'category' is passed so the API route 
+    // We explicitly ensure 'category' is passed so the API route
     // knows whether to look in the 'food' or 'drinks' table.
     const cartItem: CartItem = {
-      instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+      instanceId:
+        customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
       name: customizedItem.name,
       price: customizedItem.price, // Use the price returned (which includes size surcharges)
       imageUrl: customizedItem.imageUrl,
-      category: customizedItem.category || (selectedProduct?.type === "Food" ? "food" : "drink"),
+      category:
+        customizedItem.category ||
+        (selectedProduct?.type === "Food" ? "food" : "drink"),
       quantity: customizedItem.quantity || 1,
       customizations: {
         ice: customizedItem.customizations?.ice || "",
@@ -139,8 +143,12 @@ export default function OrderPage() {
   // --- Initial Menu Load ---
   useEffect(() => {
     setLoading(true);
-    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) => res.json());
-    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) => res.json());
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) =>
+      res.json(),
+    );
+    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) =>
+      res.json(),
+    );
 
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
@@ -174,20 +182,29 @@ export default function OrderPage() {
 
     // If it's hot (> 80°F) or Sunny
     if (tempF > 80) {
-      return menuItems.filter(item => 
-        item.category.includes("fruit") || item.category.includes("specialty")
+      return menuItems.filter(
+        (item) =>
+          item.category.includes("fruit") ||
+          item.category.includes("specialty"),
       );
-    } 
+    }
     // If it's nighttime or cool (< 65°F)
     else if (tempF < 65 || !isDay) {
-      return menuItems.filter(item => 
-        item.type === "Food" || item.category.includes("milk tea")
+      return menuItems.filter(
+        (item) => item.type === "Food" || item.category.includes("milk tea"),
       );
     }
     return menuItems.slice(0, 4);
   }, [menuItems, tempF, isDay]);
 
-  const categories = ["recommended", "most ordered", "milk tea", "fruit tea", "specialty tea", "food"];
+  const categories = [
+    "recommended",
+    "most ordered",
+    "milk tea",
+    "fruit tea",
+    "specialty tea",
+    "food",
+  ];
 
   const filteredItems = useMemo(() => {
     if (activeTab === "recommended") return recommendedItems;
@@ -195,7 +212,12 @@ export default function OrderPage() {
     return menuItems.filter((item) => item.category?.includes(activeTab));
   }, [activeTab, menuItems, recommendedItems]);
 
-  if (loading) return <div className="text-center mt-20 text-gray-500 font-bold">Loading menu...</div>;
+  if (loading)
+    return (
+      <div className="text-center mt-20 text-gray-500 font-bold">
+        Loading menu...
+      </div>
+    );
 
   return (
     <main className="p-8 pb-36">
@@ -205,7 +227,9 @@ export default function OrderPage() {
             <p className="text-sm font-bold text-gray-700">
               {isDay ? "☀️" : "🌙"} {Math.round(tempF)}°F in College Station
             </p>
-            <p className="text-xs text-[#00A67E] font-medium">Chef's Picks for this weather</p>
+            <p className="text-xs text-[#00A67E] font-medium">
+              Chef's Picks for this weather
+            </p>
           </div>
         )}
       </div>
@@ -238,7 +262,11 @@ export default function OrderPage() {
       </div>
 
       {selectedProduct && (
-        <Modal item={selectedProduct} onClose={() => setSelectedProduct(null)} onConfirm={handleAddToCart} />
+        <Modal
+          item={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onConfirm={handleAddToCart}
+        />
       )}
 
       {cart.length > 0 && (
@@ -255,7 +283,14 @@ export default function OrderPage() {
         </div>
       )}
 
-      {isCartOpen && <CartModal cart={cart} onClose={() => setIsCartOpen(false)} setCart={setCart} userId={dbUserId} />}
+      {isCartOpen && (
+        <CartModal
+          cart={cart}
+          onClose={() => setIsCartOpen(false)}
+          setCart={setCart}
+          userId={dbUserId}
+        />
+      )}
     </main>
   );
 }

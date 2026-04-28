@@ -10,7 +10,7 @@ export default function ManagerDashboard() {
     fetch("/api/login")
       .then((result) => result.json())
       .then((res) => {
-        if (res.role !== "manager") {
+        if (res.role !== "manager" && res.role !== "rev") {
           router.push("/Portal");
         }
       });

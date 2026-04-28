@@ -1,5 +1,4 @@
 "use client";
-import { on } from "events";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -8,7 +7,7 @@ interface ProductItem {
   description: string;
   price: number;
   imageUrl: string;
-  category?: string; // We use this to switch layouts
+  category?: string;
 }
 
 interface ModalProps {
@@ -18,49 +17,39 @@ interface ModalProps {
 }
 
 export default function Modal({ item, onClose, onConfirm }: ModalProps) {
-  // 1. Determine type
   const isFood = item.category === "food";
 
-  // 2. State for Drink Customizations
+  // --- State ---
+  const [size, setSize] = useState<string>("Regular");
   const [ice, setIce] = useState<string>("Regular");
   const [sugar, setSugar] = useState<string>("100%");
-  // 1. New State for Quantity
   const [quantity, setQuantity] = useState<number>(1);
-
-  // 3. State for Food Customizations
   const [specialInstructions, setSpecialInstructions] = useState("");
 
-  // 4. Shared Toppings/Extras State
-  const [toppings, setToppings] = useState<string[]>([]);
-
-  // 5. Dynamic Options based on type
-  const drinkToppings = [
-    { id: "boba", name: "Boba", price: 0.5 },
-    { id: "jelly", name: "Lychee Jelly", price: 0.5 },
-    { id: "pudding", name: "Custard Pudding", price: 0.75 },
-  ];
-
-  const foodExtras = [
-    { id: "spicy", name: "Extra Spicy", price: 0.0 },
-    { id: "sauce", name: "Side Sauce", price: 0.5 },
-    { id: "cheese", name: "Extra Cheese", price: 1.0 },
-  ];
-
-  const currentOptions = isFood ? foodExtras : drinkToppings;
-
-  const handleToppingToggle = (name: string) => {
-    setToppings((prev) =>
-      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name],
-    );
+  // --- Price Logic ---
+  // Calculates extra cost based on size
+  const getSizeSurcharge = () => {
+    if (isFood) return 0;
+    if (size === "Large") return 0.75;
+    if (size === "Extra Large") return 1.50;
+    return 0;
   };
+
+  const currentUnitPrice = item.price + getSizeSurcharge();
 
   const handleConfirm = () => {
     onConfirm({
       ...item,
-      quantity: quantity, // 2. Send the actual quantity state
+      price: currentUnitPrice, // Send the price adjusted for size
+      quantity: quantity,
       customizations: isFood
-        ? { notes: specialInstructions, toppings }
-        : { ice, sugar, toppings },
+        ? { notes: specialInstructions, toppings: [] }
+        : { 
+            size, 
+            ice, 
+            sugar, 
+            toppings: [] 
+          },
       instanceId: Math.random().toString(36).substring(2, 9),
     });
     onClose();
@@ -71,16 +60,18 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-1 text-gray-900">{item.name}</h2>
-        <p className="text-(--gray) mb-6">{item.description}</p>
+        <div className="flex justify-between items-start mb-1">
+          <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+          <span className="text-lg font-bold text-[#00A67E]">
+            ${(currentUnitPrice * quantity).toFixed(2)}
+          </span>
+        </div>
+        <p className="text-gray-500 mb-6">{item.description}</p>
 
         {/* --- DYNAMIC SECTION --- */}
         {isFood ? (
-          /* FOOD LAYOUT */
           <div className="mb-6">
-            <h4 className="font-bold mb-2 text-gray-800">
-              Special Instructions
-            </h4>
+            <h4 className="font-bold mb-2 text-gray-800">Special Instructions</h4>
             <textarea
               className="w-full border border-gray-200 rounded-xl p-3 text-gray-700 focus:ring-2 focus:ring-[#00A67E] outline-none"
               rows={3}
@@ -89,15 +80,33 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
               onChange={(e) => setSpecialInstructions(e.target.value)}
             />
           </div>
-
-          
         ) : (
-          /* DRINK LAYOUT */
           <>
+            {/* SIZE SELECTION */}
+            <div className="mb-6">
+              <h4 className="font-bold mb-2 text-gray-800">Size</h4>
+              <div className="flex flex-wrap gap-2">
+                {["Regular", "Large", "Extra Large"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSize(s)}
+                    className={`px-4 py-2 rounded-full border transition-all ${
+                      size === s
+                        ? "bg-[#00A67E] text-white border-[#00A67E]"
+                        : "text-gray-600 border-gray-200 hover:border-[#00A67E]"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ICE LEVEL - Added "Hot Drink" */}
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Ice Level</h4>
-              <div className="flex gap-2">
-                {["None", "Less", "Regular", "Extra"].map((level) => (
+              <div className="flex flex-wrap gap-2">
+                {["Hot Drink", "None", "Less", "Regular", "Extra"].map((level) => (
                   <button
                     key={level}
                     onClick={() => setIce(level)}
@@ -113,6 +122,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
               </div>
             </div>
 
+            {/* SUGAR LEVEL */}
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800">Sugar Level</h4>
               <div className="flex flex-wrap gap-2">
@@ -134,50 +144,25 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
           </>
         )}
 
-        {/* --- SHARED TOPPINGS SECTION --- */}
-        <div className="mb-6">
-  <h4 className="font-bold mb-2 text-gray-800">Quantity</h4>
-  <input
-    type="number"
-    min={1}
-    value={quantity} // Link to state
-    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)} // Update state
-    className="w-full border border-gray-200 rounded-xl p-3 text-gray-700 focus:ring-2 focus:ring-[#00A67E] outline-none"
-  />
-</div>
-        <div className="mb-6">
-          <h4 className="font-bold mb-2 text-gray-800">
-            {isFood ? "Add Extras" : "Add Toppings"}
-          </h4>
-          <div className="space-y-2">
-            {currentOptions.map((t) => (
-              <label
-                key={t.id}
-                className="flex items-center justify-between p-3 border rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={toppings.includes(t.name)}
-                    onChange={() => handleToppingToggle(t.name)}
-                    className="w-5 h-5 accent-[#00A67E]"
-                  />
-                  <span className="text-gray-700">{t.name}</span>
-                </div>
-                <span className="text-gray-400 text-sm">
-                  +${t.price.toFixed(2)}
-                </span>
-              </label>
-            ))}
+        {/* --- QUANTITY SECTION --- */}
+        <div className="mb-6 border-t pt-4">
+          <h4 className="font-bold mb-2 text-gray-800">Quantity</h4>
+          <div className="flex items-center gap-4">
+             <button 
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-bold text-xl hover:bg-gray-50"
+             >-</button>
+             <span className="text-xl font-bold w-8 text-center">{quantity}</span>
+             <button 
+                onClick={() => setQuantity(q => q + 1)}
+                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-bold text-xl hover:bg-gray-50"
+             >+</button>
           </div>
         </div>
 
         {/* Footer Buttons */}
         <div className="flex gap-4 mt-8">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 text-(--gray) font-medium hover:text-gray-800"
-          >
+          <button onClick={onClose} className="flex-1 py-3 text-gray-500 font-medium hover:text-gray-800">
             Cancel
           </button>
           <button
@@ -189,6 +174,6 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

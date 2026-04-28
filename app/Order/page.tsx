@@ -12,6 +12,7 @@ interface Customizations {
   ice: string;
   sugar: string;
   toppings: string[];
+  size?: string; // Added size support
 }
 
 interface MenuItem {
@@ -46,23 +47,18 @@ export default function OrderPage() {
     [foodItems, drinkItems],
   );
 
-  // Handle finding the numeric ID (Alli Qayyum -> 10)
-  // FIX: Using a local variable 'userSub' to satisfy TypeScript and handle guest logic
+  // Handle finding the numeric ID
   useEffect(() => {
     const userSub = user?.sub;
-
     if (userSub) {
       async function fetchMyId() {
         try {
           const res = await fetch("/api/users");
           const json = await res.json();
           const allUsers = json.data || [];
-
-          // Match Auth0 sub to auth0_user_id in DB using the captured userSub
           const matchedUser = allUsers.find(
             (u: any) => u.auth0_user_id === userSub,
           );
-
           if (matchedUser) {
             setDbUserId(matchedUser.id);
           }
@@ -72,38 +68,37 @@ export default function OrderPage() {
       }
       fetchMyId();
     } else {
-      // If user logs out or isn't logged in, reset to null for Guest Mode
       setDbUserId(null);
     }
   }, [user]);
 
+  // --- UPDATED handleAddToCart ---
   const handleAddToCart = (customizedItem: any) => {
-  const cartItem: CartItem = {
-    instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
-    name: customizedItem.name,
-    price: customizedItem.price,
-    imageUrl: customizedItem.imageUrl,
-    category: customizedItem.category,
-    quantity: customizedItem.quantity, // <--- ADD THIS LINE
-    customizations: {
-      ice: customizedItem.customizations?.ice || "",
-      sugar: customizedItem.customizations?.sugar || "",
-      notes: customizedItem.customizations?.notes || "",
-      toppings: customizedItem.customizations?.toppings || [],
-    },
+    // We explicitly ensure 'category' is passed so the API route 
+    // knows whether to look in the 'food' or 'drinks' table.
+    const cartItem: CartItem = {
+      instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+      name: customizedItem.name,
+      price: customizedItem.price, // Use the price returned (which includes size surcharges)
+      imageUrl: customizedItem.imageUrl,
+      category: customizedItem.category || (selectedProduct?.type === "Food" ? "food" : "drink"),
+      quantity: customizedItem.quantity,
+      customizations: {
+        ice: customizedItem.customizations?.ice || "",
+        sugar: customizedItem.customizations?.sugar || "",
+        notes: customizedItem.customizations?.notes || "",
+        toppings: customizedItem.customizations?.toppings || [],
+        size: customizedItem.customizations?.size || "Regular", // Sync size
+      },
+    };
+    setCart((prev) => [...prev, cartItem]);
+    setSelectedProduct(null);
   };
-  setCart((prev) => [...prev, cartItem]);
-  setSelectedProduct(null);
-};
 
   useEffect(() => {
     setLoading(true);
-    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) =>
-      res.json(),
-    );
-    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) =>
-      res.json(),
-    );
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) => res.json());
+    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) => res.json());
 
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
@@ -123,7 +118,7 @@ export default function OrderPage() {
               ...item,
               id: item.id || item._id || `food-${index}`,
               imageUrl: "/menu/" + String(item.name).trim() + ".png",
-              category: "food",
+              category: "food", // Ensure this matches what your API expects
             })),
           );
         }
@@ -139,13 +134,7 @@ export default function OrderPage() {
       </div>
     );
 
-  const categories = [
-    "most ordered",
-    "milk tea",
-    "fruit tea",
-    "specialty tea",
-    "food",
-  ];
+  const categories = ["most ordered", "milk tea", "fruit tea", "specialty tea", "food"];
 
   const filteredItems =
     activeTab === "most ordered"
@@ -154,13 +143,12 @@ export default function OrderPage() {
 
   return (
     <main className="p-8 pb-36">
-      {/* Navigation Tabs */}
-      <nav className="flex justify-center gap-8 mb-12 border-b border-gray-300">
+      <nav className="flex justify-center gap-8 mb-12 border-b border-gray-300 overflow-x-auto">
         {categories.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-2 text-lg transition-all ${
+            className={`pb-2 text-lg whitespace-nowrap transition-all ${
               activeTab === tab
                 ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]"
                 : "text-gray-600 hover:text-black"
@@ -197,7 +185,7 @@ export default function OrderPage() {
             className="bg-[#00A67E] text-white px-12 py-5 rounded-full shadow-2xl flex items-center gap-4 hover:scale-105 transition-transform text-xl font-bold"
           >
             <div className="bg-white text-[#00A67E] w-9 h-9 rounded-full flex items-center justify-center font-bold text-base">
-              {cart.length}
+              {cart.reduce((total, item) => total + item.quantity, 0)}
             </div>
             <span>Check Out</span>
           </button>

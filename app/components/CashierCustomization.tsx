@@ -47,7 +47,7 @@ export default function CashierCustomization({
   const [selectedPoppingBoba, setSelectedPoppingBoba] = useState("");
   const [quantity, setQuantity] = useState(1);
 
-  const iceOptions = ["No Ice", "Less Ice", "Normal", "Extra Ice"];
+  const iceOptions = ["Hot Drink","No Ice", "Less Ice", "Normal", "Extra Ice"];
   const milkOptions = ["Cow", "Oat", "Almond", "Soy"];
   const yesNoOptions = ["True", "False"];
 

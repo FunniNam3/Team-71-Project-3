@@ -37,6 +37,7 @@ export async function GET(request: Request) {
       `
       SELECT f.name AS item_name,
            f.price AS price,
+           ftr.quantity,
            ftr.modifiers AS details
     FROM food_to_receipt ftr
     JOIN food f ON ftr.food_id = f.id
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
 
     SELECT d.name AS item_name,
            d.price AS price,
+           dtr.quantity,
            CONCAT(
                'Ice: ', dtr.ice,
                ', Sweetness: ', dtr.sweetness,

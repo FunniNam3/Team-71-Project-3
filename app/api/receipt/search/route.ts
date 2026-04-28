@@ -41,16 +41,15 @@ export async function GET(request: Request) {
       `
       SELECT id, r.customer_id, u.name, cashier_id, purchase_date, payment_method, z_closed, discount, tax FROM receipt r LEFT JOIN (SELECT name, id as customer_id FROM users) u ON r.customer_id = u.customer_id
       WHERE
-        CAST(r.id AS TEXT) ILIKE $1
-        OR CAST(r.customer_id AS TEXT) ILIKE $1
-        OR CAST(u.name AS TEXT) ILIKE $1
-        OR CAST(r.cashier_id AS TEXT) ILIKE $1
-        OR CAST(r.purchase_date AS TEXT) ILIKE $1
-        OR r.payment_method ILIKE $1
-        OR CAST(r.z_closed AS TEXT) ILIKE $1
-        LIMIT 100
+        CAST(r.id AS TEXT) LIKE $2
+        OR CAST(r.customer_id AS TEXT) LIKE $2
+        OR CAST(u.name AS TEXT) LIKE $1
+        OR CAST(r.cashier_id AS TEXT) LIKE $2
+        OR CAST(r.purchase_date AS TEXT) LIKE $2
+        OR r.payment_method LIKE $1
+        OR CAST(r.z_closed AS TEXT) LIKE $1
       `,
-      [`%${q}%`],
+      [`%${q}%`, q],
     );
 
     return Response.json(result.rows);

@@ -18,6 +18,7 @@ interface Receipt {
 interface ReceiptItems {
   item_name: string;
   price: number;
+  quantity: number;
   details: string;
 }
 
@@ -109,24 +110,36 @@ export default function Inventory() {
           ) : (
             <>
               <h1 className="font-bold text-4xl">Receipt #{current}</h1>
-              <ul className="w-fit flex flex-col text-left">
+              <ul className="w-full flex flex-col text-left">
                 {selectedReceipt &&
                   selectedReceipt.map((item, index) => {
                     if (!item.details) {
                       return (
                         <li key={index}>
-                          <p className="font-semibold text-xl">
-                            {item.item_name} ${item.price}
-                          </p>
+                          <div className="flex justify-between">
+                            <p className="font-semibold text-xl">
+                              {item.item_name} ${item.price}
+                            </p>
+                            <p className="font-semibold text-right text-xl">
+                              {" "}
+                              x{item.quantity}
+                            </p>
+                          </div>
                         </li>
                       );
                     }
                     const details = item.details.split(", ");
                     return (
                       <li key={index}>
-                        <p className="font-semibold text-xl">
-                          {item.item_name} ${item.price}
-                        </p>
+                        <div className="flex justify-between">
+                          <p className="font-semibold text-xl">
+                            {item.item_name} ${item.price}
+                          </p>
+                          <p className="font-semibold text-right text-xl">
+                            {" "}
+                            x{item.quantity}
+                          </p>
+                        </div>
                         <ul className="w-fit ml-5">
                           {details.map((item, index) => (
                             <li key={index}>{item}</li>

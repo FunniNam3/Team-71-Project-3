@@ -30,34 +30,41 @@ export async function GET(request: Request) {
     const q = searchParams.get("q");
 
     if (!q) {
-      const result = await pool.query(
-        "SELECT id, r.customer_id, u.name, cashier_id, purchase_date, payment_method, z_closed, discount, tax FROM receipt r LEFT JOIN (SELECT name, id as customer_id FROM users) u ON r.customer_id = u.customer_id LIMIT 100",
-      );
-
-      return Response.json(result.rows);
+      return Response.json([]);
     }
 
     const result = await pool.query(
       `
-      SELECT id, r.customer_id, u.name, cashier_id, purchase_date, payment_method, z_closed, discount, tax FROM receipt r LEFT JOIN (SELECT name, id as customer_id FROM users) u ON r.customer_id = u.customer_id
-      WHERE
-        CAST(r.id AS TEXT) ILIKE $1
-        OR CAST(r.customer_id AS TEXT) ILIKE $1
-        OR CAST(u.name AS TEXT) ILIKE $1
-        OR CAST(r.cashier_id AS TEXT) ILIKE $1
-        OR CAST(r.purchase_date AS TEXT) ILIKE $1
-        OR r.payment_method ILIKE $1
-        OR CAST(r.z_closed AS TEXT) ILIKE $1
-        LIMIT 100
+      SELECT f.name AS item_name,
+           f.price AS price,
+           ftr.modifiers AS details
+    FROM food_to_receipt ftr
+    JOIN food f ON ftr.food_id = f.id
+    WHERE ftr.receipt_id = $1
+
+    UNION ALL
+
+    SELECT d.name AS item_name,
+           d.price AS price,
+           CONCAT(
+               'Ice: ', dtr.ice,
+               ', Sweetness: ', dtr.sweetness,
+               ', Milk: ', dtr.milk,
+               ', Boba: ', dtr.boba,
+               ', Popping: ', dtr.popping_boba
+           ) AS details
+    FROM drink_to_receipt dtr
+    JOIN drink d ON dtr.drink_id = d.id
+    WHERE dtr.receipt_id = $1
       `,
-      [`%${q}%`],
+      [q],
     );
 
     return Response.json(result.rows);
   } catch (err) {
     console.error(err);
     return Response.json(
-      { error: "Failed to search receipt table" },
+      { error: "Failed to search receipts" },
       { status: 500 },
     );
   }

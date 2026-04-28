@@ -82,6 +82,26 @@ export default function ManagerDashboard() {
 
           <div className="w-full max-w-xl bg-white p-10 rounded-[45px] shadow-xl">
             <h2 className="text-3xl text-(--primary) font-semibold mb-2">
+              Transactions
+            </h2>
+            <p className="text-sm text-(--gray) opacity-80 mb-6 italic">
+              Transactions Page: View Transactions
+            </p>
+            <Link
+              className="flex flex-col bg-(--primary) w-full p-6 rounded-lg justify-center shadow-lg"
+              href="/Manager/Transactions"
+            >
+              <span className="text-xl font-bold tracking-widest text-white">
+                Open Transactions Page
+              </span>
+              <span className="text-xs text-white mt-1">
+                View/Display Transactions
+              </span>
+            </Link>
+          </div>
+
+          <div className="w-full max-w-xl bg-white p-10 rounded-[45px] shadow-xl">
+            <h2 className="text-3xl text-(--primary) font-semibold mb-2">
               Daily Snapshots
             </h2>
             <p className="text-sm text-(--gray) opacity-80 mb-6 italic">

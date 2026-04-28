@@ -7,7 +7,7 @@
 import { Chart } from "chart.js/auto";
 import { useEffect, useRef, useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import "react-day-picker/dist/style.css";
 
 export default function TrendsPage() {

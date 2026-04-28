@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface Item {
   id: number;
@@ -23,6 +23,7 @@ export default function Inventory() {
         }
       });
   }, []);
+
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Item[] | null>(null);
   const [search, setSearch] = useState("");

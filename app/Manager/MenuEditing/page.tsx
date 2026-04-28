@@ -6,7 +6,7 @@ import EditFoodPopUp from "@components/EditFoodPopUp";
 import AddDrinkPopUp from "@components/AddDrinkPopUp";
 import AddFoodPopUp from "@components/AddFoodPopUp";
 import RemoveItemPopUp from "@components/RemoveItemPopUp";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 type DrinkItem = {
   id: number;

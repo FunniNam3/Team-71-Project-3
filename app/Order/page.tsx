@@ -77,27 +77,24 @@ export default function OrderPage() {
     }
   }, [user]);
 
-  const handleAddToCart = (customizedItem: MenuItem) => {
-    const customizations = customizedItem.customizations || {
-      ice: "",
-      sugar: "",
-      toppings: [],
-    };
-    const cartItem: CartItem = {
-      instanceId:
-        customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
-      name: customizedItem.name,
-      price: customizedItem.price,
-      imageUrl: customizedItem.imageUrl,
-      customizations: {
-        ice: customizations.ice,
-        sugar: customizations.sugar,
-        toppings: customizations.toppings,
-      },
-    };
-    setCart((prev) => [...prev, cartItem]);
-    setSelectedProduct(null);
+  const handleAddToCart = (customizedItem: any) => {
+  const cartItem: CartItem = {
+    instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+    name: customizedItem.name,
+    price: customizedItem.price,
+    imageUrl: customizedItem.imageUrl,
+    category: customizedItem.category,
+    quantity: customizedItem.quantity, // <--- ADD THIS LINE
+    customizations: {
+      ice: customizedItem.customizations?.ice || "",
+      sugar: customizedItem.customizations?.sugar || "",
+      notes: customizedItem.customizations?.notes || "",
+      toppings: customizedItem.customizations?.toppings || [],
+    },
   };
+  setCart((prev) => [...prev, cartItem]);
+  setSelectedProduct(null);
+};
 
   useEffect(() => {
     setLoading(true);

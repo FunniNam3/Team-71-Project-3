@@ -24,6 +24,8 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
   // 2. State for Drink Customizations
   const [ice, setIce] = useState<string>("Regular");
   const [sugar, setSugar] = useState<string>("100%");
+  // 1. New State for Quantity
+  const [quantity, setQuantity] = useState<number>(1);
 
   // 3. State for Food Customizations
   const [specialInstructions, setSpecialInstructions] = useState("");
@@ -55,9 +57,10 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
   const handleConfirm = () => {
     onConfirm({
       ...item,
+      quantity: quantity, // 2. Send the actual quantity state
       customizations: isFood
-        ? { notes: specialInstructions, toppings } // Food data
-        : { ice, sugar, toppings }, // Drink data
+        ? { notes: specialInstructions, toppings }
+        : { ice, sugar, toppings },
       instanceId: Math.random().toString(36).substring(2, 9),
     });
     onClose();
@@ -86,6 +89,8 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
               onChange={(e) => setSpecialInstructions(e.target.value)}
             />
           </div>
+
+          
         ) : (
           /* DRINK LAYOUT */
           <>
@@ -130,6 +135,16 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
         )}
 
         {/* --- SHARED TOPPINGS SECTION --- */}
+        <div className="mb-6">
+  <h4 className="font-bold mb-2 text-gray-800">Quantity</h4>
+  <input
+    type="number"
+    min={1}
+    value={quantity} // Link to state
+    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)} // Update state
+    className="w-full border border-gray-200 rounded-xl p-3 text-gray-700 focus:ring-2 focus:ring-[#00A67E] outline-none"
+  />
+</div>
         <div className="mb-6">
           <h4 className="font-bold mb-2 text-gray-800">
             {isFood ? "Add Extras" : "Add Toppings"}

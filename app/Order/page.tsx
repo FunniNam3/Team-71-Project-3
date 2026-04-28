@@ -23,7 +23,7 @@ interface MenuItem {
   imageUrl: string;
   category: string;
   type: "Food" | "Drink";
-  customizations?: Customizations;
+  customizations?: any;
   instanceId?: string;
 }
 
@@ -33,9 +33,13 @@ export default function OrderPage() {
   const [foodItems, setFoodItems] = useState<MenuItem[]>([]);
   const [drinkItems, setDrinkItems] = useState<MenuItem[]>([]);
 
+  // Weather states
+  const [tempF, setTempF] = useState<number | null>(null);
+  const [isDay, setIsDay] = useState<boolean>(true);
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("most ordered");
+  const [activeTab, setActiveTab] = useState("recommended");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
 
@@ -46,6 +50,44 @@ export default function OrderPage() {
     ],
     [foodItems, drinkItems],
   );
+
+  // 1. USE YOUR WEATHER ROUTE
+  useEffect(() => {
+    async function fetchWeather() {
+      try {
+        // Using College Station coordinates as default (matching your route's intent)
+        const lat = "30.62";
+        const long = "-96.33";
+        const res = await fetch(
+          `/api/weather?latitude=${lat}&longitude=${long}`,
+        );
+        const json = await res.json();
+
+        if (json.data) {
+          setTempF(json.data.current.temperature_2m);
+          setIsDay(json.data.current.is_day === 1);
+        }
+      } catch (err) {
+        console.error("Internal Weather Route failed", err);
+      }
+    }
+    fetchWeather();
+  }, []);
+
+  // Auth0 User Mapping
+  useEffect(() => {
+    const userSub = user?.sub;
+    if (userSub) {
+      fetch("/api/users")
+        .then((res) => res.json())
+        .then((json) => {
+          const matched = (json.data || []).find(
+            (u: any) => u.auth0_user_id === userSub,
+          );
+          if (matched) setDbUserId(matched.id);
+        });
+    }
+  }, [user]);
 
   // Handle finding the numeric ID
   useEffect(() => {
@@ -74,15 +116,18 @@ export default function OrderPage() {
 
   // --- UPDATED handleAddToCart ---
   const handleAddToCart = (customizedItem: any) => {
-    // We explicitly ensure 'category' is passed so the API route 
+    // We explicitly ensure 'category' is passed so the API route
     // knows whether to look in the 'food' or 'drinks' table.
     const cartItem: CartItem = {
-      instanceId: customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
+      instanceId:
+        customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
       name: customizedItem.name,
       price: customizedItem.price, // Use the price returned (which includes size surcharges)
       imageUrl: customizedItem.imageUrl,
-      category: customizedItem.category || (selectedProduct?.type === "Food" ? "food" : "drink"),
-      quantity: customizedItem.quantity,
+      category:
+        customizedItem.category ||
+        (selectedProduct?.type === "Food" ? "food" : "drink"),
+      quantity: customizedItem.quantity || 1,
       customizations: {
         ice: customizedItem.customizations?.ice || "",
         sugar: customizedItem.customizations?.sugar || "",
@@ -95,10 +140,15 @@ export default function OrderPage() {
     setSelectedProduct(null);
   };
 
+  // --- Initial Menu Load ---
   useEffect(() => {
     setLoading(true);
-    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) => res.json());
-    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) => res.json());
+    const fetchDrinks = fetch("/api/drinks?allDrinks=true").then((res) =>
+      res.json(),
+    );
+    const fetchFoods = fetch("/api/foods?allFoods=true").then((res) =>
+      res.json(),
+    );
 
     Promise.all([fetchDrinks, fetchFoods])
       .then(([drinksRes, foodsRes]) => {
@@ -123,9 +173,44 @@ export default function OrderPage() {
           );
         }
       })
-      .catch((error) => console.error("Fetch error:", error))
       .finally(() => setLoading(false));
   }, []);
+
+  // 2. RECOMMENDATION LOGIC (Fahrenheit Based)
+  const recommendedItems = useMemo(() => {
+    if (tempF === null) return menuItems.slice(0, 4);
+
+    // If it's hot (> 80°F) or Sunny
+    if (tempF > 80) {
+      return menuItems.filter(
+        (item) =>
+          item.category.includes("fruit") ||
+          item.category.includes("specialty"),
+      );
+    }
+    // If it's nighttime or cool (< 65°F)
+    else if (tempF < 65 || !isDay) {
+      return menuItems.filter(
+        (item) => item.type === "Food" || item.category.includes("milk tea"),
+      );
+    }
+    return menuItems.slice(0, 4);
+  }, [menuItems, tempF, isDay]);
+
+  const categories = [
+    "recommended",
+    "most ordered",
+    "milk tea",
+    "fruit tea",
+    "specialty tea",
+    "food",
+  ];
+
+  const filteredItems = useMemo(() => {
+    if (activeTab === "recommended") return recommendedItems;
+    if (activeTab === "most ordered") return menuItems;
+    return menuItems.filter((item) => item.category?.includes(activeTab));
+  }, [activeTab, menuItems, recommendedItems]);
 
   if (loading)
     return (
@@ -134,21 +219,27 @@ export default function OrderPage() {
       </div>
     );
 
-  const categories = ["most ordered", "milk tea", "fruit tea", "specialty tea", "food"];
-
-  const filteredItems =
-    activeTab === "most ordered"
-      ? menuItems
-      : menuItems.filter((item) => item.category?.includes(activeTab));
-
   return (
     <main className="p-8 pb-36">
+      <div className="text-center mb-6">
+        {tempF !== null && (
+          <div className="inline-block bg-gray-100 px-4 py-2 rounded-2xl border border-gray-200">
+            <p className="text-sm font-bold text-gray-700">
+              {isDay ? "☀️" : "🌙"} {Math.round(tempF)}°F in College Station
+            </p>
+            <p className="text-xs text-[#00A67E] font-medium">
+              Chef's Picks for this weather
+            </p>
+          </div>
+        )}
+      </div>
+
       <nav className="flex justify-center gap-8 mb-12 border-b border-gray-300 overflow-x-auto">
         {categories.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-2 text-lg whitespace-nowrap transition-all ${
+            className={`pb-2 text-lg whitespace-nowrap transition-all capitalize ${
               activeTab === tab
                 ? "text-[#00A67E] font-bold border-b-4 border-[#00A67E]"
                 : "text-gray-600 hover:text-black"

@@ -45,7 +45,9 @@ export async function POST(request: Request) {
        * CHANGE: Normalize category to lowercase.
        * This prevents "French fries" from failing if the category is "Food" instead of "food".
        */
-      const itemCategory = item.category?.toLowerCase();
+      // This ensures that even if category is missing or a number, 
+// it becomes a string like "" or "1" before calling toLowerCase()
+const itemCategory = String(item.category || "").toLowerCase();
 
       if (itemCategory === "food") {
         // Find the ID in the food table based on the name
@@ -64,7 +66,7 @@ export async function POST(request: Request) {
               receiptId, 
               foodId, 
               item.customizations.notes || "", 
-              1
+              item.quantity || 1
             ]
           );
         }
@@ -86,7 +88,7 @@ export async function POST(request: Request) {
               item.customizations.ice || "Regular", 
               isNaN(sweetnessInt) ? 100 : sweetnessInt, 
               item.customizations.toppings?.includes("Boba") || false, 
-              1
+              item.quantity || 1
             ]
           );
         }

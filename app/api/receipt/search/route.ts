@@ -31,7 +31,7 @@ export async function GET(request: Request) {
 
     if (!q) {
       const result = await pool.query(
-        "SELECT id, r.customer_id, u.name, cashier_id, purchase_date, payment_method, z_closed, discount, tax FROM receipt r LEFT JOIN (SELECT name, id as customer_id FROM users) u ON r.customer_id = u.customer_id LIMIT 100",
+        "SELECT id, r.customer_id, u.name, cashier_id, purchase_date, payment_method, z_closed, discount, tax FROM receipt r LEFT JOIN (SELECT name, id as customer_id FROM users) u ON r.customer_id = u.customer_id ORDER BY purchase_date DESC LIMIT 100 ",
       );
 
       return Response.json(result.rows);
@@ -48,6 +48,7 @@ export async function GET(request: Request) {
         OR CAST(r.purchase_date AS TEXT) LIKE $2
         OR r.payment_method LIKE $1
         OR CAST(r.z_closed AS TEXT) LIKE $1
+      ORDER BY purchase_date DESC
       `,
       [`%${q}%`, q],
     );

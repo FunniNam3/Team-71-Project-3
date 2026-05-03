@@ -44,10 +44,10 @@ export default function CashierCustomization({
   onClose,
   onAddToCart,
 }: CashierCustomizationProps) {
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedIce, setSelectedIce] = useState("");
-  const [selectedSweetness, setSelectedSweetness] = useState("");
-  const [selectedMilk, setSelectedMilk] = useState("");
+  const [selectedSize, setSelectedSize] = useState("Regular");
+  const [selectedIce, setSelectedIce] = useState("Normal");
+  const [selectedSweetness, setSelectedSweetness] = useState("100%");
+  const [selectedMilk, setSelectedMilk] = useState("Cow");
   const [selectedBoba, setSelectedBoba] = useState<string[]>([]);
   const [selectedPoppingBoba, setSelectedPoppingBoba] = useState<string[]>([]);
   const [selectedJelly, setSelectedJelly] = useState<string[]>([]);
@@ -63,15 +63,32 @@ export default function CashierCustomization({
     if (!item) return;
 
     setSelectedSize("Regular");
-    setSelectedIce(item.ice || "Normal");
+    setSelectedIce("Normal");
     setSelectedSweetness("100%");
-    setSelectedMilk(item.milk || "Cow");
+    setSelectedMilk("Cow");
     setSelectedBoba([]);
     setSelectedPoppingBoba([]);
+    setSelectedJelly([]);
+    setSelectedOther([]);
     setQuantity(1);
+    setNotes("");
   }, [item]);
 
   if (!isOpen || !item) return null;
+
+  const getSizeSurcharge = () => {
+    if (selectedSize === "Small") return -0.75;
+    if (selectedSize === "Large") return 0.75;
+    if (selectedSize === "Extra Large") return 1.5;
+    return 0;
+  };
+
+  const price =
+    item.price +
+    getSizeSurcharge() +
+    (selectedBoba.length + selectedJelly.length) * 0.5 +
+    selectedPoppingBoba.length * 0.75 +
+    selectedOther.length;
 
   function handleAdd() {
     if (!item) return;
@@ -79,7 +96,7 @@ export default function CashierCustomization({
     const customizedItem: CustomizedCartItem = {
       id: item.id,
       name: item.name,
-      price: item.price,
+      price,
       quantity,
       itemType: "drink",
       selectedSize,
@@ -105,11 +122,13 @@ export default function CashierCustomization({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-3xl rounded-xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-3xl rounded-xl max-h-3/4 overflow-y-auto bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-(--gray)">{item.name}</h2>
-            <p className="text-sm text-(--gray)">${item.price.toFixed(2)}</p>
+            <h2 className="text-2xl font-bold text-(--gray)">{item.name}</h2>
+            <p className="text-lg text-(--gray)">
+              ${(price * quantity).toFixed(2)}
+            </p>
           </div>
         </div>
 
@@ -184,7 +203,10 @@ export default function CashierCustomization({
           </div>
 
           <h3 className="mb-1 block text-lg font-medium text-(--gray)">
-            Toppings: {topLen} / 5
+            Toppings:{" "}
+            <span className={`${topLen >= 5 && "text-(--accent)"}`}>
+              {topLen} / 5
+            </span>
           </h3>
 
           <div>
@@ -215,7 +237,7 @@ export default function CashierCustomization({
                       }
                     }}
                     className={`border rounded px-2 py-1
-                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/20"}
+                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/10"}
                       ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                       `}
                   >
@@ -258,7 +280,7 @@ export default function CashierCustomization({
                       }
                     }}
                     className={`border rounded px-2 py-1
-                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/20"}
+                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/10"}
                       ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                       `}
                   >
@@ -299,7 +321,7 @@ export default function CashierCustomization({
                       }
                     }}
                     className={`border rounded px-2 py-1
-                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/20"}
+                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/10"}
                       ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                       `}
                   >
@@ -342,7 +364,7 @@ export default function CashierCustomization({
                       }
                     }}
                     className={`border rounded px-2 py-1
-                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/20"}
+                      ${selected ? "bg-(--primary) border-(--primary) text-white" : "bg-(--gray)/10"}
                       ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
                       `}
                   >
@@ -352,6 +374,19 @@ export default function CashierCustomization({
               })}
             </div>
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-lg font-medium text-gray-500">
+            Notes
+          </label>
+          <textarea
+            className="w-full border border-gray-200 rounded p-3 text-gray-700 focus:ring-2 focus:ring-(--primary) outline-none"
+            rows={3}
+            placeholder="No onions, extra napkins, etc..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
         </div>
 
         <div>

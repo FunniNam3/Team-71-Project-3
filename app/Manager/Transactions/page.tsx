@@ -20,7 +20,15 @@ interface ReceiptItems {
   item_name: string;
   price: number;
   quantity: number;
-  details: string;
+  size?: string;
+  ice?: string;
+  sweetness?: string;
+  milk?: string;
+  boba?: string;
+  popping_boba?: string;
+  jelly?: string;
+  other?: string;
+  notes: string;
 }
 
 export default function Inventory() {
@@ -42,12 +50,12 @@ export default function Inventory() {
   const [selectedReceipt, setSelectedReceipt] = useState<ReceiptItems[]>([]);
   const [openSelected, setOpenSelected] = useState(false);
   const [current, setCurrent] = useState(-1);
-  const [total, setTotal] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
 
   async function showReceipt(id: number) {
     setOpenSelected(true);
     setCurrent(-1);
-    setTotal(0);
+    setSubtotal(0);
     window.scrollTo(0, 0);
     await fetch(`/api/receipt/detailed?q=${id}`)
       .then((res) => res.json())
@@ -56,9 +64,20 @@ export default function Inventory() {
         setSelectedReceipt(result);
         let curr = 0;
         for (let i = 0; i < result.length; i++) {
-          curr += result[i].price;
+          try {
+            if (result[i].boba)
+              result[i].price += result[i].boba.split(",").length * 0.5;
+            if (result[i].popping_boba)
+              result[i].price +=
+                result[i].popping_boba.split(",").length * 0.75;
+            if (result[i].jelly)
+              result[i].price += result[i].jelly.split(",").length * 0.5;
+            if (result[i].other)
+              result[i].price += result[i].other.split(",").length;
+          } catch (err) {}
+          curr += result[i].price * result[i].quantity;
         }
-        setTotal(curr);
+        setSubtotal(curr);
       });
   }
 
@@ -122,45 +141,68 @@ export default function Inventory() {
             <>
               <h1 className="font-bold text-4xl">Receipt #{current}</h1>
               <ul className="w-full flex flex-col text-left">
-                {selectedReceipt &&
+                {Array.isArray(selectedReceipt) &&
                   selectedReceipt.map((item, index) => {
-                    if (!item.details) {
-                      return (
-                        <li key={index}>
-                          <div className="flex justify-between">
-                            <p className="font-semibold text-xl">
-                              {item.item_name} ${item.price}
-                            </p>
-                            <p className="font-semibold text-right text-xl">
-                              {" "}
-                              x{item.quantity}
-                            </p>
-                          </div>
-                        </li>
-                      );
-                    }
-                    const details = item.details.split(", ");
                     return (
                       <li key={index}>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-10">
                           <p className="font-semibold text-xl">
-                            {item.item_name} ${item.price}
+                            {item.item_name} ${item.price} x {item.quantity}
                           </p>
                           <p className="font-semibold text-right text-xl">
-                            {" "}
-                            x{item.quantity}
+                            ${item.price * item.quantity}
                           </p>
                         </div>
                         <ul className="w-fit ml-5">
-                          {details.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
+                          {item.size && <li>Size: {item.size}</li>}
+                          {item.ice && <li>Ice: {item.ice}</li>}
+                          {item.sweetness != undefined && (
+                            <li>Sweetness: {item.sweetness}%</li>
+                          )}
+                          {item.milk && <li>Milk: {item.milk}</li>}
+                          {item.boba && (
+                            <li>Boba: {item.boba?.split(",").join(", ")}</li>
+                          )}
+                          {item.popping_boba && (
+                            <li>
+                              Popping Boba:{" "}
+                              {item.popping_boba?.split(",").join(", ")}
+                            </li>
+                          )}
+                          {item.jelly && (
+                            <li>Jelly: {item.jelly?.split(",").join(", ")}</li>
+                          )}
+                          {item.other && (
+                            <li>Other: {item.other?.split(",").join(", ")}</li>
+                          )}
                         </ul>
+                        {item.notes && (
+                          <p className="text-wrap max-w-md ml-5 break-all">
+                            Notes: {item.notes}
+                          </p>
+                        )}
                       </li>
                     );
                   })}
               </ul>
-              <h2 className="text-left font-bold">Total Price: ${total}</h2>
+              <div>
+                <div className="flex font-semibold justify-between">
+                  <h2>Subtotal Price:</h2>
+                  <h2>${subtotal.toFixed(2)}</h2>
+                </div>
+                {discount > 0 && (
+                  <div className="flex font-semibold justify-between">
+                    <h2>Discount:</h2> <h2>-${discount.toFixed(2)}</h2>
+                  </div>
+                )}
+                <div className="flex font-semibold justify-between">
+                  <h2>Tax:</h2> <h2>${tax.toFixed(2)}</h2>
+                </div>
+                <div className="flex font-semibold justify-between">
+                  <h2>Total Price:</h2>{" "}
+                  <h2>${(subtotal - discount + tax).toFixed(2)}</h2>
+                </div>
+              </div>
             </>
           )}
         </div>

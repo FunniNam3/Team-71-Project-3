@@ -58,6 +58,27 @@ type CartItem = {
   notes: string;
 };
 
+interface ReceiptItem {
+  instanceId: string;
+  name: string;
+  price: number;
+  category?: string;
+  quantity: number;
+  customizations: {
+    size?: string; // Added for drink sizing
+    ice?: string;
+    sugar?: string;
+    milk?: string;
+    notes?: string;
+    toppings?: {
+      boba: string[];
+      popping: string[];
+      jelly: string[];
+      other: string[];
+    };
+  };
+}
+
 export default function CashierPOSPage() {
   const router = useRouter();
   useEffect(() => {
@@ -261,17 +282,44 @@ export default function CashierPOSPage() {
     }
 
     try {
+      let cart: ReceiptItem[] = [];
+      for (const item of cartItems) {
+        cart = [
+          ...cart,
+          {
+            instanceId: item.id.toString(),
+            name: item.name,
+            price: item.price,
+            category: item.itemType,
+            quantity: item.quantity,
+            customizations: {
+              size: item.selectedSize,
+              ice: item.selectedIce,
+              sugar: item.selectedSweetness,
+              milk: item.selectedMilk,
+              notes: item.notes,
+              toppings: {
+                boba: item.selectedBoba || [],
+                popping: item.selectedPoppingBoba || [],
+                jelly: item.selectedJelly || [],
+                other: item.selectedOther || [],
+              },
+            },
+          },
+        ];
+      }
+
+      const points = Math.floor(total * 10);
+
       const receiptPayload = {
         customer_id: selectedCustomer.id,
         cashier_id: cashierId,
-        purchase_date: new Date().toISOString(),
         tax,
         discount: discountAmount,
         payment_method: selectedMethod,
-        z_closed: false,
+        points,
         total,
-        items: cartItems,
-        discount_id: selectedDiscount?.id ?? null,
+        cart,
       };
 
       console.log("Sending receipt payload:", receiptPayload);
@@ -294,57 +342,57 @@ export default function CashierPOSPage() {
 
       const receiptId = getReceiptId(json);
 
-      console.log("Receipt ID found:", receiptId);
-
       if (!receiptId) {
         alert("Checkout failed: receipt ID was not returned.");
         return;
       }
 
-      console.log("Sending receipt items:", {
-        receipt_id: receiptId,
-        items: cartItems,
-      });
+      console.log("Receipt ID found:", receiptId);
 
-      const receiptItemsRes = await fetch("/api/to_receipt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          receipt_id: receiptId,
-          items: cartItems,
-        }),
-      });
+      // console.log("Sending receipt items:", {
+      //   receipt_id: receiptId,
+      //   items: cartItems,
+      // });
 
-      const receiptItemsJson = await receiptItemsRes.json();
+      // const receiptItemsRes = await fetch("/api/to_receipt", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     receipt_id: receiptId,
+      //     items: cartItems,
+      //   }),
+      // });
 
-      console.log("Receipt items API status:", receiptItemsRes.status);
-      console.log("Receipt items API response:", receiptItemsJson);
+      // const receiptItemsJson = await receiptItemsRes.json();
 
-      if (!receiptItemsRes.ok) {
-        alert("Receipt was created, but food/drink items failed to save.");
-        return;
-      }
+      // console.log("Receipt items API status:", receiptItemsRes.status);
+      // console.log("Receipt items API response:", receiptItemsJson);
 
-      const pointsToAdd = Math.floor(total * 10);
+      // if (!receiptItemsRes.ok) {
+      //   alert("Receipt was created, but food/drink items failed to save.");
+      //   return;
+      // }
 
-      const pointsRes = await fetch("/api/users", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedCustomer.id,
-          pointsToAdd,
-        }),
-      });
+      // const points = Math.floor(total * 10);
 
-      const pointsJson = await pointsRes.json();
+      // const pointsRes = await fetch("/api/users", {
+      //   method: "PATCH",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     id: selectedCustomer.id,
+      //     pointsToAdd,
+      //   }),
+      // });
 
-      console.log("Points API status:", pointsRes.status);
-      console.log("Points API response:", pointsJson);
+      // const pointsJson = await pointsRes.json();
 
-      if (!pointsRes.ok) {
-        alert("Receipt was created, but customer points failed to update.");
-        return;
-      }
+      // console.log("Points API status:", pointsRes.status);
+      // console.log("Points API response:", pointsJson);
+
+      // if (!pointsRes.ok) {
+      //   alert("Receipt was created, but customer points failed to update.");
+      //   return;
+      // }
 
       alert(`${selectedMethod} transaction completed.`);
 
@@ -369,7 +417,7 @@ export default function CashierPOSPage() {
   }
 
   return (
-    <main className="flex min-h-screen #C4AF9A">
+    <main className="flex min-h-dvh">
       <section className="w-[32%] min-w-85 bg-white p-5 rounded-tr-2xl">
         <h1 className="mb-6 text-2xl font-bold text-(--gray)">Checkout</h1>
 
@@ -427,6 +475,7 @@ export default function CashierPOSPage() {
                           {item.selectedOther?.length !== 0 && (
                             <p>Other: {item.selectedOther?.join(", ")}</p>
                           )}
+                          {item.notes && <p>Notes: {item.notes}</p>}
                         </div>
                       )}
                     </div>

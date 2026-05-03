@@ -131,49 +131,53 @@ export default function CartModal({
                     </h3>
                     <div className="text-sm text-gray-600">
                       {item.category !== "food" && (
-                        <p>
-                          <span className="font-medium text-black">
-                            {item.customizations.size}
-                          </span>
-                          {" • "}
-                          <span
-                            className={
-                              item.customizations.ice === "Hot Drink"
-                                ? "text-orange-600 font-bold"
-                                : ""
-                            }
-                          >
-                            {item.customizations.ice}
-                            {item.customizations.ice !== "Hot Drink"
-                              ? " ice"
-                              : ""}
-                          </span>
-                          {" • "}
-                          {item.customizations.milk}
-                          {" • "}
-                          {item.customizations.sugar} sugar
-                        </p>
+                        <>
+                          <p>
+                            <span className="font-medium text-black">
+                              {item.customizations.size}
+                            </span>
+                            {" • "}
+                            <span
+                              className={
+                                item.customizations.ice === "Hot Drink"
+                                  ? "text-orange-600 font-bold"
+                                  : ""
+                              }
+                            >
+                              {item.customizations.ice}
+                              {item.customizations.ice !== "Hot Drink"
+                                ? " ice"
+                                : ""}
+                            </span>
+                            {" • "}
+                            {item.customizations.milk}
+                            {" • "}
+                            {item.customizations.sugar} sugar
+                          </p>
+
+                          <p>
+                            {item.customizations.toppings.boba.length !== 0 &&
+                              "Boba: " +
+                                item.customizations.toppings.boba.join(", ")}
+                          </p>
+                          <p>
+                            {item.customizations.toppings.popping.length !==
+                              0 &&
+                              "Popping: " +
+                                item.customizations.toppings.popping.join(", ")}
+                          </p>
+                          <p>
+                            {item.customizations.toppings.jelly.length !== 0 &&
+                              "Jelly: " +
+                                item.customizations.toppings.jelly.join(", ")}
+                          </p>
+                          <p>
+                            {item.customizations.toppings.other.length !== 0 &&
+                              "Other: " +
+                                item.customizations.toppings.other.join(", ")}
+                          </p>
+                        </>
                       )}
-                      <p>
-                        {item.customizations.toppings.boba.length !== 0 &&
-                          "Boba: " +
-                            item.customizations.toppings.boba.join(", ")}
-                      </p>
-                      <p>
-                        {item.customizations.toppings.popping.length !== 0 &&
-                          "Popping: " +
-                            item.customizations.toppings.popping.join(", ")}
-                      </p>
-                      <p>
-                        {item.customizations.toppings.jelly.length !== 0 &&
-                          "Jelly: " +
-                            item.customizations.toppings.jelly.join(", ")}
-                      </p>
-                      <p>
-                        {item.customizations.toppings.other.length !== 0 &&
-                          "Other: " +
-                            item.customizations.toppings.other.join(", ")}
-                      </p>
                       <p>
                         {item.customizations.notes || "No special instructions"}
                       </p>

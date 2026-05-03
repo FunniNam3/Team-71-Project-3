@@ -13,7 +13,7 @@ interface CartItem {
     sugar?: string;
     milk?: string;
     notes?: string;
-    toppings: {
+    toppings?: {
       boba: string[];
       popping: string[];
       jelly: string[];
@@ -98,9 +98,9 @@ export async function POST(request: Request) {
             "SELECT id FROM drink WHERE name = $1",
             [item.name],
           );
-          const drinkId = drinkLookup.rows[0]?.id;
 
-          if (drinkId) {
+          if (drinkLookup.rows.length !== 0) {
+            const drinkId = drinkLookup.rows[0]?.id;
             // Convert sugar string (e.g., "100%") to integer (100)
             const sweetnessInt = parseInt(
               item.customizations.sugar || "100",
@@ -117,14 +117,17 @@ export async function POST(request: Request) {
                 item.customizations.ice || "Regular",
                 isNaN(sweetnessInt) ? 100 : sweetnessInt,
                 item.customizations.milk,
-                item.customizations.toppings.boba.join(),
-                item.customizations.toppings.popping.join(),
-                item.customizations.toppings.jelly.join(),
-                item.customizations.toppings.other.join(),
+                item.customizations.toppings?.boba.join(),
+                item.customizations.toppings?.popping.join(),
+                item.customizations.toppings?.jelly.join(),
+                item.customizations.toppings?.other.join(),
                 item.quantity || 1,
                 item.customizations.notes,
               ],
             );
+          } else {
+            console.log("Cannot find Drink");
+            throw new Error("Cannot find Drink");
           }
         }
       }

@@ -185,7 +185,7 @@ export default function Inventory() {
                     );
                   })}
               </ul>
-              <div>
+              <div className="border-t mt-3 text-xl">
                 <div className="flex font-semibold justify-between">
                   <h2>Subtotal Price:</h2>
                   <h2>${subtotal.toFixed(2)}</h2>
@@ -198,7 +198,7 @@ export default function Inventory() {
                 <div className="flex font-semibold justify-between">
                   <h2>Tax:</h2> <h2>${tax.toFixed(2)}</h2>
                 </div>
-                <div className="flex font-semibold justify-between">
+                <div className="flex font-semibold justify-between border-t border-dashed">
                   <h2>Total Price:</h2>{" "}
                   <h2>${(subtotal - discount + tax).toFixed(2)}</h2>
                 </div>

@@ -14,8 +14,14 @@ export interface CartItem {
     size?: string; // Added for drink sizing
     ice?: string;
     sugar?: string;
+    milk?: string;
     notes?: string;
-    toppings: string[];
+    toppings: {
+      boba: string[];
+      popping: string[];
+      jelly: string[];
+      other: string[];
+    };
   };
 }
 
@@ -41,7 +47,10 @@ export default function CartModal({
   const [orderId, setOrderId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const tax = subtotal * 0.0825;
   const total = subtotal + tax;
   const points = Math.floor(total) * 10;
@@ -115,23 +124,63 @@ export default function CartModal({
                 >
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-black">
-                      {item.name} <span className="text-[#00A67E] ml-1">x{item.quantity}</span>
+                      {item.name}{" "}
+                      <span className="text-[#00A67E] ml-1">
+                        x{item.quantity}
+                      </span>
                     </h3>
                     <div className="text-sm text-gray-600">
-                      {item.category === "food" ? (
-                        <p>{item.customizations.notes || "No special instructions"}</p>
-                      ) : (
-                        <p>
-                          <span className="font-medium text-black">{item.customizations.size}</span>
-                          {" • "}
-                          <span className={item.customizations.ice === "Hot Drink" ? "text-orange-600 font-bold" : ""}>
-                            {item.customizations.ice}
-                            {item.customizations.ice !== "Hot Drink" ? " ice" : ""}
-                          </span>
-                          {" • "}
-                          {item.customizations.sugar} sugar
-                        </p>
+                      {item.category !== "food" && (
+                        <>
+                          <p>
+                            <span className="font-medium text-black">
+                              {item.customizations.size}
+                            </span>
+                            {" • "}
+                            <span
+                              className={
+                                item.customizations.ice === "Hot Drink"
+                                  ? "text-orange-600 font-bold"
+                                  : ""
+                              }
+                            >
+                              {item.customizations.ice}
+                              {item.customizations.ice !== "Hot Drink"
+                                ? " ice"
+                                : ""}
+                            </span>
+                            {" • "}
+                            {item.customizations.milk}
+                            {" • "}
+                            {item.customizations.sugar} sugar
+                          </p>
+
+                          <p>
+                            {item.customizations.toppings.boba.length !== 0 &&
+                              "Boba: " +
+                                item.customizations.toppings.boba.join(", ")}
+                          </p>
+                          <p>
+                            {item.customizations.toppings.popping.length !==
+                              0 &&
+                              "Popping: " +
+                                item.customizations.toppings.popping.join(", ")}
+                          </p>
+                          <p>
+                            {item.customizations.toppings.jelly.length !== 0 &&
+                              "Jelly: " +
+                                item.customizations.toppings.jelly.join(", ")}
+                          </p>
+                          <p>
+                            {item.customizations.toppings.other.length !== 0 &&
+                              "Other: " +
+                                item.customizations.toppings.other.join(", ")}
+                          </p>
+                        </>
                       )}
+                      <p>
+                        {item.customizations.notes || "No special instructions"}
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end">
@@ -152,11 +201,17 @@ export default function CartModal({
             <div className="p-6 bg-gray-50 border-t">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase font-bold">Total Bill</p>
-                  <p className="text-3xl font-bold text-black">${total.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500 uppercase font-bold">
+                    Total Bill
+                  </p>
+                  <p className="text-3xl font-bold text-black">
+                    ${total.toFixed(2)}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-500 uppercase font-bold">Points</p>
+                  <p className="text-xs text-gray-500 uppercase font-bold">
+                    Points
+                  </p>
                   <p className="text-2xl font-bold text-[#00A67E]">+{points}</p>
                 </div>
               </div>
@@ -176,7 +231,9 @@ export default function CartModal({
             <h2 className="text-2xl font-bold text-black">Payment</h2>
             <select
               value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+              onChange={(e) =>
+                setPaymentMethod(e.target.value as PaymentMethod)
+              }
               className="w-full border-2 border-gray-200 p-3 rounded-xl outline-none text-black bg-white font-medium"
             >
               <option value="Payment Method">Select Method...</option>
@@ -185,25 +242,38 @@ export default function CartModal({
               <option value="Check">Check</option>
             </select>
 
-            <div className="min-h-[140px]">
+            <div className="min-h-35">
               {paymentMethod === "Card" && (
                 <div className="space-y-3 animate-in fade-in duration-300">
-                  <input className="w-full border-2 border-gray-200 p-3 rounded-lg text-black" placeholder="Card Number" />
+                  <input
+                    className="w-full border-2 border-gray-200 p-3 rounded-lg text-black"
+                    placeholder="Card Number"
+                  />
                   <div className="flex gap-2">
-                    <input className="w-1/2 border-2 border-gray-200 p-3 rounded-lg text-black" placeholder="MM/YY" />
-                    <input className="w-1/2 border-2 border-gray-200 p-3 rounded-lg text-black" placeholder="CVC" />
+                    <input
+                      className="w-1/2 border-2 border-gray-200 p-3 rounded-lg text-black"
+                      placeholder="MM/YY"
+                    />
+                    <input
+                      className="w-1/2 border-2 border-gray-200 p-3 rounded-lg text-black"
+                      placeholder="CVC"
+                    />
                   </div>
                 </div>
               )}
               {paymentMethod === "Cash" && (
                 <p className="p-4 bg-gray-100 rounded-xl text-sm border text-black">
-                  Please pay at the counter. Points will be added upon completion.
+                  Please pay at the counter. Points will be added upon
+                  completion.
                 </p>
               )}
             </div>
 
             <div className="flex gap-4 pt-4">
-              <button onClick={() => setView("cart")} className="flex-1 py-3 font-bold text-black">
+              <button
+                onClick={() => setView("cart")}
+                className="flex-1 py-3 font-bold text-black"
+              >
                 Back
               </button>
               <button
@@ -222,10 +292,14 @@ export default function CartModal({
             <div className="w-16 h-16 rounded-full bg-[#00A67E] text-white flex items-center justify-center mx-auto text-3xl font-bold">
               ✓
             </div>
-            <h2 className="text-2xl font-bold uppercase text-black">Order Confirmed</h2>
+            <h2 className="text-2xl font-bold uppercase text-black">
+              Order Confirmed
+            </h2>
 
             <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-300 text-left font-mono text-sm text-black">
-              <p className="text-center font-bold mb-4 border-b pb-2">OFFICIAL RECEIPT</p>
+              <p className="text-center font-bold mb-4 border-b pb-2">
+                OFFICIAL RECEIPT
+              </p>
               <div className="flex justify-between mb-4 text-xs">
                 <span>RECEIPT ID:</span>
                 <span className="font-bold">#{orderId}</span>
@@ -233,11 +307,17 @@ export default function CartModal({
 
               <div className="space-y-2 mb-4 border-b pb-4">
                 {cart.map((item) => (
-                  <div key={item.instanceId} className="flex justify-between text-black">
+                  <div
+                    key={item.instanceId}
+                    className="flex justify-between text-black"
+                  >
                     <div className="flex flex-col">
-                      <span>{item.name} x{item.quantity}</span>
+                      <span>
+                        {item.name} x{item.quantity}
+                      </span>
                       <span className="text-[10px] text-gray-500 uppercase">
-                        {item.customizations.size} {item.customizations.ice === "Hot Drink" ? "(HOT)" : ""}
+                        {item.customizations.size}{" "}
+                        {item.customizations.ice === "Hot Drink" ? "(HOT)" : ""}
                       </span>
                     </div>
                     <span>${(item.price * item.quantity).toFixed(2)}</span>
@@ -274,6 +354,6 @@ export default function CartModal({
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

@@ -22,6 +22,21 @@ PATCH  - Update part of resource
 DELETE - Remove data
 */
 
+interface ReceiptItems {
+  item_name: string;
+  price: number;
+  quantity: number;
+  size?: string;
+  ice?: string;
+  sweetness?: string;
+  milk?: string;
+  boba?: string;
+  popping_boba?: string;
+  jelly?: string;
+  other?: string;
+  notes: string;
+}
+
 // will return all table lines the match the parameter enetered,
 // searches by any of the attributes of the receipt table
 export async function GET(request: Request) {
@@ -33,36 +48,45 @@ export async function GET(request: Request) {
       return Response.json([]);
     }
 
-    const result = await pool.query(
-      `
+    const food: ReceiptItems[] = (
+      await pool.query(
+        `
       SELECT f.name AS item_name,
            f.price AS price,
            ftr.quantity,
-           ftr.modifiers AS details
+           ftr.modifiers AS notes
     FROM food_to_receipt ftr
     JOIN food f ON ftr.food_id = f.id
     WHERE ftr.receipt_id = $1
+      `,
+        [q],
+      )
+    ).rows;
 
-    UNION ALL
-
+    const drinks: ReceiptItems[] = (
+      await pool.query(
+        `
     SELECT d.name AS item_name,
-           d.price AS price,
-           dtr.quantity,
-           CONCAT(
-               'Ice: ', dtr.ice,
-               ', Sweetness: ', dtr.sweetness,
-               ', Milk: ', dtr.milk,
-               ', Boba: ', dtr.boba,
-               ', Popping: ', dtr.popping_boba
-           ) AS details
+          d.price AS price,
+          dtr.quantity,
+          dtr.size AS size,
+          dtr.ice AS ice,
+          dtr.sweetness AS sweetness,
+          dtr.milk AS milk,
+          dtr.boba AS boba,
+          dtr.popping_boba AS popping_boba,
+          dtr.jelly AS jelly,
+          dtr.other AS other,
+          dtr.special AS notes
     FROM drink_to_receipt dtr
     JOIN drink d ON dtr.drink_id = d.id
     WHERE dtr.receipt_id = $1
       `,
-      [q],
-    );
+        [q],
+      )
+    ).rows;
 
-    return Response.json(result.rows);
+    return Response.json([...food, ...drinks]);
   } catch (err) {
     console.error(err);
     return Response.json(

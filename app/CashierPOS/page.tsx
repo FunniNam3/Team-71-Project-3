@@ -23,6 +23,7 @@ type FoodItem = {
   id: number;
   name: string;
   price: number;
+  notes: string;
 };
 
 type Customer = {
@@ -46,11 +47,15 @@ type CartItem = {
   price: number;
   quantity: number;
   itemType: "drink" | "food";
+  selectedSize?: string;
   selectedIce?: string;
   selectedSweetness?: string;
   selectedMilk?: string;
-  selectedBoba?: string;
-  selectedPoppingBoba?: string;
+  selectedBoba?: string[];
+  selectedPoppingBoba?: string[];
+  selectedJelly?: string[];
+  selectedOther?: string[];
+  notes: string;
 };
 
 export default function CashierPOSPage() {
@@ -203,6 +208,7 @@ export default function CashierPOSPage() {
       price: Number(food.price),
       quantity: 1,
       itemType: "food",
+      notes: food.notes,
     };
 
     setCartItems((prev) => [...prev, newFood]);
@@ -229,6 +235,7 @@ export default function CashierPOSPage() {
     return json.receipt?.id ?? json.data?.id ?? json.id ?? json.receipt_id;
   }
 
+  // TODO Fix this so that it is more similar to the Customer Checkout System
   async function handleCheckout(selectedMethod: string) {
     console.log("Checkout started with payment method:", selectedMethod);
     console.log("Selected customer:", selectedCustomer);
@@ -405,8 +412,21 @@ export default function CashierPOSPage() {
                           <p>Ice: {item.selectedIce}</p>
                           <p>Sweetness: {item.selectedSweetness}</p>
                           <p>Milk: {item.selectedMilk}</p>
-                          <p>Boba: {item.selectedBoba}</p>
-                          <p>Popping Boba: {item.selectedPoppingBoba}</p>
+                          {item.selectedBoba?.length !== 0 && (
+                            <p>Boba: {item.selectedBoba?.join(", ")}</p>
+                          )}
+                          {item.selectedPoppingBoba?.length !== 0 && (
+                            <p>
+                              Popping Boba:{" "}
+                              {item.selectedPoppingBoba?.join(", ")}
+                            </p>
+                          )}
+                          {item.selectedJelly?.length !== 0 && (
+                            <p>Jelly: {item.selectedJelly?.join(", ")}</p>
+                          )}
+                          {item.selectedOther?.length !== 0 && (
+                            <p>Other: {item.selectedOther?.join(", ")}</p>
+                          )}
                         </div>
                       )}
                     </div>

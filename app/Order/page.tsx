@@ -7,14 +7,6 @@ import Modal from "@components/Modal";
 import CartModal from "@components/CartModal";
 import { CartItem } from "@components/CartModal";
 
-// 1. THE "STRUCTS" (Interfaces)
-interface Customizations {
-  ice: string;
-  sugar: string;
-  toppings: string[];
-  size?: string; // Added size support
-}
-
 interface MenuItem {
   id: string | number;
   name: string;
@@ -131,6 +123,7 @@ export default function OrderPage() {
       customizations: {
         ice: customizedItem.customizations?.ice || "",
         sugar: customizedItem.customizations?.sugar || "",
+        milk: customizedItem.customizations?.milk || "",
         notes: customizedItem.customizations?.notes || "",
         toppings: customizedItem.customizations?.toppings || [],
         size: customizedItem.customizations?.size || "Regular", // Sync size

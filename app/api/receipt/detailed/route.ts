@@ -49,11 +49,15 @@ export async function GET(request: Request) {
            d.price AS price,
            dtr.quantity,
            CONCAT(
-               'Ice: ', dtr.ice,
+               'Size: ', dtr.size,
+               ', Ice: ', dtr.ice,
                ', Sweetness: ', dtr.sweetness,
                ', Milk: ', dtr.milk,
                ', Boba: ', dtr.boba,
-               ', Popping: ', dtr.popping_boba
+               ', Popping: ', dtr.popping_boba,
+               ', Jelly: ', dtr.jelly,
+               ', Other: ', dtr.other,
+               ', Notes: ', dtr.special
            ) AS details
     FROM drink_to_receipt dtr
     JOIN drink d ON dtr.drink_id = d.id

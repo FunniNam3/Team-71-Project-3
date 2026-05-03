@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CashierItemCard from "@components/CashierItemCard";
-import CashierCustomization from "@components/CashierCustomization";
+import CashierCustomization, {
+  FoodCustomization,
+} from "@components/CashierCustomization";
 import DiscountPopUp from "@components/DiscountPopUp";
 import PaymentMethodPopUp from "@components/PaymentMethodPopUp";
 import { useRouter } from "next/navigation";
@@ -65,7 +67,7 @@ interface ReceiptItem {
   category?: string;
   quantity: number;
   customizations: {
-    size?: string; // Added for drink sizing
+    size?: string;
     ice?: string;
     sugar?: string;
     milk?: string;
@@ -103,6 +105,7 @@ export default function CashierPOSPage() {
     null,
   );
   const [selectedDrink, setSelectedDrink] = useState<DrinkItem | null>(null);
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(
     null,
   );
@@ -219,26 +222,20 @@ export default function CashierPOSPage() {
 
   function handleSelectDrink(drink: DrinkItem) {
     setSelectedDrink(drink);
+    setSelectedFood(null);
     setShowCustomization(true);
   }
 
-  function handleAddFood(food: FoodItem) {
-    const newFood: CartItem = {
-      id: food.id,
-      name: food.name,
-      price: Number(food.price),
-      quantity: 1,
-      itemType: "food",
-      notes: food.notes,
-    };
-
-    setCartItems((prev) => [...prev, newFood]);
-    setItemSearch("");
+  function handleSelectFood(food: FoodItem) {
+    setSelectedFood(food);
+    setSelectedDrink(null);
+    setShowCustomization(true);
   }
 
-  function handleAddCustomizedDrink(customizedDrink: CartItem) {
-    setCartItems((prev) => [...prev, customizedDrink]);
+  function handleAddCustomizedItem(customizedItem: CartItem) {
+    setCartItems((prev) => [...prev, customizedItem]);
     setSelectedDrink(null);
+    setSelectedFood(null);
     setShowCustomization(false);
     setItemSearch("");
   }
@@ -256,7 +253,6 @@ export default function CashierPOSPage() {
     return json.receipt?.id ?? json.data?.id ?? json.id ?? json.receipt_id;
   }
 
-  // TODO Fix this so that it is more similar to the Customer Checkout System
   async function handleCheckout(selectedMethod: string) {
     console.log("Checkout started with payment method:", selectedMethod);
     console.log("Selected customer:", selectedCustomer);
@@ -455,29 +451,31 @@ export default function CashierPOSPage() {
                         {(item.price * item.quantity).toFixed(2)}
                       </p>
 
-                      {item.itemType === "drink" && (
-                        <div className="mt-2 text-xs text-(--gray)">
-                          <p>Ice: {item.selectedIce}</p>
-                          <p>Sweetness: {item.selectedSweetness}</p>
-                          <p>Milk: {item.selectedMilk}</p>
-                          {item.selectedBoba?.length !== 0 && (
-                            <p>Boba: {item.selectedBoba?.join(", ")}</p>
-                          )}
-                          {item.selectedPoppingBoba?.length !== 0 && (
-                            <p>
-                              Popping Boba:{" "}
-                              {item.selectedPoppingBoba?.join(", ")}
-                            </p>
-                          )}
-                          {item.selectedJelly?.length !== 0 && (
-                            <p>Jelly: {item.selectedJelly?.join(", ")}</p>
-                          )}
-                          {item.selectedOther?.length !== 0 && (
-                            <p>Other: {item.selectedOther?.join(", ")}</p>
-                          )}
-                          {item.notes && <p>Notes: {item.notes}</p>}
-                        </div>
-                      )}
+                      <div className="mt-2 text-xs text-(--gray)">
+                        {item.itemType === "drink" && (
+                          <>
+                            <p>Ice: {item.selectedIce}</p>
+                            <p>Sweetness: {item.selectedSweetness}</p>
+                            <p>Milk: {item.selectedMilk}</p>
+                            {item.selectedBoba?.length !== 0 && (
+                              <p>Boba: {item.selectedBoba?.join(", ")}</p>
+                            )}
+                            {item.selectedPoppingBoba?.length !== 0 && (
+                              <p>
+                                Popping Boba:{" "}
+                                {item.selectedPoppingBoba?.join(", ")}
+                              </p>
+                            )}
+                            {item.selectedJelly?.length !== 0 && (
+                              <p>Jelly: {item.selectedJelly?.join(", ")}</p>
+                            )}
+                            {item.selectedOther?.length !== 0 && (
+                              <p>Other: {item.selectedOther?.join(", ")}</p>
+                            )}
+                          </>
+                        )}
+                        {item.notes && <p>Notes: {item.notes}</p>}
+                      </div>
                     </div>
 
                     <button
@@ -609,7 +607,7 @@ export default function CashierPOSPage() {
                   {filteredFoods.map((food) => (
                     <button
                       key={`food-${food.id}`}
-                      onClick={() => handleAddFood(food)}
+                      onClick={() => handleSelectFood(food)}
                       className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100 last:border-b-0"
                     >
                       <p className="font-medium text-(--gray)">{food.name}</p>
@@ -657,8 +655,20 @@ export default function CashierPOSPage() {
         onClose={() => {
           setShowCustomization(false);
           setSelectedDrink(null);
+          setSelectedFood(null);
         }}
-        onAddToCart={handleAddCustomizedDrink}
+        onAddToCart={handleAddCustomizedItem}
+      />
+
+      <FoodCustomization
+        item={selectedFood}
+        isOpen={showCustomization}
+        onClose={() => {
+          setShowCustomization(false);
+          setSelectedDrink(null);
+          setSelectedFood(null);
+        }}
+        onAddToCart={handleAddCustomizedItem}
       />
 
       <DiscountPopUp

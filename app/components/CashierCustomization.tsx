@@ -19,15 +19,15 @@ type CustomizedCartItem = {
   name: string;
   price: number;
   quantity: number;
-  itemType: "drink";
-  selectedSize: string;
-  selectedIce: string;
-  selectedSweetness: string;
-  selectedMilk: string;
-  selectedBoba: string[];
-  selectedPoppingBoba: string[];
-  selectedJelly: string[];
-  selectedOther: string[];
+  itemType: "drink" | "food";
+  selectedSize?: string;
+  selectedIce?: string;
+  selectedSweetness?: string;
+  selectedMilk?: string;
+  selectedBoba?: string[];
+  selectedPoppingBoba?: string[];
+  selectedJelly?: string[];
+  selectedOther?: string[];
   notes: string;
 };
 
@@ -389,6 +389,107 @@ export default function CashierCustomization({
           />
         </div>
 
+        <div>
+          <label className="mb-1 block text-lg font-medium text-gray-500">
+            Quantity
+          </label>
+          <input
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+            className="w-full rounded border p-2 text-gray-500"
+          />
+        </div>
+
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded border px-4 py-2 hover:bg-gray-100 text-(--gray)"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={handleAdd}
+            className="rounded bg-(--primary) px-4 py-2 text-white hover:scale-105 active:scale-95"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type FoodItem = {
+  id: number;
+  name: string;
+  price: number;
+  notes: string;
+};
+
+type FoodCustomizationProps = {
+  item: FoodItem | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onAddToCart: (customizedItem: CustomizedCartItem) => void;
+};
+
+export function FoodCustomization({
+  item,
+  isOpen,
+  onClose,
+  onAddToCart,
+}: FoodCustomizationProps) {
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (!item) return;
+    setQuantity(1);
+    setNotes("");
+  }, [item]);
+
+  if (!isOpen || !item) return null;
+  function handleAdd() {
+    if (!item) return;
+
+    const customizedItem: CustomizedCartItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity,
+      itemType: "food",
+      notes,
+    };
+
+    onAddToCart(customizedItem);
+    onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-3xl rounded-xl max-h-3/4 overflow-y-auto bg-white p-6 shadow-xl">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-(--gray)">{item.name}</h2>
+            <p className="text-lg text-(--gray)">
+              ${(item.price * quantity).toFixed(2)}
+            </p>
+          </div>
+        </div>
+
+        <label className="mb-1 block text-lg font-medium text-gray-500">
+          Notes
+        </label>
+        <textarea
+          className="w-full border border-gray-200 rounded p-3 text-gray-700 focus:ring-2 focus:ring-(--primary) outline-none"
+          rows={3}
+          placeholder="No onions, extra napkins, etc..."
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
         <div>
           <label className="mb-1 block text-lg font-medium text-gray-500">
             Quantity

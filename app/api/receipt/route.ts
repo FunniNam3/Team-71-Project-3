@@ -7,12 +7,12 @@ interface CartItem {
   imageUrl: string;
   category?: string;
   quantity: number;
-  inventoryImpact?: number[]; // Added this to match frontend
+  inventoryImpact?: number[]; 
   customizations: {
     size?: string;
     ice?: string;
     sugar?: string;
-    milk?: string;
+    milk?: string; // Added to fix the 'any' type error
     notes?: string;
     toppings?: {
       boba: string[];
@@ -61,13 +61,15 @@ export async function POST(request: Request) {
       const newCart: CartItem[] = cart;
       for (const item of newCart) {
         
-        // --- NEW: INVENTORY UPDATE LOGIC ---
-        // For every ID in inventoryImpact, decrease the stock by 1
+        // --- UPDATED: INVENTORY UPDATE LOGIC (Supports multiple quantities) ---
         if (item.inventoryImpact && Array.isArray(item.inventoryImpact)) {
           for (const invId of item.inventoryImpact) {
             await client.query(
-              "UPDATE inventory SET amount = amount - 1 WHERE id = $1",
-              [invId]
+              "UPDATE inventory SET amount = amount - $1 WHERE id = $2",
+              [
+                item.quantity || 1, // Now subtracts the full quantity (e.g., 3 milks for 3 drinks)
+                invId
+              ]
             );
           }
         }

@@ -123,7 +123,7 @@ export default function OrderPage() {
       customizations: {
         ice: customizedItem.customizations?.ice || "",
         sugar: customizedItem.customizations?.sugar || "",
-        milk: customizedItem.customizations?.milk || "",
+        milk: customizedItem.milk || customizedItem.customizations?.milk || "Cow",
         notes: customizedItem.customizations?.notes || "",
         toppings: customizedItem.customizations?.toppings || [],
         size: customizedItem.customizations?.size || "Regular",

@@ -118,7 +118,7 @@ export async function DELETE(request: Request) {
 
     // can tbe null so fails the attempt
     if (!id) {
-      return Response.json({ error: "Id is required" }, { status: 400 });
+      return Response.json({ error: "Id is required" }, { status: 400 });//check if id is given
     }
 
     await pool.query(

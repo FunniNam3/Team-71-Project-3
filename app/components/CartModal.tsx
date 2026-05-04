@@ -78,14 +78,16 @@ export default function CartModal({
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to save order");
+      if (!response.ok) {
+        throw new Error((await response.json()).error);
+      }
 
       const savedReceipt = await response.json();
       setOrderId(savedReceipt.id);
       setView("receipt");
     } catch (error) {
-      console.error("Checkout Error:", error);
-      alert("Database error: Transaction failed.");
+      // console.log(error);
+      alert(error);
     } finally {
       setIsSubmitting(false);
     }

@@ -76,22 +76,39 @@ export async function POST(request: Request) {
           );
           const foodId = foodLookup.rows[0]?.id;
 
-          if (foodId) {
-            /**
-             * CHANGE: Column name alignment.
-             * Updated from 'notes' to 'modifiers' to match your 'food_to_receipt' table schema.
-             */
-            await client.query(
-              `INSERT INTO food_to_receipt (receipt_id, food_id, modifiers, quantity)
+          await client.query(
+            `INSERT INTO food_to_receipt (receipt_id, food_id, modifiers, quantity)
              VALUES ($1, $2, $3, $4)`,
-              [
-                receiptId,
-                foodId,
-                item.customizations.notes || "",
-                item.quantity || 1,
-              ],
-            );
+            [
+              receiptId,
+              foodId,
+              item.customizations.notes || "",
+              item.quantity || 1,
+            ],
+          );
+
+          const checkRes = await client.query(
+            `
+            select count(*) from inventory i
+            join food_recipe fr on i.id = fr.inventory_id
+            where fr.food_id = $1 and (i.amount - fr.quantity_used) <= 0
+            `,
+            [foodId],
+          );
+
+          if (parseInt(checkRes.rows[0].count) > 0) {
+            throw new Error("Insufficient inventory amount");
           }
+
+          await client.query(
+            `
+            update inventory
+            set amount = amount - fr.quantity_used
+            from food_recipe fr
+            where inventory.id = fr.inventory_id and fr.food_id = $1
+            `,
+            [foodId],
+          );
         } else {
           // Drink logic
           const drinkLookup = await client.query(
@@ -125,6 +142,68 @@ export async function POST(request: Request) {
                 item.customizations.notes,
               ],
             );
+
+            const checkRes = await client.query(
+              `
+              select count(*) from inventory i
+              join drink_recipe dr on i.id = dr.inventory_id
+              where dr.drink_id = $1 and (i.amount - dr.quantity_used) <= 0
+              `,
+              [drinkId],
+            );
+
+            if (parseInt(checkRes.rows[0].count) > 0) {
+              throw new Error("Insufficient inventory amount");
+            }
+
+            await client.query(
+              `
+              update inventory
+              set amount = amount - dr.quantity_used
+              from drink_recipe dr
+              where inventory.id = dr.inventory_id and dr.drink_id = $1
+              `,
+              [drinkId],
+            );
+
+            if (item.customizations.toppings) {
+              const toppingTypes = [
+                {
+                  toppings: item.customizations.toppings?.boba,
+                  prefix: "Boba ",
+                },
+                {
+                  toppings: item.customizations.toppings?.popping,
+                  prefix: "Popping ",
+                },
+                {
+                  toppings: item.customizations.toppings?.jelly,
+                  prefix: "Jelly ",
+                },
+                { toppings: item.customizations.toppings?.other, prefix: "" },
+              ];
+
+              for (const type of toppingTypes) {
+                for (const topping of type.toppings || []) {
+                  const name = type.prefix + topping;
+
+                  // Check inventory before update
+                  const result = await client.query(
+                    `SELECT amount FROM inventory WHERE name = $1`,
+                    [name],
+                  );
+
+                  if (!result.rows[0] || result.rows[0].amount <= 0) {
+                    throw new Error(`Insufficient inventory for ${name}`);
+                  }
+
+                  await client.query(
+                    `UPDATE inventory SET amount = amount - 1 WHERE name = $1`,
+                    [name],
+                  );
+                }
+              }
+            }
           } else {
             console.log("Cannot find Drink");
             throw new Error("Cannot find Drink");
@@ -133,24 +212,18 @@ export async function POST(request: Request) {
       }
     }
 
-    /**
-     * CHANGE: Added check for customer_id.
-     * Only attempts to update points if a valid user ID is present (skips for guests).
-     */
-    if (points && customer_id) {
-      await client.query(
-        "UPDATE users SET points = points + $1 WHERE id = $2",
-        [points, customer_id],
-      );
-    }
+    await client.query("UPDATE users SET points = points + $1 WHERE id = $2", [
+      points,
+      customer_id,
+    ]);
 
     await client.query("COMMIT");
     return Response.json({ id: receiptId });
-  } catch (err) {
+  } catch (err: any) {
     await client.query("ROLLBACK");
-    console.error("DATABASE ERROR:", err);
+    console.log(err.toString());
     return Response.json(
-      { error: "Database transaction failed" },
+      { error: err.toString().replace(/^Error: /, "") },
       { status: 500 },
     );
   } finally {

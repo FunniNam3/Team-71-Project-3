@@ -143,7 +143,7 @@ export async function POST(request: Request) {
               ],
             );
 
-            const checkRes = await client.query(
+            let checkRes = await client.query(
               `
               select count(*) from inventory i
               join drink_recipe dr on i.id = dr.inventory_id
@@ -164,6 +164,63 @@ export async function POST(request: Request) {
               where inventory.id = dr.inventory_id and dr.drink_id = $1
               `,
               [drinkId],
+            );
+
+            checkRes = await client.query(
+              `
+              select count(*) from inventory 
+              where id = 32 and (amount - 1) <= 0
+              `,
+            );
+
+            if (parseInt(checkRes.rows[0].count) > 0) {
+              throw new Error("Insufficient inventory amount");
+            }
+
+            await client.query(
+              `
+              update inventory
+              set amount = amount - 1
+              where id = 32
+              `,
+            );
+
+            checkRes = await client.query(
+              `
+              select count(*) from inventory 
+              where id = 30 and (amount - 1) <= 0
+              `,
+            );
+
+            if (parseInt(checkRes.rows[0].count) > 0) {
+              throw new Error("Insufficient inventory amount");
+            }
+
+            await client.query(
+              `
+              update inventory
+              set amount = amount - 1
+              where id = 30
+              `,
+            );
+
+            checkRes = await client.query(
+              `
+              select count(*) from inventory 
+              where id = 29 and (amount - 1) <= 0
+              `,
+            );
+
+            if (parseInt(checkRes.rows[0].count) > 0) {
+              throw new Error("Insufficient inventory amount");
+            }
+
+            await client.query(
+              `
+              update inventory
+              set amount = amount - 1
+              where id = 29
+              `,
             );
 
             if (item.customizations.toppings) {

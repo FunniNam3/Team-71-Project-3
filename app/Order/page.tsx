@@ -107,26 +107,26 @@ export default function OrderPage() {
   }, [user]);
 
   // --- UPDATED handleAddToCart ---
-  const handleAddToCart = (customizedItem: any) => {
-    // We explicitly ensure 'category' is passed so the API route
-    // knows whether to look in the 'food' or 'drinks' table.
+ const handleAddToCart = (customizedItem: any) => {
     const cartItem: CartItem = {
       instanceId:
         customizedItem.instanceId || `item-${Date.now()}-${Math.random()}`,
       name: customizedItem.name,
-      price: customizedItem.price, // Use the price returned (which includes size surcharges)
+      price: customizedItem.price, 
       imageUrl: customizedItem.imageUrl,
       category:
         customizedItem.category ||
         (selectedProduct?.type === "Food" ? "food" : "drink"),
       quantity: customizedItem.quantity || 1,
+      // ADD THIS LINE BELOW:
+      inventoryImpact: customizedItem.inventoryImpact || [], 
       customizations: {
         ice: customizedItem.customizations?.ice || "",
         sugar: customizedItem.customizations?.sugar || "",
         milk: customizedItem.customizations?.milk || "",
         notes: customizedItem.customizations?.notes || "",
         toppings: customizedItem.customizations?.toppings || [],
-        size: customizedItem.customizations?.size || "Regular", // Sync size
+        size: customizedItem.customizations?.size || "Regular",
       },
     };
     setCart((prev) => [...prev, cartItem]);

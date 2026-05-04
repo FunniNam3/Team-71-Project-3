@@ -2,6 +2,54 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
+// --- INVENTORY MAPPING (From team_71_db) ---
+const INVENTORY_MAP: Record<string, number> = {
+  // Food Items
+  "French fries": 39,
+  "Teriyaki chicken": 38,
+  "BBQ pork": 37,
+  // Milk
+  "Cow": 12,
+  "Oat": 13,
+  "Almond": 14,
+  "Soy": 61,
+  "Coconut": 15,
+  // Boba
+  "Tapioca Boba": 4,
+  "Golden Tapioca Boba": 43,
+  "Mini Tapioca Boba": 44,
+  "Crystal Boba": 45,
+  "Matcha Boba": 46,
+  "Taro Boba": 47,
+  // Popping
+  "Strawberry Popping": 6,
+  "Mango Popping": 5,
+  "Lychee Popping": 7,
+  "Blueberry Popping": 48,
+  "Green Apple Popping": 49,
+  "Peach Popping": 50,
+  "Pomegranate Popping": 51,
+  "Watermelon Popping": 52,
+  // Jelly
+  "Grass Jelly": 53,
+  "Coconut Jelly": 54,
+  "Lychee Jelly": 55,
+  "Mango Jelly": 56,
+  "Rainbow Jelly": 57,
+  "Coffee Jelly": 58,
+  "Aloe Vera Jelly": 59,
+  "Strawberry Jelly": 60,
+  // Other
+  "Brown Sugar": 8,
+  "Honey": 10,
+  "Whipped Cream": 27,
+  "Cheese Foam": 28,
+  "Oreo Crumbles": 62,
+  "Egg Pudding": 63,
+  "Red Bean": 64,
+  "Taro Paste": 65,
+};
+
 interface ProductItem {
   name: string;
   description: string;
@@ -50,10 +98,45 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
     other.length;
 
   const handleConfirm = () => {
+    // --- CREATE INVENTORY IMPACT LIST ---
+    const impactIds: number[] = [];
+
+    // 1. Base Product
+    if (INVENTORY_MAP[item.name]) impactIds.push(INVENTORY_MAP[item.name]);
+
+    // 2. Milk
+    if (!isFood && INVENTORY_MAP[milk]) impactIds.push(INVENTORY_MAP[milk]);
+
+    // 3. Toppings Logic
+    boba.forEach((t) => {
+      const key =
+        t === "Tapioca"
+          ? "Tapioca Boba"
+          : t.includes("Boba")
+          ? t
+          : `${t} Boba`;
+      if (INVENTORY_MAP[key]) impactIds.push(INVENTORY_MAP[key]);
+    });
+
+    popping.forEach((t) => {
+      const key = t.includes("Popping") ? t : `${t} Popping`;
+      if (INVENTORY_MAP[key]) impactIds.push(INVENTORY_MAP[key]);
+    });
+
+    jelly.forEach((t) => {
+      const key = t.includes("Jelly") ? t : `${t} Jelly`;
+      if (INVENTORY_MAP[key]) impactIds.push(INVENTORY_MAP[key]);
+    });
+
+    other.forEach((t) => {
+      if (INVENTORY_MAP[t]) impactIds.push(INVENTORY_MAP[t]);
+    });
+
     onConfirm({
       ...item,
       price: currentUnitPrice,
       quantity: quantity,
+      inventoryImpact: impactIds, // This is what we added
       customizations: isFood
         ? { notes: specialInstructions, toppings: [] }
         : {
@@ -105,7 +188,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
               </div>
             </div>
 
-            {/* ICE LEVEL - Added "Hot Drink" */}
+            {/* ICE LEVEL */}
             <div className="mb-6">
               <h4 className="font-bold mb-2 text-gray-800 text-xl">
                 Ice Level
@@ -124,7 +207,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                     >
                       {level}
                     </button>
-                  ),
+                  )
                 )}
               </div>
             </div>
@@ -168,7 +251,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                     >
                       {level}
                     </button>
-                  ),
+                  )
                 )}
               </div>
             </div>
@@ -194,7 +277,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                   "Matcha",
                   "Taro",
                 ].map((b) => {
-                  const selected = boba.includes(b); // or popping/jelly/etc
+                  const selected = boba.includes(b);
                   const disabled = !selected && topLen >= 5;
                   return (
                     <button
@@ -213,7 +296,11 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                             ? "bg-(--primary) text-white border-(--primary)"
                             : "text-gray-600 border-gray-200 hover:border-(--primary)"
                         }
-                        ${disabled ? "opacity-40 cursor-not-allowed " : "cursor-pointer"}
+                        ${
+                          disabled
+                            ? "opacity-40 cursor-not-allowed "
+                            : "cursor-pointer"
+                        }
                       `}
                     >
                       {b}
@@ -239,7 +326,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                   "Pomegranate",
                   "Watermelon",
                 ].map((p) => {
-                  const selected = popping.includes(p); // or popping/jelly/etc
+                  const selected = popping.includes(p);
                   const disabled = !selected && topLen >= 5;
 
                   return (
@@ -248,7 +335,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                       onClick={() => {
                         if (popping.includes(p)) {
                           setPopping((prev) =>
-                            prev.filter((item) => item !== p),
+                            prev.filter((item) => item !== p)
                           );
                         } else {
                           if (topLen >= 5) return;
@@ -261,7 +348,11 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                           ? "bg-(--primary) text-white border-(--primary)"
                           : "text-gray-600 border-gray-200 hover:border-(--primary)"
                       }
-                    ${disabled ? "opacity-40 cursor-not-allowed " : "cursor-pointer"}
+                    ${
+                      disabled
+                        ? "opacity-40 cursor-not-allowed "
+                        : "cursor-pointer"
+                    }
                     `}
                     >
                       {p}
@@ -285,7 +376,7 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                   "Aloe Vera",
                   "Strawberry",
                 ].map((j) => {
-                  const selected = jelly.includes(j); // or popping/jelly/etc
+                  const selected = jelly.includes(j);
                   const disabled = !selected && topLen >= 5;
                   return (
                     <button
@@ -304,7 +395,11 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                             ? "bg-(--primary) text-white border-(--primary)"
                             : "text-gray-600 border-gray-200 hover:border-(--primary)"
                         }
-                      ${disabled ? "opacity-40 cursor-not-allowed " : "cursor-pointer"}
+                      ${
+                        disabled
+                          ? "opacity-40 cursor-not-allowed "
+                          : "cursor-pointer"
+                      }
                       `}
                     >
                       {j}
@@ -330,14 +425,16 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                   "Vanilla Ice Cream",
                   "Matcha Ice Cream",
                 ].map((o) => {
-                  const selected = other.includes(o); // or popping/jelly/etc
+                  const selected = other.includes(o);
                   const disabled = !selected && topLen >= 5;
                   return (
                     <button
                       key={o}
                       onClick={() => {
                         if (other.includes(o)) {
-                          setOther((prev) => prev.filter((item) => item !== o));
+                          setOther((prev) =>
+                            prev.filter((item) => item !== o)
+                          );
                         } else {
                           if (topLen >= 5) return;
                           setOther((prev) => [...prev, o]);
@@ -349,7 +446,11 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
                           ? "bg-(--primary) text-white border-(--primary)"
                           : "text-gray-600 border-gray-200 hover:border-(--primary)"
                       }
-                    ${disabled ? "opacity-40 cursor-not-allowed " : "cursor-pointer"}
+                    ${
+                      disabled
+                        ? "opacity-40 cursor-not-allowed "
+                        : "cursor-pointer"
+                    }
                     `}
                     >
                       {o}
@@ -413,6 +514,6 @@ export default function Modal({ item, onClose, onConfirm }: ModalProps) {
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

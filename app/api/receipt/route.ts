@@ -7,8 +7,9 @@ interface CartItem {
   imageUrl: string;
   category?: string;
   quantity: number;
+  inventoryImpact?: number[]; // Added this to match frontend
   customizations: {
-    size?: string; // Added for drink sizing
+    size?: string;
     ice?: string;
     sugar?: string;
     milk?: string;
@@ -40,7 +41,6 @@ export async function POST(request: Request) {
     await client.query("BEGIN");
 
     // 1. Insert into receipt table
-    // Using customer_id || null allows guests to checkout without breaking FK constraints
     const receiptRes = await client.query(
       `INSERT INTO receipt (customer_id, cashier_id, tax, discount, payment_method, total)
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
@@ -56,20 +56,25 @@ export async function POST(request: Request) {
 
     const receiptId = receiptRes.rows[0].id;
 
-    // 2. Insert items into bridging tables
+    // 2. Insert items into bridging tables AND update inventory
     if (Array.isArray(cart)) {
       const newCart: CartItem[] = cart;
       for (const item of newCart) {
-        /**
-         * CHANGE: Normalize category to lowercase.
-         * This prevents "French fries" from failing if the category is "Food" instead of "food".
-         */
-        // This ensures that even if category is missing or a number,
-        // it becomes a string like "" or "1" before calling toLowerCase()
+        
+        // --- NEW: INVENTORY UPDATE LOGIC ---
+        // For every ID in inventoryImpact, decrease the stock by 1
+        if (item.inventoryImpact && Array.isArray(item.inventoryImpact)) {
+          for (const invId of item.inventoryImpact) {
+            await client.query(
+              "UPDATE inventory SET amount = amount - 1 WHERE id = $1",
+              [invId]
+            );
+          }
+        }
+
         const itemCategory = String(item.category || "").toLowerCase();
 
         if (itemCategory === "food") {
-          // Find the ID in the food table based on the name
           const foodLookup = await client.query(
             "SELECT id FROM food WHERE name = $1",
             [item.name],
@@ -77,13 +82,9 @@ export async function POST(request: Request) {
           const foodId = foodLookup.rows[0]?.id;
 
           if (foodId) {
-            /**
-             * CHANGE: Column name alignment.
-             * Updated from 'notes' to 'modifiers' to match your 'food_to_receipt' table schema.
-             */
             await client.query(
               `INSERT INTO food_to_receipt (receipt_id, food_id, modifiers, quantity)
-             VALUES ($1, $2, $3, $4)`,
+               VALUES ($1, $2, $3, $4)`,
               [
                 receiptId,
                 foodId,
@@ -101,7 +102,6 @@ export async function POST(request: Request) {
 
           if (drinkLookup.rows.length !== 0) {
             const drinkId = drinkLookup.rows[0]?.id;
-            // Convert sugar string (e.g., "100%") to integer (100)
             const sweetnessInt = parseInt(
               item.customizations.sugar || "100",
               10,
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 
             await client.query(
               `INSERT INTO drink_to_receipt (receipt_id, drink_id, size, ice, sweetness, milk, boba, popping_boba, jelly, other, quantity, special)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
               [
                 receiptId,
                 drinkId,
@@ -126,17 +126,12 @@ export async function POST(request: Request) {
               ],
             );
           } else {
-            console.log("Cannot find Drink");
             throw new Error("Cannot find Drink");
           }
         }
       }
     }
 
-    /**
-     * CHANGE: Added check for customer_id.
-     * Only attempts to update points if a valid user ID is present (skips for guests).
-     */
     if (points && customer_id) {
       await client.query(
         "UPDATE users SET points = points + $1 WHERE id = $2",
